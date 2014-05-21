@@ -1,0 +1,41 @@
+<form prefix="cpl: http://catalogus-professorum.org/lipsiensium/ cpm: http://catalogus-professorum.org/cpm/">
+  <legend>Allgemein</legend>
+  <!--  ### Main Class ### -->
+  <div typeof="cpm:Professor" resource="cpl:{rdfs:label}_{cpm:pid}">
+    <label>Bezeichnung:</label>  
+    <input name="rdfs:label" datatype="xsd:string" placeholder="Vorname Nachname" required />
+    <input name="cpm:surname" datatype="xsd:string" placeholder="Nachname" required />
+    <label>Akademischer Titel:</label>
+    <input name="cpm:fullAcademicalTitle" datatype="xsd:string" placeholder="Voller akademischer Titel" />
+    <input name="cpm:religion" datatype="xsd:string" placeholder="Religion" />    
+
+    <!-- ### Ressourcen Eigenschaften ### -->
+    <input name="cpm:has-period" datatype="resource" value="cpm:Career" />
+    <input name="cpm:has-forename" datatype="resource" value="cpm:Forename" />
+
+    <input name="cpm:pid" type="hidden" datatype="xsd:int" value="%" />
+  </div>  
+
+  <!-- ### Vornamen ### -->
+  <div typeof="cpm:Forename" resource="cpl:{cpm:forename}-{cpm:forenamePosition}-{cpm:isFirstName}" multiple>
+    <label>Vorname:</label>      
+    <input name="cpm:forename" datatype="xsd:string" placeholder="1. Vorname" required />
+
+    <input name="rdfs:label" type="hidden" value="{cpm:forename}" />
+    <input name="cpm:forenamePosition" type="hidden" datatype="xsd:int" value="1" />
+    <input name="cpm:isFirstName" type="hidden" datatype="xsd:boolean" value="1" />    
+  </div>  
+
+  <!-- ### Karriere ### -->
+  <legend>Karriere</legend>
+  <div typeof="cpm:Career" resource="cpl:Karriere_%" multiple>
+    <label>Akademische Karriere</label>
+    <input name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
+
+    <label>von:</label>
+    <input name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+    <label>bis:</label>
+    <input name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+  </div>
+</form>

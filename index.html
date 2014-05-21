@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+    <meta name="author" content="">
+	<!-- Bootstrap -->
+	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<!-- Datepicker -->
+	<!--<link href="css/datepicker.css" rel="stylesheet" media="screen">-->
+	
+	<!-- JQueryUI Style -->
+	<!--<link href="css/smoothness/jquery-ui.custom.min.css" rel="stylesheet">-->
+
+	<!-- style -->
+	<link href="css/style.css" rel="stylesheet" media="screen">
+
+	<title>Erfassung Professors (Ersteingabe)</title>
+</head>
+<body>
+
+<div class="container">
+    <h1>Erfassung eines Professors (Ersteingabe)</h1>
+
+    <p>Modell des Formulars in <a href="./formular.html">formular_rdfa.html</a> (siehe Quelltext)</p>
+
+    <!-- The formular -->
+	<form action="#" class="form-horizontal">
+
+		<!-- Data will be included here -->
+	
+		<div class="row-fluid">		
+			<div class="span3 offset9">
+				<!-- TODO: add reset button -->
+				<button type="submit" class="btn btn-large btn-block btn-primary">Datensatz anlegen</button>
+			</div>
+		</div>	
+
+	</form>	
+
+	<!-- Result -->
+	<div class="row-fluid result">
+		<legend>Ergebnis</legend>
+		<div class="span9">
+			<textarea class="input-block-level" rows="10"></textarea>
+			<!-- TODO: export -->
+		</div>
+	</div>	
+
+</div>
+
+    <!-- jQuery -->
+    <script src="js/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Datepicker  http://www.eyecon.ro/bootstrap-datepicker/ -->
+    <!--<script src="js/bootstrap-datepicker.js"></script>-->
+    <!-- JQuery UI -->
+    <!--<script src="js/jquery-ui.custom.min.js"></script>-->
+    <!-- own stuff -->
+    <script src="js/script.js"></script>
+    <!-- professorum-cataloge spezific functions -->
+    <script src="js/cpl.js"></script>
+
+</body>
+</html>
