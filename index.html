@@ -23,28 +23,28 @@
 <div class="container">
     <h1>Erfassung eines Professors (Ersteingabe)</h1>
 
-    <p>Modell des Formulars in <a href="./formular.html">formular_rdfa.html</a> (siehe Quelltext)</p>
+    <p>Modell des Formulars in <a href="./formular.html">formular.html</a> (siehe Quelltext)</p>
 
     <!-- The formular -->
-	<form action="#" class="form-horizontal">
+	<form action="#" class="form-horizontal rdform">
 
 		<!-- Data will be included here -->
 	
 		<div class="row-fluid">		
-			<div class="span3 offset9">
-				<!-- TODO: add reset button -->
-				<button type="submit" class="btn btn-large btn-block btn-primary">Datensatz anlegen</button>
+			<div class="span12" style="text-align:right">
+				<button type="reset" class="btn">zurücksetzen</button>
+				<button type="submit" class="btn btn-large btn-primary">Datensatz anlegen</button>
 			</div>
 		</div>	
 
 	</form>	
 
-	<!-- Result -->
+	<!-- Result -->	
 	<div class="row-fluid result">
 		<legend>Ergebnis</legend>
 		<div class="span9">
 			<textarea class="input-block-level" rows="10"></textarea>
-			<!-- TODO: export -->
+			<!-- TODO: export to file -->
 		</div>
 	</div>	
 
@@ -61,7 +61,7 @@
     <!-- own stuff -->
     <script src="js/script.js"></script>
     <!-- professorum-cataloge spezific functions -->
-    <script src="js/cpl.js"></script>
+    <script src="js/hooks.js"></script>
 
 </body>
 </html>
