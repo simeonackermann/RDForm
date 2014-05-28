@@ -343,13 +343,26 @@ $(document).ready(function(){
 			var strWcds = str.match(/\{[^\}]*/gi);		
 			for ( var i in strWcds ) {
 				var wcd = strWcds[i].substring( 1 );
-				wcd = $(domain).find('input[name="' + wcd + '"]');
 
-				// test if property exists
-				if ( wcd.length == 0 ) {
-					alert( 'Cannot find property "' + strWcds[i].substring( 1 ) + '"' );
-				}
-				var wcdVal = wcd.val();
+				// test if its a pointer to a global var
+				if ( wcd.search(/^global:/) != -1 ) {
+					//var globalVar = wcd.substring(7);
+					if ( globals[wcd] === undefined ) {
+						alert('The global var "' + wcd + '" doest not exist but required for the wildcard "' + str + '"');
+					} else {
+						var wcdVal = globals[wcd];
+					}
+				} 
+				// but its a pointer to a property
+				else {
+					wcd = $(domain).find('input[name="' + wcd + '"]');
+
+					// test if property exists
+					if ( wcd.length == 0 ) {
+						alert( 'Cannot find property "' + strWcds[i].substring( 1 ) + '"' );
+					}
+					var wcdVal = wcd.val();
+				}				
 
 				// passing wildcard value to the function
 				if ( adaptFct !== undefined ) {

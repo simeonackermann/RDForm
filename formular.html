@@ -1,7 +1,7 @@
 <form vocab="" prefix="cpm: ... cpl: ...">
   <legend>Allgemein</legend>
   <!--  ### Main Class ### -->
-  <div typeof="cpm:Professor" resource="cpl:Professor/"> <!-- {global:puri} -->
+  <div typeof="cpm:Professor" resource="cpl:Professor/{global:puri}"> <!-- {global:puri} -->
     <label>Bezeichnung:</label>  
                                                                           <!-- __forename__ als eigene Funktion in Hook alle Vornamen reinschreiben -->
     <input name="rdfs:label" datatype="xsd:string" value="{cpm:fullAcademicalTitle} __forenames__ {cpm:surname}" required readonly />
@@ -20,7 +20,7 @@
     <!-- Verweis auf Select Liste -->
     <input name="cpm:has-period" type="resource" value="cpm:PeriodOfLife" />
 
-    <!-- GLOBALE Variablen sind KEINE PROPERTIES!!! -->
+    <!-- GLOBALE Variablen (werden nicht als properties angelegt!) -->
     <input name="global:pid" type="global" />
     <input name="global:puri" type="global" value="{cpm:surname}_{global:pid}" />    <!-- alternativ: {rdfs:...} __pid__ -->
   </div>  
