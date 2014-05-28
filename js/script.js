@@ -13,21 +13,19 @@ $(document).ready(function(){
 										),
 								)
 			),
-	
-
-	Tmp Resource Properties:
-	Array => (
-			['class']	 = owner-class of the property (result[index])
-			['value']		= property name (e.g. cpm:has-period)
-			['resource']= resource value (e.g. cpm:Career)
-			),	
-
+			[tmpProperties] => (
+								Array => (
+										['value'] = property name (e.g. cpm:has-period),
+										['resource'] = resource value (e.g. cpm:Career)
+								),
+			),
+	),
 	*/
 
-	/* inti some vars */
+	/* init some vars */
 	var prefixes = new Array();	
-	var classes = new Array();
-	var tmpResources = new Array();
+	var classes = new Array();	
+	var globals = new Object();
 
 	/*
 	 *	Parse form modell config file from user and build HTML formula
@@ -37,98 +35,55 @@ $(document).ready(function(){
 	parseFormModel = function( data ) {
 		// regexp: http://de.selfhtml.org/perl/sprache/regexpr.htm#merken
 		// rdfa http://www.w3.org/TR/xhtml-rdfa-primer/#setting-a-default-vocabulary
-
-		//var prefixAttr = data.match(/<form prefix="[^\"]*/gi).toString().substr(14); // get prefix value, substr <form ... (14 letter)
-		//prefixAttr = prefixAttr.substr( prefixAttr.indexOf('"') + 1 );
-		//prefixes = prefixAttr.split(" ");
-
 		var dom_model = $.parseHTML( data );
 
-		/*
-
-		var data_rows = data.split("\n");
-
-		for ( ri in data_rows ) {
-			
-		}
-
-		*/
-
-		prefixes = $(dom_model).attr("prefix").split(" ");
+		if ( $(dom_model).attr("prefix") ) {
+			prefixes = $(dom_model).attr("prefix").split(" ");
+		}		
 		
 		$(dom_model).children("div").each(function() {
 
 			$(this).addClass("row-fluid"); // add row-fluid to every class
 
-			// add type="hidden" to resource inputs
-			$(this).find('input[datatype="resource"]').attr("type", "hidden");
+			// parse resource properties
+			$(this).find('input[type="resource"]').attr("resource", "resource");
+			$(this).find('input[type="resource"]').attr("type", "hidden");
 
 			// add type="text" to other inputs
-			$(this).find('input[type!="hidden"]').attr("type", "text");
+			//$(this).find('input[type!="hidden"]').attr("type", "text");
+			$(this).find('input').not("[type]").attr("type", "text");
 
-			// wrap input text elements
-			$(this).find('input[type="text"]').wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
+			// global variables
+			$(this).find('input[type="global"]').attr("global", "global");
+			$(this).find('input[type="global"]').attr("type", "hidden");
+			
+			// wrap not hidden inputs
+			$(this).find('input[type!="hidden"]').wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
 
-			// add .control-label to labels
-			$(this).find("label").addClass("control-label");
+			// radio labels
+			$(this).find("input:radio").each(function() {
+				$(this).after( $(this).attr("label") );
+			})
 
-			// move labels into cotrol groups
+			// add label class and move labels into control groups
 			$(this).find("label").each(function() {
+				$(this).addClass("control-label");
 				$(this).next("div").children("div").prepend( $(this) );
 			})
 
 			// add small inputs
-			var smallInput = $(this).find('input[datatype="xsd:date"]');
+			var smallInput = $(this).find('input[datatype*="date"]');
 			smallInput.addClass("input-small");
-			smallInput.parents(".span10").removeClass("span4").addClass("span4");
-			
+			smallInput.parents(".span10").removeClass("span4").addClass("span4");			
 			
 		});
 
-		$("form").prepend( $(dom_model).html() );
-		$("form").prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );
-
-		/*
-
-		// remove form
-		data = data.replace(/<form.*>/g, '');
-		data = data.replace(/<\/form.*>/g, '');
-
-		// add row-fluid class
-		data = data.replace(/<div/g, '<div class="row-fluid"');
-
-		// add div before and after input elements
-		data = data.replace(/(.*<input.*\/>)/g, '<div>$1</div>');
-		// remove div from resource and hidden inputs
-		data = data.replace(/<div>(.*<input.*datatype="resource".*)<\/div>/g, '$1');
-		data = data.replace(/<div>(.*<input.*type="hidden".*)<\/div>/g, '$1');
-
-		// add type="hidden" to resource inputs
-		data = data.replace(/<input(.*datatype="resource")/g, '<input type="hidden"$1');
-
-		// add type="text" to other inputs
-		//data = data.replace(/<input(?!.*\sdatatype="resource")/g, '<input type="text"');
-		data = data.replace(/<input(?!.*\stype=)/g, '<input type="text"');
-		
-		// insert data to form
-		$("form").prepend( data );
-		$("form").prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );
-
-		// put labels into divs
-		$("label").each(function() {
-			$(this).next("div").prepend( $(this) );
-		})
-
-		// add class "date" and "input-small" to every from|to input
-		$("input[name=cpm\\:from], input[name=cpm\\:to]").addClass("date input-small");
-		$("input.date").parent().addClass("span2");
-		// add span4 to every not date 
-		//$("input:not(.date)").parent().addClass("span4");
-		$('input[type="text"]').parent().addClass("span6");	
-		*/	
+		// add to form
+		$("form.rdform").prepend( $(dom_model).html() );
+		$("form.rdform").prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );
 
 		// add button to multiple fields
-		$("form div[multiple]").each( function() {
+		$("form.rdform div[multiple]").each( function() {
 			$(this).after('<a class="btn btn-mini duplicate-dataset" href="#"><i class="icon-plus"></i> hinzufügen</a>');
 		});	
 
@@ -161,12 +116,18 @@ $(document).ready(function(){
 				weekStart: 1
 			});
 		});​
-		*/			
+		*/		
 
-		$(".duplicate-dataset").click(function() {
+		// validate input values
+		$("form.rdform input").change(function() {
+			propertyValidation( $(this) );
+		})
+
+		// duplicate dataset button
+		$("form.rdform .duplicate-dataset").click(function() {
 			var dataset = $(this).prev().clone();
 			dataset.find("input").val(""); // reset values
-			dataset.find("label").remove(); // remove labels
+			//dataset.find("label").remove(); // remove labels
 			dataset.find("input").removeAttr("required"); // remove requiered attribute
 			dataset.find("div").removeClass("error");
 			//dataset.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
@@ -176,10 +137,21 @@ $(document).ready(function(){
 			return false;
 		}); 
 
+		// reset button
+		$("form.rdform button[type=reset]").click(function() {		
+			$("#error-msg").hide();
+			$("form.rdform")[0].reset();
+			$(".result").hide();
+			$(".result textarea").val( "" );
+			// TODO: remove duplicated datasets
+		});
+
 		// submit formular
-		$("button[type=submit]").click(function() {			
+		$("form.rdform").submit(function() {			
 			$("#error-msg").hide();
 			var proceed = true;
+
+			// validate requiered inputs
 			$("input[required]").each(function() {
 				if ( $(this).val() == "" ) {
 					$(this).parents(".control-group").addClass("error");
@@ -191,9 +163,15 @@ $(document).ready(function(){
 				}
 			});
 
+			// proceed
 			if ( proceed ) {
+				//var rdform = $("form.rdform").clone();
+
+				// remove unchecked radio buttons
+				//$(rdform).find("input:radio").not(":checked").remove();
+
 				$("button[type=submit]").html("Datensatz aktualisieren");
-				createClasses();
+				createClasses(); // dform
 			}
 
 			return false;
@@ -204,99 +182,106 @@ $(document).ready(function(){
 	/*
 	 * Create result classes array with class and properties
 	 */
-	createClasses = function() {
-		// reset result Arrays
+	createClasses = function() { // rdform
+		// reset class Array
 		classes = new Array();	
-		tmpResources = new Array();
 
-		/* walk through every class in formula */
-		$("form > div[typeof]").each(function( ci ) {			
+		/* walk through every class in form */
+		$("form.rdform > div[typeof]").each(function( ci ) {
+		//$(rdform).find("div[typeof]").each(function( ) {			
 			var curClass = new Object();
-			var properties = new Array();			
+			var properties = new Array();
+			var tmpResources = new Array();
+
+			//$(this).filter( $(this).find('input') ).attr('checked', true);
+			//$(this).find('input').filter( ":radio" );
 			
 			/* walk through every class-property (inputs) */
-			$(this).find('input').each(function( ) { //TODO: input[value!="" -> dont need: if ( $(this).val() != "" ) {
+			$(this).find('input').each(function( ) {
 				var property = new Object();
 
 				__createClassProperty( $(this) );
 
-				// store properties and resources
-				if ( $(this).val() != "" ) {
-					property['name'] = $(this).attr("name");
-					if ( $(this).attr("datatype") != "resource" ) {	// its a regular property
-							if ( $(this).attr("datatype") ) {
-								if ( $(this).attr("datatype") == "xsd:date" ) {
-									prepareDateProperty( $(this) );
-								}
-								property['datatype']= $(this).attr("datatype");
-							}
+				// store not empty properties and resources
+				if ( $(this).val() != ""
+					// TODO: filter not checked radio buttons a better way
+					&& ( ( $(this).prop("type") == "radio" && $(this).prop("checked") || $(this).prop("type") != "radio" ) )
+					) {
 
-							// if value points to another property
-							if ( $(this).val().search(/\{.*\}/) != -1 ) {
-								var propRes = $(this).val().substring( $(this).val().indexOf('{')+1, $(this).val().indexOf('}') );
-								propRes = $(this).parents("div[typeof]").find('input[name="'+propRes+'"]').val();
-								if ( propRes != "" ) {
-									$(this).val( propRes );
-								}
-							}
-							property['value'] = '"' + $(this).val() + '"';
-							properties.push( property );
-					} else { // its a resource property
-						property['class'] = ci;
+					property['name'] = $(this).attr("name");
+
+					if ( $(this).attr("resource") ) {	// its a resource property
 						property['resource']= $(this).val();
 						tmpResources.push( property );
+
+					} else if ( $(this).attr("global") ) { // its a global var
+						//var globVal = replaceWildcards( $(this) );
+						var globVal = replaceWildcards( $(this).val(), $(this).parents("div[typeof]"), getWebsafeString )['str'];
+						globals[$(this).attr("name")] = globVal;
+
+						// TODO if global value points to antoher property of global
+
+					} else { // its a regular property
+						if ( $(this).attr("datatype") ) {
+							property['datatype'] = $(this).attr("datatype");
+						}
+						var propVal = replaceWildcards( $(this).val(), $(this).parents("div[typeof]") )['str'];
+
+						property['value'] = '"' + propVal + '"';
+						properties.push( property );
 					}
-				}
+				} // end not empty property
 
 			}); // end walk through properties			
 
-			// dont safe classes without any property
-			if ( properties.length == 0 )
+			// dont save classes without any property
+			if ( properties.length == 0 ) {
+				console.log( 'Break class "' + $(this).attr("typeof") + '" because it has no properties' );
 				return true;
+			}
 
 			// add properties to current class 
-			curClass['properties'] = properties;					
+			curClass['properties'] = properties;
+
+			// add tmp resources to current class
+			curClass['tmpResources'] = tmpResources;
 
 			//* generate current class */
 			__createClass( $(this) );
 			var classID = $(this).attr("resource"); 
 
-			if ( classID.search(/\{.*\}/) != -1 ) { // ID is a property value
-				var propNames = classID.match(/\{[^\}]*/gi);
-				var propValI = 0;
-				for ( var i in propNames ) {
-					var prop = propNames[i].substring( 1 );
-					prop = $(this).find('input[name="' + prop + '"]');
-					if ( $(prop).attr("type") != "hidden" && $(prop).val() != "" ) // count not hidden or empty properties 
-						++propValI;
-					prop = getWebsafeString( $(prop).val() );					
-					classID = classID.replace(/\{[^\}]*\}/, prop ); // replace {...} with property value
-				}
-				if ( propValI == 0 ) 
-					return true; // every properties for classID are emtpy or hidden -> break current class
-			}
+			var wildcardsFct = replaceWildcards( classID, $(this), getWebsafeString );
 
-			// TMP, class id replace % with number TODO: replace this
-			//classID = classID.replace(/%/g, Math.floor( Math.random() * 10 ) );
+			// dont save classes with wildcard pointers when every value is empty
+			if ( classID.search(/\{.*\}/) != -1 && wildcardsFct['count'] == 0 ) {
+				console.log( 'Break class "' + $(this).attr("typeof") + '" because it has wildcards, but every pointer property is empty. Resource value is "' + classID + '"' );
+				return true;
+			}
+			classID = wildcardsFct['str']
 
 			curClass['classID'] = classID;
 			curClass['typeof'] = $(this).attr("typeof");
 
-			// add current class to classes
-			classes.push( curClass );
+			// add current class to global classes
+			classes.push( curClass );			
 
-			/* if current class is a property (resource) of another class add resource-properties to this class */
-			for ( var tRi in tmpResources ) {
-				var property = new Object();
-				var tmpResource = tmpResources[tRi];
-				if ( tmpResource['resource'].match( curClass['typeof'] ) ) {
-					property['name'] = tmpResource['name']; 
-					property['value'] = curClass['classID'];
-					classes[tmpResource['class']]['properties'].push( property );
+			/* use tmpResources to find
+			   if current class is a property (resource) of another class add resource-properties to this class */
+			for ( var tRCi in classes ) {
+				for ( var tRi in classes[tRCi]['tmpResources'] ) {
+					var property = new Object();
+					var tmpResource = classes[tRCi]['tmpResources'][tRi];
+					if ( tmpResource['resource'].match( curClass['typeof'] ) ) {
+						property['name'] = tmpResource['name']; 
+						property['value'] = curClass['classID'];
+						classes[tRCi]['properties'].push( property );
+					}
 				}
 			}
 
 		}); // end walk through classes
+
+		console.log( globals );
 		
 		createResult();
 
@@ -320,7 +305,7 @@ $(document).ready(function(){
 
 		// create result classes
 		for ( var ci in classes ) {
-			resultStr += classes[ci]['classID'] + " a " + classes[ci]['typeof'] + "	;\n";
+			resultStr += classes[ci]['classID'] + " a " + classes[ci]['typeof'] + " ;\n";
 
 			for ( var pi in classes[ci]['properties']) {
 				var property = classes[ci]['properties'][pi];
@@ -341,10 +326,61 @@ $(document).ready(function(){
 
 	/* helper functions */
 
+	/*
+	 * Replacing wildcards {...} with the value of the proprty in the domain
+	 *
+	 * @str String value with the wildcards
+	 * @domain DOM element where to find inputs (properties)
+	 * @adaptFct passing wildcard value to that function
+	 * 
+	 * return Object. Keys: 'str', 'count'
+	 */
+	replaceWildcards = function ( str, domain, adaptFct ) {
+		var result = new Object();
+		var counted = 0;
+
+		if ( str.search(/\{.*\}/) != -1 ) {
+			var strWcds = str.match(/\{[^\}]*/gi);		
+			for ( var i in strWcds ) {
+				var wcd = strWcds[i].substring( 1 );
+				wcd = $(domain).find('input[name="' + wcd + '"]');
+
+				// test if property exists
+				if ( wcd.length == 0 ) {
+					alert( 'Cannot find property "' + strWcds[i].substring( 1 ) + '"' );
+				}
+				var wcdVal = wcd.val();
+
+				// passing wildcard value to the function
+				if ( adaptFct !== undefined ) {
+					wcdVal = adaptFct(wcdVal);
+				}
+
+				if ( wcdVal != "" ) // count not empty properties 
+						++counted;
+
+				// replace the {wildard pointer} with the value
+				var regex = new RegExp(strWcds[i] + "\}", "g");
+				if ( wcdVal != "" ) {										
+					str = str.replace(regex, wcdVal );
+				} else {
+					str = str.replace(regex, '' );
+				}
+			}
+		}		
+
+		result['str'] = str.trim();
+		result['count'] = counted;
+
+		return result;
+	}
+	
+
 	/* 
-	 *	Remove accents, umlauts, special signs, ... from string ###
+	 *	Remove accents, umlauts, special signs, ... from string
 	 *
 	 * @str String
+	 * return String with only a-z0-9-_
 	 */
 	getWebsafeString = function ( str ) {
 		// str= str.replace(/[ÀÁÂÃÄÅ]/g,"A");
@@ -363,27 +399,39 @@ $(document).ready(function(){
 			"ß": "ss"
 		}
 		// replace not alphabetical signs if its in dictionary
+		// TODO: test if str empty
 		str = str.replace(/[^\w ]/gi, function(char) {
 			return dict[char] || char;
 		});
 
-		return str.replace(/[^a-z0-9]/gi,''); // return str without special signs
+		return str.replace(/[^a-z0-9-_]/gi,'');
 	}
 
+	/*
+	 *	Validate and correct input values from datatype
+	 *
+	 * @property DOM object with input element
+	 */
+	propertyValidation = function ( property ) {		
+		var value = $(property).val();
 
-	prepareDateProperty = function ( property ) {
-		/*
-		var datatype = $(property).attr("datatype");
-		str = str.replace(/[^\d-]/g, '');
-		str = str.replace(/-00/g, '');
-		if ( str.search(/\b\d{4}-\d{2}-\d{2}\b/) != -1 ) {
-			datatype = "xsd:gYearMonth";
+		value = value.trim();
+
+		if ( $(property).attr("datatype") ) {
+			if ( $(property).attr("datatype").indexOf(":date") >= 0 ) { // TODO: how to get every date inputs?
+				value = value.replace(/[^\d-]/g, '');
+				value = value.replace(/-00/g, '' );
+				// TOD: maybe show an info
+				/*
+				if ( str.search(/\b\d{4}-\d{2}-\d{2}\b/) != -1 ) {
+					datatype = "xsd:gYearMonth";
+				}
+				*/
+			}
+			if ( $(property).attr("datatype").indexOf(":int") >= 0 ) {
+				value = value.replace(/[^\d]/g, '');
+			}
 		}
-		*/
+		$(property).val( value );
 	}
-
-	/* hook functions */	
-	__afterDuplicateDataset = function ( dateset ) {}
-	__createClassProperty = function( property ) {}
-	__createClass = function ( curClass ) {}
 });

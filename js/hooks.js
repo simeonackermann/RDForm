@@ -15,15 +15,21 @@ $(document).ready(function(){
 	__createClassProperty = function( property ) {
 
 		//if ( $(property).val() != "" ) {
-
+			// obsolete, unused, TODO: delete it
+			/*
 			if ( $(property).attr("name") == "cpm:pid" ) {
 				createPID();
 			}
+			*/
 
 		//}
+		if ( $(property).attr("name") == "global:pid" ) {
+
+				createPID();
+		}
 	}
 
-	// befare generating the class object from input values and properties
+	// before generating the class object from input values and properties
 	__createClass = function ( curClass ) {
 		
 		if ( $(curClass).attr("typeof") == "cpm:Career" ) {
@@ -32,14 +38,15 @@ $(document).ready(function(){
 		}
 	}
 	
+	/* own functions */
 
 	// generate unique prof id
 	createPID = function() {
-		var forename = $("form").find('input[name="cpm:forename"]').val();
-		var surname = $("form").find('input[name="cpm:surname"]').val();
-
+		var forename = $("form.rdform").find('input[name="cpm:forename"]').val();
+		var surname = $("form.rdform").find('input[name="cpm:surname"]').val();
+		
 		var pid = ( ( forename.length + surname.length ) % 90 ) + 10;
-		$("form").find('input[name="cpm:pid"]').val( pid );
+		$("form.rdform").find('input[name="global:pid"]').val( pid );
 	}
 
 });
