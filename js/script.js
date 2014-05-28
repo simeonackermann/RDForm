@@ -143,43 +143,25 @@ $(document).ready(function(){
 		$('form.rdform').find('input[type="text"][value*="{"]').each(function() {
 			var wcdPointerVals = new Object();
 			var wildcardTxtInput = $(this);
-			/*$(this).attr({
-				modvalue: $(this).val(),
-				wcvalue: $(this).val()
-			}); */
 			$(this).attr("modvalue",  $(this).val() );
 
 			var strWcds = $(this).val().match(/\{[^\}]*/gi);
 			for ( var i in strWcds ) {				
-				var wcd = strWcds[i].substring( 1 ); 
+				var wcd = strWcds[i].substring( 1 );
+				if ( $('form.rdform input[name="'+wcd+'"]').length == 0 ) {
+					alert( 'Error: property "' + wcd + '" does not exist.' );
+				} 
+				// keyup handlers for the pointed inputs
 				$('form.rdform input[name="'+wcd+'"]').keyup( function() {
-					// test if property exists
-					/*
-					if ( wcd.length == 0 ) {
-						alert( 'Cannot find property "' + strWcds[i].substring( 1 ) + '"' );
-					}
-					*/
 					wcdPointerVals[$(this).attr("name")] = $(this).val();
-
-					var wcdVal = $(this).val();
-
 					var val = $(wildcardTxtInput).attr("modvalue");
 					for ( var j in wcdPointerVals) {
-						if ( val.search(wcdPointerVals[j]) ) {
-							val = val.replace('\{' + j + '\}', wcdPointerVals[j]);
+						if ( val.search(j) != -1 ) {
+							var regex = new RegExp( '\{' + j + '\}', "g");
+							val = val.replace(regex, wcdPointerVals[j]);
 						}
 					}
 					$(wildcardTxtInput).val( val );
-					
-					// replace the {wildard pointer} with the value
-					/*
-					var regex = new RegExp( $(this).attr("name"), "g");
-					if ( wcdVal != "" ) {	
-						console.log(wcdPointerVals);							
-						$(wildcardTxtInput).attr( "wcvalue", $(wildcardTxtInput).attr("modvalue").replace(regex, wcdVal ) );
-						$(wildcardTxtInput).val( $(wildcardTxtInput).attr( "wcvalue" ) );
-					}
-					*/
 				});
 			}
 		})
@@ -395,7 +377,7 @@ $(document).ready(function(){
 				if ( wcd.search(/^global:/) != -1 ) {
 					//var globalVar = wcd.substring(7);
 					if ( globals[wcd] === undefined ) {
-						alert('The global var "' + wcd + '" doest not exist but required for the wildcard "' + str + '"');
+						alert('Error: the global var "' + wcd + '" does not exist but required for the wildcard "' + str + '"');
 					} else {
 						var wcdVal = globals[wcd];
 					}
@@ -406,7 +388,7 @@ $(document).ready(function(){
 
 					// test if property exists
 					if ( wcdVal.length == 0 ) {
-						alert( 'Cannot find property "' + strWcds[i].substring( 1 ) + '"' );
+						alert( 'Error: cannot find property "' + strWcds[i].substring( 1 ) + '"' );
 					}
 					var wcdVal = wcdVal.val();
 				}				
