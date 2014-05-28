@@ -1,5 +1,21 @@
 $(document).ready(function(){
 
+	// after model is parsed - init form handlers
+	__initFormHandlers = function () {
+
+		// insert forenames to prof. label
+		$('form.rdform').on("keyup", 'input[name="cpm:forename"]', function() {
+			var forenames = "";
+			$('form.rdform input[name="cpm:forename"]').each(function() {
+				forenames += $(this).val() + " ";
+			})
+			forenames = forenames.trim();
+			$('form.rdform input[name="global:forenames"]').val( forenames );
+			$('form.rdform input[name="global:forenames"]').trigger( "keyup" );
+		});		
+
+	}
+
 	// after pressing the duplicate button
 	__afterDuplicateDataset = function ( dataset ) {
 

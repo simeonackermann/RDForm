@@ -118,7 +118,10 @@ $(document).ready(function(){
 				weekStart: 1
 			});
 		});​
-		*/		
+		*/
+
+		__initFormHandlers();
+
 
 		// validate input values
 		$("form.rdform input").change(function() {
@@ -134,7 +137,10 @@ $(document).ready(function(){
 			dataset.find("div").removeClass("error");
 			//dataset.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
 			dataset.insertBefore( $(this) );
+
 			__afterDuplicateDataset( dataset );
+
+			//__initFormHandlers();
 
 			return false;
 		});
