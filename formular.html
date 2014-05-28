@@ -2,9 +2,9 @@
   <legend>Allgemein</legend>
   <!--  ### Main Class ### -->
   <div typeof="cpm:Professor" resource="cpl:Professor/{global:puri}"> <!-- {global:puri} -->
-    <label>Bezeichnung:</label>  
+    <label>Bezeichnung:</label>                                                                            
+    <input name="rdfs:label" datatype="xsd:string" value="{cpm:fullAcademicalTitle} {cpm:surname}" required readonly /><!-- __forenames__  -->
                                                                           <!-- __forename__ als eigene Funktion in Hook alle Vornamen reinschreiben -->
-    <input name="rdfs:label" datatype="xsd:string" value="{cpm:fullAcademicalTitle} __forenames__ {cpm:surname}" required readonly />
     <label>Akademischer Titel:</label>
     <input name="cpm:fullAcademicalTitle" datatype="xsd:string" placeholder="Bsp: Prof. Dr." />
     <label>Nachname:</label>
@@ -41,7 +41,7 @@
 
   <!-- ###  ### -->
   <legend>Geburt</legend>
-  <div typeof="cpm:Birth" resource="cpl:Birth/{global:puri}/{cpm:date}">
+  <div typeof="cpm:Birth" resource="cpl:Birth/{global:puri}">
     <label>Ort:</label>
     <input name="rdfs:label" datatype="xsd:string" placeholder="Geburtsort" />
 

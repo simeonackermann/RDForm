@@ -14,17 +14,7 @@ $(document).ready(function(){
 	// before creating the class properties from input values
 	__createClassProperty = function( property ) {
 
-		//if ( $(property).val() != "" ) {
-			// obsolete, unused, TODO: delete it
-			/*
-			if ( $(property).attr("name") == "cpm:pid" ) {
-				createPID();
-			}
-			*/
-
-		//}
 		if ( $(property).attr("name") == "global:pid" ) {
-
 				createPID();
 		}
 	}
@@ -33,8 +23,8 @@ $(document).ready(function(){
 	__createClass = function ( curClass ) {
 		
 		if ( $(curClass).attr("typeof") == "cpm:Career" ) {
-			var classRes = $("form").find('div[typeof="cpm:Career"]').attr( "resource" );
-			$("form").find('div[typeof="cpm:Career"]').attr( "resource", "cpl:Karriere_" + Math.floor( Math.random() * 10 ) );
+			var classRes = $("form.rdform").find('div[typeof="cpm:Career"]').attr( "resource" );
+			$("form.rdform").find('div[typeof="cpm:Career"]').attr( "resource", "cpl:Karriere_" + Math.floor( Math.random() * 10 ) );
 		}
 	}
 	
@@ -44,7 +34,7 @@ $(document).ready(function(){
 	createPID = function() {
 		var forename = $("form.rdform").find('input[name="cpm:forename"]').val();
 		var surname = $("form.rdform").find('input[name="cpm:surname"]').val();
-		
+
 		var pid = ( ( forename.length + surname.length ) % 90 ) + 10;
 		$("form.rdform").find('input[name="global:pid"]').val( pid );
 	}

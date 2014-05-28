@@ -53,7 +53,9 @@ $(document).ready(function(){
 			//$(this).find('input[type!="hidden"]').attr("type", "text");
 			$(this).find('input').not("[type]").attr("type", "text");
 
-			// global variables
+			// TODO: add handler to text inputs for replacing wildcards
+
+			// parse global variables
 			$(this).find('input[type="global"]').attr("global", "global");
 			$(this).find('input[type="global"]').attr("type", "hidden");
 			
@@ -120,8 +122,8 @@ $(document).ready(function(){
 
 		// validate input values
 		$("form.rdform input").change(function() {
-			propertyValidation( $(this) );
-		})
+			userInputValidation( $(this) );
+		});
 
 		// duplicate dataset button
 		$("form.rdform .duplicate-dataset").click(function() {
@@ -135,7 +137,52 @@ $(document).ready(function(){
 			__afterDuplicateDataset( dataset );
 
 			return false;
-		}); 
+		});
+
+		// find text inputs with wildcard values -> bind handlers to dynamically change the value
+		$('form.rdform').find('input[type="text"][value*="{"]').each(function() {
+			var wcdPointerVals = new Object();
+			var wildcardTxtInput = $(this);
+			/*$(this).attr({
+				modvalue: $(this).val(),
+				wcvalue: $(this).val()
+			}); */
+			$(this).attr("modvalue",  $(this).val() );
+
+			var strWcds = $(this).val().match(/\{[^\}]*/gi);
+			for ( var i in strWcds ) {				
+				var wcd = strWcds[i].substring( 1 ); 
+				$('form.rdform input[name="'+wcd+'"]').keyup( function() {
+					// test if property exists
+					/*
+					if ( wcd.length == 0 ) {
+						alert( 'Cannot find property "' + strWcds[i].substring( 1 ) + '"' );
+					}
+					*/
+					wcdPointerVals[$(this).attr("name")] = $(this).val();
+
+					var wcdVal = $(this).val();
+
+					var val = $(wildcardTxtInput).attr("modvalue");
+					for ( var j in wcdPointerVals) {
+						if ( val.search(wcdPointerVals[j]) ) {
+							val = val.replace('\{' + j + '\}', wcdPointerVals[j]);
+						}
+					}
+					$(wildcardTxtInput).val( val );
+					
+					// replace the {wildard pointer} with the value
+					/*
+					var regex = new RegExp( $(this).attr("name"), "g");
+					if ( wcdVal != "" ) {	
+						console.log(wcdPointerVals);							
+						$(wildcardTxtInput).attr( "wcvalue", $(wildcardTxtInput).attr("modvalue").replace(regex, wcdVal ) );
+						$(wildcardTxtInput).val( $(wildcardTxtInput).attr( "wcvalue" ) );
+					}
+					*/
+				});
+			}
+		})
 
 		// reset button
 		$("form.rdform button[type=reset]").click(function() {		
@@ -355,13 +402,13 @@ $(document).ready(function(){
 				} 
 				// but its a pointer to a property
 				else {
-					wcd = $(domain).find('input[name="' + wcd + '"]');
+					var wcdVal = $(domain).find('input[name="' + wcd + '"]');
 
 					// test if property exists
-					if ( wcd.length == 0 ) {
+					if ( wcdVal.length == 0 ) {
 						alert( 'Cannot find property "' + strWcds[i].substring( 1 ) + '"' );
 					}
-					var wcdVal = wcd.val();
+					var wcdVal = wcdVal.val();
 				}				
 
 				// passing wildcard value to the function
@@ -372,8 +419,8 @@ $(document).ready(function(){
 				if ( wcdVal != "" ) // count not empty properties 
 						++counted;
 
-				// replace the {wildard pointer} with the value
-				var regex = new RegExp(strWcds[i] + "\}", "g");
+				// regex: replace the {wildard pointer} with the value
+				var regex = new RegExp("\{" + wcd + "\}", "g");
 				if ( wcdVal != "" ) {										
 					str = str.replace(regex, wcdVal );
 				} else {
@@ -421,11 +468,11 @@ $(document).ready(function(){
 	}
 
 	/*
-	 *	Validate and correct input values from datatype
+	 *	Validate and correct input values depending on the datatype after user changed the value
 	 *
 	 * @property DOM object with input element
 	 */
-	propertyValidation = function ( property ) {		
+	userInputValidation = function ( property ) {		
 		var value = $(property).val();
 
 		value = value.trim();
