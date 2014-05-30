@@ -23,9 +23,10 @@ $(document).ready(function(){
 	*/
 
 	/* init some vars */
-	var prefixes = new Array();	
-	var classes = new Array();	
-	var globals = new Object();
+	var prefixes = new Array();	// RDF prefixes
+	var classes = new Array();
+	var globals = new Object(); // gloabel variables
+	var selectTemplates = new Object(); // templates for selects
 
 	/*
 	 *	Parse form modell config file from user and build HTML formula
@@ -39,55 +40,94 @@ $(document).ready(function(){
 
 		if ( $(dom_model).attr("prefix") ) {
 			prefixes = $(dom_model).attr("prefix").split(" ");
-		}		
+		}
+
+		// TODO: maybe without each..., just $(dom_model).find("div[typeof]").addClass("row-fluid");
+
+		$(dom_model).find("div[typeof]").addClass("row-fluid"); // add row-fluid to every class
+
+		// parse resource properties
+		$(dom_model).find('input[type="resource"]').attr("resource", "resource");
+		$(dom_model).find('input[type="resource"]').attr("type", "hidden");
+
+		// add type="text" to other inputs
+		//$(this).find('input[type!="hidden"]').attr("type", "text");
+		$(dom_model).find('input').not("[type]").attr("type", "text");
+
+		// parse global variables
+		$(dom_model).find('input[type="global"]').attr("global", "global");
+		$(dom_model).find('input[type="global"]').attr("type", "hidden");
 		
-		$(dom_model).children("div").each(function() {
+		// wrap not hidden inputs
+		$(dom_model).find('input[type!="hidden"]').wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
 
-			$(this).addClass("row-fluid"); // add row-fluid to every class
+		// put legens into classes
+		$(dom_model).find("legend").each(function() {
+			$(this).next("div").prepend( $(this) );
+		})
 
-			// parse resource properties
-			$(this).find('input[type="resource"]').attr("resource", "resource");
-			$(this).find('input[type="resource"]').attr("type", "hidden");
+		// add label class and move labels into control groups
+		$(dom_model).find("label").each(function() {
+			$(this).addClass("control-label");
+			$(this).next("div").children("div").prepend( $(this) );
+		})
 
-			// add type="text" to other inputs
-			//$(this).find('input[type!="hidden"]').attr("type", "text");
-			$(this).find('input').not("[type]").attr("type", "text");
+		// radio labels
+		$(dom_model).find("input:radio").each(function() {
+			$(this).after( $(this).attr("label") );
+		})
 
-			// TODO: add handler to text inputs for replacing wildcards
+		// add small inputs
+		var smallInput = $(dom_model).find('input[datatype*="date"]');
+		smallInput.addClass("input-small");
+		smallInput.parents(".span10").removeClass("span4").addClass("span4");
 
-			// parse global variables
-			$(this).find('input[type="global"]').attr("global", "global");
-			$(this).find('input[type="global"]').attr("type", "hidden");
+		// multiple classes
+		$(dom_model).find("div[multiple]").each( function() {			
 			
-			// wrap not hidden inputs
-			$(this).find('input[type!="hidden"]').wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
-
-			// radio labels
-			$(this).find("input:radio").each(function() {
-				$(this).after( $(this).attr("label") );
+			// TODO: except global pointers!!!
+			// TODO: index -> $(this).attr("index", "	1" );
+			$(this).attr("typeof", $(this).attr("typeof") + "~1" );
+			$(this).attr("resource", $(this).attr("resource").replace(/\}/g, '~1}') );
+			$(this).find("input").each(function() {
+				$(this).attr("name", $(this).attr("name") + "~1" );
+				$(this).val( $(this).val().replace(/\}/g, '~1}') );
 			})
 
-			// add label class and move labels into control groups
-			$(this).find("label").each(function() {
-				$(this).addClass("control-label");
-				$(this).next("div").children("div").prepend( $(this) );
-			})
-
-			// add small inputs
-			var smallInput = $(this).find('input[datatype*="date"]');
-			smallInput.addClass("input-small");
-			smallInput.parents(".span10").removeClass("span4").addClass("span4");			
-			
+			$(this).append('<div class="span10"><a class="btn btn-mini duplicate-dataset" href="#"><i class="icon-plus"></i> hinzufügen</a></div>');
 		});
+
+		// select classes
+		$(dom_model).find("div[select]").each( function(){
+			var selectElem = $("<select><option disabled selected>Klasse wählen...</option></select>");			
+
+			$(this).children("div[typeof]").each(function() {
+				//var selectTemplate = new Object();
+				var t = $(this).attr("typeof");
+				
+				selectTemplates[t] = $(this);
+
+				$(selectElem).append('<option value="'+t+'">'+t+'</option>');
+
+				$(this).remove();
+			})
+
+			$(this).append( selectElem );
+
+		})		
+
 
 		// add to form
 		$("form.rdform").prepend( $(dom_model).html() );
 		$("form.rdform").prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );
+				
 
-		// mod multiple classes
+		// multiple classes
+		/*
 		$("form.rdform div[multiple]").each( function() {			
 			
 			// TODO: except global pointers!!!
+			// TODO: index -> $(this).attr("index", "	1" );
 			$(this).attr("typeof", $(this).attr("typeof") + "~1" );
 			$(this).attr("resource", $(this).attr("resource").replace(/\}/g, '~1}') );
 			$(this).find("input").each(function() {
@@ -96,9 +136,12 @@ $(document).ready(function(){
 			})
 
 			$(this).after('<a class="btn btn-mini duplicate-dataset" href="#"><i class="icon-plus"></i> hinzufügen</a>');
-		});	
+		});
+*/
 
 		initFormHandler();
+
+		//return $(dom_model).html();
 		
 	} // end of parseFormModel
 
@@ -137,10 +180,13 @@ $(document).ready(function(){
 		});
 
 		// duplicate dataset button
-		$("form.rdform .duplicate-dataset").click(function() {
-			var dataset = $(this).prev().clone();
+		$("form.rdform").on("click", ".duplicate-dataset", function() {
+
+			//var dataset = $(this).prev().clone();
+			var dataset = $(this).parents("div[typeof]").clone();			
 			dataset.find('input[type="text"]').val(""); // reset values
-			//dataset.find("label").remove(); // remove labels
+			dataset.find("legend").remove(); // remove labels
+			//dataset.find(".duplicate-dataset").parent().remove();
 			dataset.find("input").removeAttr("required"); // remove requiered attribute // TODO: maybe dont remove it, jus break empty classes
 			dataset.find("div").removeClass("error");
 			//dataset.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
@@ -148,11 +194,7 @@ $(document).ready(function(){
 			//dataset.find('input[type="radio"]').attr(  );
 			var classTypeof = dataset.attr("typeof").replace(/~\d+/, '');
 			var index = $('form.rdform > div[typeof^="'+classTypeof+'"]').length;
-			++index;
-			dataset.find('input[type="radio"]').each(function() {
-				//$(this).attr( "name", $(this).attr("name") + "~" + index + "~" );
-				//$(this).attr( "name", $(this).attr("name")  + index  );
-			})
+			++index;		
 
 			dataset.attr("typeof", classTypeof + "~" + index );
 			dataset.attr("resource", dataset.attr("resource").replace(/~\d+\}/g, '~'+index+'}') );
@@ -161,7 +203,10 @@ $(document).ready(function(){
 				$(this).val( $(this).val().replace(/~\d+\}/g, '~'+index+'}') );
 			})
 
-			dataset.insertBefore( $(this) );			
+			//dataset.insertBefore( $(this) );			
+			//dataset.insertAfter( $(this).parents("div[typeof]") );
+			$(this).parents("div[typeof]").after( dataset );
+			$(this).parent().remove();
 
 			__afterDuplicateDataset( dataset );
 
@@ -193,6 +238,14 @@ $(document).ready(function(){
 					$(wildcardTxtInput).val( val );
 				});
 			}
+		})
+
+		//select
+		$("form.rdform div[select] select").change(function() {
+			//alert( $(this).val() );
+			//console.log( selectTemplates[$(this).val()] );
+			//var template = 
+			$(this).parent("div[select]").before( selectTemplates[$(this).val()] );
 		})
 
 		// reset button
