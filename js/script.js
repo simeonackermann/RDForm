@@ -326,7 +326,7 @@ $(document).ready(function(){
 				console.log( 'Break class "' + $(this).attr("typeof") + '" because it has wildcards, but every pointer property is empty. Resource value is "' + classID + '"' );
 				return true;
 			}
-			classID = wildcardsFct['str']
+			classID = wildcardsFct['str'];
 
 			curClass['classID'] = classID;
 
@@ -432,6 +432,9 @@ $(document).ready(function(){
 				// but its a pointer to a property
 				else {
 					var wcdVal = $(domain).find('input[name="' + wcd + '"]');
+					if ( $(wcdVal).attr("type") == "radio" ) {
+						wcdVal = $(domain).find('input[name="' + wcd + '"]:checked');
+					}
 
 					// test if property exists
 					if ( wcdVal.length == 0 ) {
