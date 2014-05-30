@@ -3,14 +3,16 @@ $(document).ready(function(){
 	// after model is parsed - init form handlers
 	__initFormHandlers = function () {
 
-		// insert forenames to prof. label
-		$('form.rdform').on("keyup", 'input[name="cpm:forename"]', function() {
+		// on change forename -> insert all forenames to prof. label
+		// TODO: maybe add index for multile forename classes
+		$('form.rdform').on("keyup", 'input[name^="cpm:forename~"]', function() {
 			var forenames = "";
-			$('form.rdform input[name="cpm:forename"]').each(function() {
+			$('form.rdform input[name^="cpm:forename~"]').each(function() {
 				forenames += $(this).val() + " ";
 			})
 			forenames = forenames.trim();
 			$('form.rdform input[name="global:forenames"]').val( forenames );
+			// trigger keyup handler to input
 			$('form.rdform input[name="global:forenames"]').trigger( "keyup" );
 		});		
 
@@ -19,11 +21,14 @@ $(document).ready(function(){
 	// after pressing the duplicate button
 	__afterDuplicateDataset = function ( dataset ) {
 
-		if ( $(dataset).attr("typeof") == "cpm:Forename" ) {
-			var index = $('form > div[typeof="cpm:Forename"]').length;
-			$(dataset).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
-			$(dataset).find('input[name="cpm:forenamePosition"]').val( index );
-			$(dataset).find('input[name="cpm:isFirstName"]').val( "0" );
+		// TODO: maybe add index for multile forename classes
+		//if ( $(dataset).attr("typeof") == "cpm:Forename" ) {
+		if ( $(dataset).attr("typeof").search(/cpm:Forename/) != -1 ) {
+			//var index = $('form.rdform > div[typeof^="'+classTypeof+'"]').length;
+			var index = $('form.rdform > div[typeof^="cpm:Forename"]').length;
+			$(dataset).find('input[name^="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
+			$(dataset).find('input[name^="cpm:forenamePosition"]').val( index );
+			//$(dataset).find('input[name^="cpm:isFirstName"]').val( "0" );
 		}
 	}
 
@@ -48,8 +53,8 @@ $(document).ready(function(){
 
 	// generate unique prof id
 	createPID = function() {
-		var forename = $("form.rdform").find('input[name="cpm:forename"]').val();
-		var surname = $("form.rdform").find('input[name="cpm:surname"]').val();
+		var forename = $("form.rdform").find('input[name^="cpm:forename"]').val();
+		var surname = $("form.rdform").find('input[name^="cpm:surname"]').val();
 
 		var pid = ( ( forename.length + surname.length ) % 90 ) + 10;
 		$("form.rdform").find('input[name="global:pid"]').val( pid );

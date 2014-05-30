@@ -84,8 +84,17 @@ $(document).ready(function(){
 		$("form.rdform").prepend( $(dom_model).html() );
 		$("form.rdform").prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );
 
-		// add button to multiple fields
-		$("form.rdform div[multiple]").each( function() {
+		// mod multiple classes
+		$("form.rdform div[multiple]").each( function() {			
+			
+			// TODO: except global pointers!!!
+			$(this).attr("typeof", $(this).attr("typeof") + "~1" );
+			$(this).attr("resource", $(this).attr("resource").replace(/\}/g, '~1}') );
+			$(this).find("input").each(function() {
+				$(this).attr("name", $(this).attr("name") + "~1" );
+				$(this).val( $(this).val().replace(/\}/g, '~1}') );
+			})
+
 			$(this).after('<a class="btn btn-mini duplicate-dataset" href="#"><i class="icon-plus"></i> hinzufügen</a>');
 		});	
 
@@ -122,7 +131,6 @@ $(document).ready(function(){
 
 		__initFormHandlers();
 
-
 		// validate input values
 		$("form.rdform input").change(function() {
 			userInputValidation( $(this) );
@@ -131,16 +139,31 @@ $(document).ready(function(){
 		// duplicate dataset button
 		$("form.rdform .duplicate-dataset").click(function() {
 			var dataset = $(this).prev().clone();
-			dataset.find("input").val(""); // reset values
+			dataset.find('input[type="text"]').val(""); // reset values
 			//dataset.find("label").remove(); // remove labels
-			dataset.find("input").removeAttr("required"); // remove requiered attribute
+			dataset.find("input").removeAttr("required"); // remove requiered attribute // TODO: maybe dont remove it, jus break empty classes
 			dataset.find("div").removeClass("error");
 			//dataset.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
-			dataset.insertBefore( $(this) );
+			// BUGFIX: if radiobuttons -> change name
+			//dataset.find('input[type="radio"]').attr(  );
+			var classTypeof = dataset.attr("typeof").replace(/~\d+/, '');
+			var index = $('form.rdform > div[typeof^="'+classTypeof+'"]').length;
+			++index;
+			dataset.find('input[type="radio"]').each(function() {
+				//$(this).attr( "name", $(this).attr("name") + "~" + index + "~" );
+				//$(this).attr( "name", $(this).attr("name")  + index  );
+			})
+
+			dataset.attr("typeof", classTypeof + "~" + index );
+			dataset.attr("resource", dataset.attr("resource").replace(/~\d+\}/g, '~'+index+'}') );
+			dataset.find("input").each(function() {
+				$(this).attr("name", $(this).attr("name").replace(/~\d+/, '~'+index) );
+				$(this).val( $(this).val().replace(/~\d+\}/g, '~'+index+'}') );
+			})
+
+			dataset.insertBefore( $(this) );			
 
 			__afterDuplicateDataset( dataset );
-
-			//__initFormHandlers();
 
 			return false;
 		});
@@ -202,7 +225,7 @@ $(document).ready(function(){
 			if ( proceed ) {
 				//var rdform = $("form.rdform").clone();
 
-				// remove unchecked radio buttons
+				// remove unchecked radio buttons. BAD: dont want to give the form as an argument!
 				//$(rdform).find("input:radio").not(":checked").remove();
 
 				$("button[type=submit]").html("Datensatz aktualisieren");
@@ -240,27 +263,38 @@ $(document).ready(function(){
 				// store not empty properties and resources
 				if ( $(this).val() != ""
 					// TODO: filter not checked radio buttons a better way
+					// BUG:  on several forenames only the last isFirstName radio gets written
 					&& ( ( $(this).prop("type") == "radio" && $(this).prop("checked") || $(this).prop("type") != "radio" ) )
 					) {
 
-					property['name'] = $(this).attr("name");
+					var propVal = $(this).val();
+					var propName = $(this).attr("name");
+
+					// if its a multiple class remove ~index
+					if ( $(this).parents("div[typeof]").attr("multiple") ) {
+						propName = propName.replace(/~\d+/, '');
+						//propVal = propVal.replace(/~\d+/, '');
+					}
+
+					property['name'] = propName;
+
+					// BUGFIX: radiobutton duplicates same name, remove ~...~
+					//property['name'] = property['name'].replace(/~\d+/, '');
 
 					if ( $(this).attr("resource") ) {	// its a resource property
-						property['resource']= $(this).val();
+						property['resource']= propVal;
 						tmpResources.push( property );
 
 					} else if ( $(this).attr("global") ) { // its a global var
 						//var globVal = replaceWildcards( $(this) );
-						var globVal = replaceWildcards( $(this).val(), $(this).parents("div[typeof]"), getWebsafeString )['str'];
-						globals[$(this).attr("name")] = globVal;
-
-						// TODO if global value points to antoher property of global
+						propVal = replaceWildcards( propVal, $(this).parents("div[typeof]"), getWebsafeString )['str'];
+						globals[propName] = propVal;
 
 					} else { // its a regular property
 						if ( $(this).attr("datatype") ) {
 							property['datatype'] = $(this).attr("datatype");
 						}
-						var propVal = replaceWildcards( $(this).val(), $(this).parents("div[typeof]") )['str'];
+						propVal = replaceWildcards( propVal, $(this).parents("div[typeof]") )['str'];
 
 						property['value'] = '"' + propVal + '"';
 						properties.push( property );
@@ -283,7 +317,7 @@ $(document).ready(function(){
 
 			//* generate current class */
 			__createClass( $(this) );
-			var classID = $(this).attr("resource"); 
+			var classID = $(this).attr("resource");			
 
 			var wildcardsFct = replaceWildcards( classID, $(this), getWebsafeString );
 
@@ -295,7 +329,14 @@ $(document).ready(function(){
 			classID = wildcardsFct['str']
 
 			curClass['classID'] = classID;
-			curClass['typeof'] = $(this).attr("typeof");
+
+			var classTypeof = $(this).attr("typeof");
+			// if its a multiple class remove ~index
+			if ( $(this).attr("multiple") ) {
+				classTypeof = classTypeof.replace(/~\d+/, '');
+			}
+
+			curClass['typeof'] = classTypeof;
 
 			// add current class to global classes
 			classes.push( curClass );			
@@ -394,7 +435,7 @@ $(document).ready(function(){
 
 					// test if property exists
 					if ( wcdVal.length == 0 ) {
-						alert( 'Error: cannot find property "' + strWcds[i].substring( 1 ) + '"' );
+						alert( 'Error: cannot find property "' + strWcds[i].substring( 1 ) + '"\n\n str = ' + str );
 					}
 					var wcdVal = wcdVal.val();
 				}				
