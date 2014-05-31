@@ -23,13 +23,12 @@
     <!-- GLOBALE Variablen (werden nicht als properties angelegt!) -->
     <input name="global:forenames" type="global" />
     <input name="global:pid" type="global" />
-    <input name="global:puri" type="global" value="{cpm:surname}_{global:pid}" />    <!-- alternativ: {rdfs:...} __pid__ -->
+    <input name="global:puri" type="global" value="{cpm:surname}_{global:pid}" />
   </div>  
 
   <!-- ### Vornamen ### -->
   <legend>Vornamen</legend>                                                                              
   <div typeof="cpm:Forename" resource="cpl:Forename/{cpm:forename}-{cpm:forenamePosition}-{cpm:isFirstName}" multiple>
-                                                                            <!-- BUG: on multiple forenames + radiobuttons: name not unique -->
     <label>Vorname:</label>      
     <input name="cpm:forename" datatype="xsd:string" placeholder="1. Vorname" value="Dummy Forename" required />
 

@@ -99,18 +99,22 @@ $(document).ready(function(){
 
 		// select classes
 		$(dom_model).find("div[select]").each( function(){
-			var selectElem = $("<select><option disabled selected>Klasse wählen...</option></select>");			
+			var selectElem = $("<select><option disabled selected>Klasse wählen...</option></select>");
+			var selectTypeof = $(this).attr("typeof");
 
 			$(this).children("div[typeof]").each(function() {
-				//var selectTemplate = new Object();
+				$(this).attr("subclassof", selectTypeof);
+
 				var t = $(this).attr("typeof");
 				
 				selectTemplates[t] = $(this);
-
+				// TODO: legend als titel
 				$(selectElem).append('<option value="'+t+'">'+t+'</option>');
 
 				$(this).remove();
 			})
+
+			//selectElem = $(selectElem).wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
 
 			$(this).append( selectElem );
 
@@ -190,8 +194,6 @@ $(document).ready(function(){
 			dataset.find("input").removeAttr("required"); // remove requiered attribute // TODO: maybe dont remove it, jus break empty classes
 			dataset.find("div").removeClass("error");
 			//dataset.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
-			// BUGFIX: if radiobuttons -> change name
-			//dataset.find('input[type="radio"]').attr(  );
 			var classTypeof = dataset.attr("typeof").replace(/~\d+/, '');
 			var index = $('form.rdform > div[typeof^="'+classTypeof+'"]').length;
 			++index;		
@@ -204,7 +206,6 @@ $(document).ready(function(){
 			})
 
 			//dataset.insertBefore( $(this) );			
-			//dataset.insertAfter( $(this).parents("div[typeof]") );
 			$(this).parents("div[typeof]").after( dataset );
 			$(this).parent().remove();
 
@@ -240,12 +241,13 @@ $(document).ready(function(){
 			}
 		})
 
-		//select
-		$("form.rdform div[select] select").change(function() {
-			//alert( $(this).val() );
-			//console.log( selectTemplates[$(this).val()] );
-			//var template = 
+		//select class
+		$("form.rdform div[select] select").change(function() {			
 			$(this).parent("div[select]").before( selectTemplates[$(this).val()] );
+			$(this).children('option[value="'+$(this).val()+'"]').attr("disabled", "disabled");
+
+			//$('form.rdform div[typeof] input[value="cpm:PeriodOfLife"]').after('<input name="cpm:has-period" type="resource" value="cpm:PeriodOfLife" />');
+
 		})
 
 		// reset button
@@ -358,7 +360,7 @@ $(document).ready(function(){
 
 			// dont save classes without any property
 			if ( properties.length == 0 ) {
-				console.log( 'Break class "' + $(this).attr("typeof") + '" because it has no properties' );
+				console.log( 'Skip class "' + $(this).attr("typeof") + '" because it has no properties' );
 				return true;
 			}
 
@@ -376,7 +378,7 @@ $(document).ready(function(){
 
 			// dont save classes with wildcard pointers when every value is empty
 			if ( classID.search(/\{.*\}/) != -1 && wildcardsFct['count'] == 0 ) {
-				console.log( 'Break class "' + $(this).attr("typeof") + '" because it has wildcards, but every pointer property is empty. Resource value is "' + classID + '"' );
+				console.log( 'Skip class "' + $(this).attr("typeof") + '" because it has wildcards, but every pointer property is empty. Resource value is "' + classID + '"' );
 				return true;
 			}
 			classID = wildcardsFct['str'];
@@ -388,8 +390,14 @@ $(document).ready(function(){
 			if ( $(this).attr("multiple") ) {
 				classTypeof = classTypeof.replace(/~\d+/, '');
 			}
-
 			curClass['typeof'] = classTypeof;
+
+			// if its a subclass (eg in a select class)
+			if ( $(this).attr("subclassof") ) {
+				curClass['subClassOf'] = $(this).attr("subclassof");
+			} else {
+				curClass['subClassOf'] = null;
+			}
 
 			// add current class to global classes
 			classes.push( curClass );			
@@ -400,7 +408,9 @@ $(document).ready(function(){
 				for ( var tRi in classes[tRCi]['tmpResources'] ) {
 					var property = new Object();
 					var tmpResource = classes[tRCi]['tmpResources'][tRi];
-					if ( tmpResource['resource'].match( curClass['typeof'] ) ) {
+					if ( tmpResource['resource'].match( curClass['typeof'] ) 
+						|| tmpResource['resource'].match( curClass['subClassOf'] )
+						 ) {
 						property['name'] = tmpResource['name']; 
 						property['value'] = curClass['classID'];
 						classes[tRCi]['properties'].push( property );
@@ -410,7 +420,7 @@ $(document).ready(function(){
 
 		}); // end walk through classes
 
-		console.log( globals );
+		//console.log( globals );
 		
 		createResult();
 
