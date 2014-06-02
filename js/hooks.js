@@ -4,8 +4,6 @@ $(document).ready(function(){
 	__initFormHandlers = function () {
 
 		// on change forename -> insert all forenames to prof. label
-						// because multiple class: search on beginning (^)
-						// to exclude cpm:forenamePosition search with index marker (~)
 		$('form.rdform').on("keyup", 'input[name="cpm:forename"]', function() {
 			var forenames = "";
 			$('form.rdform input[name="cpm:forename"]').each(function() {
@@ -22,14 +20,11 @@ $(document).ready(function(){
 	// after pressing the duplicate button
 	__afterDuplicateDataset = function ( dataset ) {
 
-		//if ( $(dataset).attr("typeof") == "cpm:Forename" ) {
+		// rewrite placeholder index and position in forenames...
 		if ( $(dataset).attr("typeof").search(/cpm:Forename/) != -1 ) {
-			//var index = $('form.rdform > div[typeof^="'+classTypeof+'"]').length;
-			//var index = $('form.rdform > div[typeof^="cpm:Forename"]').length;
 			var index = $(dataset).attr("index");
 			$(dataset).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
 			$(dataset).find('input[name="cpm:forenamePosition"]').val( index );
-			//$(dataset).find('input[name^="cpm:isFirstName"]').val( "0" );
 		}
 	}
 

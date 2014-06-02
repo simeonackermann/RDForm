@@ -84,29 +84,13 @@ $(document).ready(function(){
 		smallInput.parents(".span10").removeClass("span4").addClass("span4");
 
 		// multiple classes
-		$(dom_model).find("div[multiple]").each( function() {			
-			
+		$(dom_model).find("div[multiple]").each( function() {
 			// TODO: except global pointers!!!
-			// TODO: add index attr -> $(this).attr("index", "	1" );
-			// TODO: ~index may not needed for class typeof
+			// TODO: replace references in other inputs in same classes
 			$(this).attr("index", "1" );
-			//$(this).attr("typeof", $(this).attr("typeof") + "~1" );			
-			//$(this).attr("resource", $(this).attr("resource").replace(/\}/g, '[1]}') );
-			/*
-			$(this).find("input").each(function() {
-				$(this).attr("name", $(this).attr("name") + "[1]" );
-				$(this).val( $(this).val().replace(/\}/g, '~1}') );
-			})
-			*/
 			$(this).find('input[type=radio]').each(function() {
-				
-				//$(this).val( $(this).val().replace(/\}/g, '~1}') );
-				//alert($(this).attr("name"));
-				//console.log( $(this).parents("div[typeof]") );
 				var regex = new RegExp( $(this).attr("name") + '\}', "g");
-				$(this).parents("div[typeof]").attr("resource", $(this).parents("div[typeof]").attr("resource").replace( regex , $(this).attr("name") + "-1}" ) );
-				// TODO: reaplace references other inputs in same classes
-
+				$(this).parents("div[typeof]").attr("resource", $(this).parents("div[typeof]").attr("resource").replace( regex , $(this).attr("name") + "-1}" ) );				
 				$(this).attr("name", $(this).attr("name") + "-1" );				
 			})
 
@@ -122,42 +106,21 @@ $(document).ready(function(){
 				$(this).attr("subclassof", selectTypeof);
 
 				var t = $(this).attr("typeof");
-				
+
+				if ( $(this).find("legend").length ) {
+					t = $(this).find("legend").text() + " - " + t;
+				}				
 				selectTemplates[t] = $(this);
-				// TODO: legend als titel
 				$(selectElem).append('<option value="'+t+'">'+t+'</option>');
 
 				$(this).remove();
 			})
-
-			//selectElem = $(selectElem).wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
-
 			$(this).append( selectElem );
-
-		})		
-
+		})
 
 		// add to form
 		$("form.rdform").prepend( $(dom_model).html() );
-		$("form.rdform").prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );
-				
-
-		// multiple classes
-		/*
-		$("form.rdform div[multiple]").each( function() {			
-			
-			// TODO: except global pointers!!!
-			// TODO: index -> $(this).attr("index", "	1" );
-			$(this).attr("typeof", $(this).attr("typeof") + "~1" );
-			$(this).attr("resource", $(this).attr("resource").replace(/\}/g, '~1}') );
-			$(this).find("input").each(function() {
-				$(this).attr("name", $(this).attr("name") + "~1" );
-				$(this).val( $(this).val().replace(/\}/g, '~1}') );
-			})
-
-			$(this).after('<a class="btn btn-mini duplicate-dataset" href="#"><i class="icon-plus"></i> hinzufügen</a>');
-		});
-*/
+		$("form.rdform").prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );				
 
 		initFormHandler();
 		
@@ -177,7 +140,7 @@ $(document).ready(function(){
 	});
 
 	/*
-	 *	Initial form buttons after building the form
+	 *	Init form button handlers after building the form
 	 */
 	initFormHandler = function() {
 		/*
@@ -199,42 +162,21 @@ $(document).ready(function(){
 
 		// duplicate dataset button
 		$("form.rdform").on("click", ".duplicate-dataset", function() {
-
-			//var dataset = $(this).prev().clone();
 			var dataset = $(this).parents("div[typeof]").clone();			
 			dataset.find('input[type="text"]').val(""); // reset values
 			dataset.find("legend").remove(); // remove labels
-			//dataset.find(".duplicate-dataset").parent().remove();
-			dataset.find("input").removeAttr("required"); // remove requiered attribute // TODO: maybe dont remove it, jus break empty classes
+			//dataset.find("input").removeAttr("required"); // remove requiered attribute // TODO: maybe dont remove it, jus break empty classes
 			dataset.find("div").removeClass("error");
 			//dataset.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
 
-			/*
-			var classTypeof = dataset.attr("typeof").replace(/~\d+/, '');
-			var index = $('form.rdform > div[typeof^="'+classTypeof+'"]').length;
-			++index;		
-
-			dataset.attr("typeof", classTypeof + "~" + index );
-			dataset.attr("resource", dataset.attr("resource").replace(/~\d+\}/g, '~'+index+'}') );
-			dataset.find("input").each(function() {
-				$(this).attr("name", $(this).attr("name").replace(/~\d+/, '~'+index) );
-				$(this).val( $(this).val().replace(/~\d+\}/g, '~'+index+'}') );
-			})
-			*/
+			// rewrite index, radio input names index and references in wildcards
 			var index = $(dataset).attr("index");
 			++index;
 			$(dataset).attr("index", index);
 			$(dataset).find('input[type="radio"]').each(function() {
-
-				//var regex = new RegExp( $(this).attr("name") + '\}', "g");
-				//$(this).parents("div[typeof]").attr("resource", $(this).parents("div[typeof]").attr("resource").replace( regex , $(this).attr("name") + "-1}" ) );
-
-				var name_new = $(this).attr("name").replace(/\d+$/, index);
-
-				$(this).parents("div[typeof]").attr("resource", $(this).parents("div[typeof]").attr("resource").replace( $(this).attr("name"), name_new ) );
-				//alert( $(this).attr("name") );
-
-				$(this).attr("name", name_new );
+				var newRadioName = $(this).attr("name").replace(/\d+$/, index);
+				$(this).parents("div[typeof]").attr("resource", $(this).parents("div[typeof]").attr("resource").replace( $(this).attr("name"), newRadioName ) );
+				$(this).attr("name", newRadioName );
 			});
 
 			//dataset.insertBefore( $(this) );			
@@ -342,20 +284,15 @@ $(document).ready(function(){
 				// store not empty properties and resources
 				if ( $(this).val() != ""
 					// TODO: filter not checked radio buttons a better way
-					// BUG:  on several forenames only the last isFirstName radio gets written
-					&& ( ( $(this).prop("type") == "radio" && $(this).prop("checked") || $(this).prop("type") != "radio" ) )
+					&& ( ( $(this).attr("type") == "radio" && $(this).prop("checked") || $(this).attr("type") != "radio" ) )
 					) {
 
 					var propVal = $(this).val();
 					var propName = $(this).attr("name");
 
-					// if its a multiple class remove ~index
-					if ( $(this).parents("div[typeof]").attr("multiple") ) {
-						//propName = propName.replace(/~\d+/, '');
-
-						//propName = propName.replace(/\[\d+\]$/, '');
+					// if its a multiple class radio input remove -index
+					if ( $(this).parents("div[typeof]").attr("multiple") && $(this).attr("type") == "radio" ) {
 						propName = propName.replace(/-\d+$/, '');
-						//alert(propName);
 					}
 
 					property['name'] = propName;
@@ -395,15 +332,7 @@ $(document).ready(function(){
 
 			//* generate current class */
 			__createClass( $(this) );
-			var classID = $(this).attr("resource");
-
-			// if its a multiple class remove ~index
-			if ( $(this).attr("multiple") ) {
-				//classTypeof = classTypeof.replace(/~\d+/, '');
-				//classID = classID.replace(/\[\d+\]/, '');
-				//alert(classTypeof);
-				//alert(classID);
-			}
+			var classID = $(this).attr("resource");			
 
 			var wildcardsFct = replaceWildcards( classID, $(this), getWebsafeString );
 
@@ -416,12 +345,6 @@ $(document).ready(function(){
 			curClass['classID'] = classID;
 
 			var classTypeof = $(this).attr("typeof");
-			// if its a multiple class remove ~index
-			if ( $(this).attr("multiple") ) {
-				//classTypeof = classTypeof.replace(/~\d+/, '');
-				//classTypeof = classTypeof.replace(/\[\d+\]/, '');
-				
-			}
 			curClass['typeof'] = classTypeof;
 
 			// if its a subclass (eg in a select class)
@@ -518,7 +441,6 @@ $(document).ready(function(){
 
 				// test if its a pointer to a global var
 				if ( wcd.search(/^global:/) != -1 ) {
-					//var globalVar = wcd.substring(7);
 					if ( globals[wcd] === undefined ) {
 						alert('Error: the global var "' + wcd + '" does not exist but required for the wildcard "' + str + '"');
 					} else {
@@ -545,7 +467,7 @@ $(document).ready(function(){
 				}
 
 				if ( wcdVal != "" ) // count not empty properties 
-						++counted;
+					++counted;
 
 				// regex: replace the {wildard pointer} with the value
 				var regex = new RegExp("\{" + wcd + "\}", "g");
@@ -555,11 +477,9 @@ $(document).ready(function(){
 					str = str.replace(regex, '' );
 				}
 			}
-		}		
-
+		}
 		result['str'] = str.trim();
 		result['count'] = counted;
-
 		return result;
 	}
 	
