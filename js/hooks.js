@@ -6,9 +6,9 @@ $(document).ready(function(){
 		// on change forename -> insert all forenames to prof. label
 						// because multiple class: search on beginning (^)
 						// to exclude cpm:forenamePosition search with index marker (~)
-		$('form.rdform').on("keyup", 'input[name^="cpm:forename~"]', function() {
+		$('form.rdform').on("keyup", 'input[name="cpm:forename"]', function() {
 			var forenames = "";
-			$('form.rdform input[name^="cpm:forename~"]').each(function() {
+			$('form.rdform input[name="cpm:forename"]').each(function() {
 				forenames += $(this).val() + " ";
 			})
 			forenames = forenames.trim();
@@ -25,9 +25,10 @@ $(document).ready(function(){
 		//if ( $(dataset).attr("typeof") == "cpm:Forename" ) {
 		if ( $(dataset).attr("typeof").search(/cpm:Forename/) != -1 ) {
 			//var index = $('form.rdform > div[typeof^="'+classTypeof+'"]').length;
-			var index = $('form.rdform > div[typeof^="cpm:Forename"]').length;
-			$(dataset).find('input[name^="cpm:forename~"]').attr( "placeholder" , index + ". Vorname");
-			$(dataset).find('input[name^="cpm:forenamePosition"]').val( index );
+			//var index = $('form.rdform > div[typeof^="cpm:Forename"]').length;
+			var index = $(dataset).attr("index");
+			$(dataset).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
+			$(dataset).find('input[name="cpm:forenamePosition"]').val( index );
 			//$(dataset).find('input[name^="cpm:isFirstName"]').val( "0" );
 		}
 	}
