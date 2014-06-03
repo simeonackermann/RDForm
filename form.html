@@ -50,8 +50,8 @@
   </div> 
 
    <legend>Studium</legend>
-    <div typeof="cpm:Study" resource="cpl:Study/Study_{rdfs:label}" multiple>
-      <label>Studium...</label>
+    <div typeof="cpm:Study" resource="cpl:Study/{global:puri}/{rdfs:label}" multiple>
+      <label>Studium</label>
       <input name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
       <label>von:</label>
@@ -70,7 +70,7 @@
   <div typeof="cpm:PeriodOfLife" select="select">
     <!-- Select 1 -->
     <legend>Karriere</legend>
-    <div typeof="cpm:Career" resource="cpl:Career/Karriere_%" multiple>
+    <div typeof="cpm:Career" resource="cpl:Career/{global:puri}/{rdfs:label}" multiple>
       <label>Akademische Karriere</label>
       <input name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
@@ -82,7 +82,7 @@
     </div>
     <!-- Select 2 -->
     <legend>Amt</legend>
-    <div typeof="cpm:Office" resource="cpl:Office/{rdfs:label}" multiple>
+    <div typeof="cpm:Office" resource="cpl:Office/{global:puri}/{rdfs:label}" multiple>
       <label>Bezeichnung</label>
       <input name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 

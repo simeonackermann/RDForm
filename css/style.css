@@ -48,6 +48,10 @@ label {
 	margin-bottom: 12px;
 }
 
+div[typeof]:hover {
+	//background-color: #555;
+}
+
 
 .help-block {
 	display: none;

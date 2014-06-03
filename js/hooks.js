@@ -6,6 +6,7 @@ $(document).ready(function(){
 		// on change forename -> insert all forenames to prof. label
 		$('form.rdform').on("keyup", 'input[name="cpm:forename"]', function() {
 			var forenames = "";
+			// TODO: nur rufnamen
 			$('form.rdform input[name="cpm:forename"]').each(function() {
 				forenames += $(this).val() + " ";
 			})
@@ -31,26 +32,33 @@ $(document).ready(function(){
 	// before creating the class properties from input values
 	__createClassProperty = function( property ) {
 
+		// create pid for professor
 		if ( $(property).attr("name") == "global:pid" ) {
-				createPID();
+			createPID();
 		}
 	}
 
 	// before generating the class object from input values and properties
 	__createClass = function ( curClass ) {
 		
+		/*
+		// add ID to creer class...
 		if ( $(curClass).attr("typeof") == "cpm:Career" ) {
 			var classRes = $("form.rdform").find('div[typeof="cpm:Career"]').attr( "resource" );
 			$("form.rdform").find('div[typeof="cpm:Career"]').attr( "resource", "cpl:Karriere_" + Math.floor( Math.random() * 10 ) );
 		}
+		*/
 	}
 	
 	/* own functions */
 
 	// generate unique prof id
 	createPID = function() {
-		var forename = $("form.rdform").find('input[name^="cpm:forename"]').val();
-		var surname = $("form.rdform").find('input[name^="cpm:surname"]').val();
+		var forename = $("form.rdform").find('input[name="cpm:forename"]').val();
+		var surname = $("form.rdform").find('input[name="cpm:surname"]').val();
+		var birth = $('form.rdform div[typeof="cpm:Birth"] input[name="cpm:date"]').val();
+
+		// TODO: explode birth (-) sum parts lengths
 
 		var pid = ( ( forename.length + surname.length ) % 90 ) + 10;
 		$("form.rdform").find('input[name="global:pid"]').val( pid );

@@ -74,9 +74,12 @@ $(document).ready(function(){
 		})
 
 		// radio labels
+		$(dom_model).find("input:radio").wrap('<label class="radio"><label>');
 		$(dom_model).find("input:radio").each(function() {
 			$(this).after( $(this).attr("label") );
 		})
+
+		// TODO: checkbox
 
 		// add small inputs
 		var smallInput = $(dom_model).find('input[datatype*="date"]');
@@ -85,7 +88,6 @@ $(document).ready(function(){
 
 		// multiple classes
 		$(dom_model).find("div[multiple]").each( function() {
-			// TODO: except global pointers!!!
 			// TODO: replace references in other inputs in same classes
 			$(this).attr("index", "1" );
 			$(this).find('input[type=radio]').each(function() {
@@ -131,11 +133,14 @@ $(document).ready(function(){
 	### GET formula ###
 	*/
 	$.ajax({ 
-		url: "formular.html",
+		url: "form.html",
 		type: "GET",
 		dataType: "text",
 		success: function(data) {
 				parseFormModel( data );
+		},
+		error: function() {
+			alert("Error when calling form.html. Is the filename right?");
 		}
 	});
 
@@ -179,16 +184,18 @@ $(document).ready(function(){
 				$(this).attr("name", newRadioName );
 			});
 
-			//dataset.insertBefore( $(this) );			
+			//dataset.insertBefore( $(this) );		
+			$(dataset).hide();	
 			$(this).parents("div[typeof]").after( dataset );
-			$(this).parent().remove();
+			$(dataset).show("slow");
+			$(this).parent().remove(); // remove duplicate btn
 
 			__afterDuplicateDataset( dataset );
 
 			return false;
 		});
 
-		// find text inputs with wildcard values -> bind handlers to dynamically change the value
+		// text inputs with wildcard values -> bind handlers to dynamically change the value
 		$('form.rdform').find('input[type="text"][value*="{"]').each(function() {
 			var wcdPointerVals = new Object();
 			var wildcardTxtInput = $(this);
@@ -217,7 +224,9 @@ $(document).ready(function(){
 
 		//select class, add selected template before
 		$("form.rdform div[select] select").change(function() {			
+			selectTemplates[$(this).val()].hide();
 			$(this).parent("div[select]").before( selectTemplates[$(this).val()] );
+			selectTemplates[$(this).val()].show("slow");
 			$(this).children('option[value="'+$(this).val()+'"]').attr("disabled", "disabled");
 		})
 
@@ -395,11 +404,10 @@ $(document).ready(function(){
 				resultStr += "<" + prefixes[i] + "> .\n";
 			}
 		}
-		resultStr += "\n";
 
 		// create result classes
 		for ( var ci in classes ) {
-			resultStr += classes[ci]['classID'] + " a " + classes[ci]['typeof'] + " ;\n";
+			resultStr += "\n" + classes[ci]['classID'] + " a " + classes[ci]['typeof'] + " ;\n";
 
 			for ( var pi in classes[ci]['properties']) {
 				var property = classes[ci]['properties'][pi];
@@ -407,13 +415,14 @@ $(document).ready(function(){
 				// add datatype if exist
 				resultStr += property.hasOwnProperty('datatype') ? "^^" + property['datatype'] : "";
 				// end of property or end of class (add ; or .)
-				resultStr += ( ( 1 + parseInt(pi) ) == classes[ci]['properties'].length ) ? " .\n\n" : " ;\n";
+				resultStr += ( ( 1 + parseInt(pi) ) == classes[ci]['properties'].length ) ? " .\n" : " ;\n";
 			}
 		}
 		
 		$(".result").show();
-		$(".result textarea").val( resultStr );
-		// TODO: dynamically height of textarea
+		$(".result textarea").val( resultStr );		
+		var lines = resultStr.split("\n");
+		$(".result textarea").attr( "rows" , ( lines.length ) );
 		$('html, body').animate({ scrollTop: $(".result").offset().top }, 200);		
 
 	} // end of creating result
@@ -485,7 +494,7 @@ $(document).ready(function(){
 	
 
 	/* 
-	 *	Remove accents, umlauts, special signs, ... from string
+	 *	Remove accents, umlauts, special chars, ... from string
 	 *
 	 * @str String
 	 * return String with only a-z0-9-_
@@ -506,7 +515,7 @@ $(document).ready(function(){
 			"Ó": "O", "Ò": "O", "Ô": "O",
 			"ß": "ss"
 		}
-		// replace not alphabetical signs if its in dictionary
+		// replace not alphabetical chars if its in dictionary
 		// TODO: test if str empty
 		str = str.replace(/[^\w ]/gi, function(char) {
 			return dict[char] || char;
@@ -520,9 +529,16 @@ $(document).ready(function(){
 	 *
 	 * @property DOM object with input element
 	 */
-	userInputValidation = function ( property ) {		
-		var value = $(property).val();
+	userInputValidation = function ( property ) {	
+		/*
+		var dates = {
+			'0000' : 'yYear',
+			'0000-00' : 'gYearMonth',
+			'0000-00-00' : 'date'			
+		}
+		*/
 
+		var value = $(property).val();
 		value = value.trim();
 
 		if ( $(property).attr("datatype") ) {
