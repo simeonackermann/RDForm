@@ -15,7 +15,7 @@ The data model is based on the RDFa notation with flexible possiilities to creat
 
 ## Documentation ##
 
-On the base of the data model the HTML5 form is generated. Its stored in form.html and its notation is based on (https://en.wikipedia.org/wiki/RDFa)[RDFa] with HTML-form elements and attributes.
+On the base of the data model the HTML5 form is generated. Its stored in form.html and its notation is based on [RDFa](https://en.wikipedia.org/wiki/RDFa) with HTML-form elements and attributes.
 
 The base notation is:
 
@@ -30,7 +30,7 @@ The base notation is:
 is parsed to (the label value comes from user input):
 
 	Person-Bowie a Person ;
-		label "Lunis"^^string ;
+		label "Mr Unknown"^^string .
 
 
 ### Element descriptions and attributes: ###
