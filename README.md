@@ -29,7 +29,7 @@ The base notation is:
 
 is parsed to (the label value comes from user input):
 
-	Person-Bowie a Person ;
+	Person-MrUnkown a Person ;
 		label "Mr Unknown"^^string .
 
 
