@@ -46,6 +46,7 @@ is parsed to (the label value comes from user input):
 	* `typeof` type of the class
 	* `resources` class identifier
 	* `multiple` if given, class can be duplicated
+	* `select` generates a select list of containung subclasses
 
 * `<label>` label for the following property
 
