@@ -1,98 +1,24 @@
-<form prefix="">
-  <legend>Allgemein</legend>
-  <!--  ### Main Class ### -->
-  <div typeof="cpm:Professor" resource="cpl:Professor/{global:puri}">
-    <label>Bezeichnung:</label>                                                                            
-    <input name="rdfs:label" datatype="xsd:string" value="{cpm:fullAcademicalTitle} {global:forenames} {cpm:surname}" required readonly />    
-    <label>Akademischer Titel:</label>
-    <input name="cpm:fullAcademicalTitle" datatype="xsd:string" placeholder="Bsp: Prof. Dr." />
-    <label>Nachname:</label>
-    <input name="cpm:surname" datatype="xsd:string" />
-    
-    <input name="cpm:religion" datatype="xsd:string" placeholder="Religion" />    
+<form prefix="bio http://vocab.org/bio/0.1/">
+  <legend>Person</legend>
+  <div typeof="foaf:Person" resource="Person-{foaf:name}">
+    <label>Name:</label>                                                                           
+    <input name="foaf:name" datatype="xsd:string" required />
+    <label>E-Mail:</label>    
+    <input name="foaf:mbox" placeholder="name@example.org" />    
 
-    <!-- ### Ressourcen Eigenschaften ### -->    
-    <input name="cpm:has-period" type="resource" value="cpm:Birth" />
-    <input name="cpm:has-forename" type="resource" value="cpm:Forename" />
-    <input name="cpm:has-period" type="resource" value="cpm:Study" />
+    <!-- property ressource -->    
+    <input name="bio:event" type="resource" value="bio:Birth" />
 
-    <!-- Verweis auf Select Liste -->
-    <input name="cpm:has-period" type="resource" value="cpm:PeriodOfLife" />
+    <!-- global person name -->
+    <input name="global:pid" type="global" value="{foaf:name}" />
+  </div> 
 
-    <!-- GLOBALE Variablen (werden nicht als properties angelegt!) -->
-    <input name="global:forenames" type="global" />
-    <input name="global:pid" type="global" />
-    <input name="global:puri" type="global" value="{cpm:surname}_{global:pid}" />
-  </div>  
-
-  <!-- ### Vornamen ### -->
-  <legend>Vornamen</legend>                                                                              
-  <div typeof="cpm:Forename" resource="cpl:Forename/{cpm:forename}-{cpm:forenamePosition}-{cpm:isFirstName}" multiple>
-    <label>Vorname:</label>      
-    <input name="cpm:forename" datatype="xsd:string" placeholder="1. Vorname" required />
-
-    <input name="rdfs:label" type="hidden" value="{cpm:forename}" />
-    <input name="cpm:forenamePosition" type="hidden" datatype="xsd:int" value="1" />
-
-    <label>Ist Rufname?</label>
-    <input name="cpm:isFirstName" type="radio" datatype="xsd:boolean" value="1" label="Ja" checked />
-    <input name="cpm:isFirstName" type="radio" datatype="xsd:boolean" value="0" label="Nein" />
-  </div>  
-
-  <!-- ###  ### -->
-  <legend>Geburt</legend>
-  <div typeof="cpm:Birth" resource="cpl:Birth/{global:puri}">
+  <legend>Birth</legend>
+  <div typeof="bio:Birth" resource="Birth-{global:pid}">
     <label>Ort:</label>
     <input name="rdfs:label" datatype="xsd:string" placeholder="Geburtsort" />
 
     <label>Datum:</label>
-    <input name="cpm:date" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input name="dc:date" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
   </div> 
-
-   <legend>Studium</legend>
-    <div typeof="cpm:Study" resource="cpl:Study/{global:puri}/{rdfs:label}" multiple>
-      <label>Studium</label>
-      <input name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
-
-      <label>von:</label>
-      <input name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-
-      <label>bis:</label>
-      <input name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-    </div>
-
-
-  <legend>Lebensabschnitt</legend>
-  <!--
-  Select Liste mit verschiedenen Ressourcen
-  - bei Add aus Select Liste entfernen
-  -->
-  <div typeof="cpm:PeriodOfLife" select>
-    <!-- Select 1 -->
-    <legend>Karriere</legend>
-    <div typeof="cpm:Career" resource="cpl:Career/{global:puri}/{rdfs:label}" multiple>
-      <label>Akademische Karriere</label>
-      <input name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
-
-      <label>von:</label>
-      <input name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-
-      <label>bis:</label>
-      <input name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-    </div>
-    <!-- Select 2 -->
-    <legend>Amt</legend>
-    <div typeof="cpm:Office" resource="cpl:Office/{global:puri}/{rdfs:label}" multiple>
-      <label>Bezeichnung</label>
-      <input name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
-
-      <label>von:</label>
-      <input name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-
-      <label>bis:</label>
-      <input name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-    </div>
-
-  </div>
-
 </form> 
