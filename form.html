@@ -1,4 +1,4 @@
-<form vocab="" prefix="cpm: ... cpl: ...">
+<form prefix="">
   <legend>Allgemein</legend>
   <!--  ### Main Class ### -->
   <div typeof="cpm:Professor" resource="cpl:Professor/{global:puri}">
@@ -7,7 +7,7 @@
     <label>Akademischer Titel:</label>
     <input name="cpm:fullAcademicalTitle" datatype="xsd:string" placeholder="Bsp: Prof. Dr." />
     <label>Nachname:</label>
-    <input name="cpm:surname" datatype="xsd:string" required value="Dummy Surname" />
+    <input name="cpm:surname" datatype="xsd:string" />
     
     <input name="cpm:religion" datatype="xsd:string" placeholder="Religion" />    
 
@@ -29,7 +29,7 @@
   <legend>Vornamen</legend>                                                                              
   <div typeof="cpm:Forename" resource="cpl:Forename/{cpm:forename}-{cpm:forenamePosition}-{cpm:isFirstName}" multiple>
     <label>Vorname:</label>      
-    <input name="cpm:forename" datatype="xsd:string" placeholder="1. Vorname" value="Dummy Forename" required />
+    <input name="cpm:forename" datatype="xsd:string" placeholder="1. Vorname" required />
 
     <input name="rdfs:label" type="hidden" value="{cpm:forename}" />
     <input name="cpm:forenamePosition" type="hidden" datatype="xsd:int" value="1" />
@@ -67,7 +67,7 @@
   Select Liste mit verschiedenen Ressourcen
   - bei Add aus Select Liste entfernen
   -->
-  <div typeof="cpm:PeriodOfLife" select="select">
+  <div typeof="cpm:PeriodOfLife" select>
     <!-- Select 1 -->
     <legend>Karriere</legend>
     <div typeof="cpm:Career" resource="cpl:Career/{global:puri}/{rdfs:label}" multiple>
