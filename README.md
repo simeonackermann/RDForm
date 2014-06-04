@@ -10,7 +10,16 @@ The data model is based on the RDFa notation with flexible possiilities to creat
 * **Requirements:** only JavaScript (JQuery) in a modern browser
 * download the source code
 * edit form.html to your requirements
-* open index.hml in your browser
+* open index.html in your browser
+
+For a more complex example change in index.html the line 68 to:
+
+	$(document).ready(function(){
+		$(".rdform").RDForm({
+			model: "form_cpl.html",
+			hooks: "js/hooks_cpl.js"
+		});
+	});
 
 
 ## Documentation ##
