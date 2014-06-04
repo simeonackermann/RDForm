@@ -51,14 +51,24 @@
 		
 		rdform = $(this);
 
+		// loading bootstrap
+		/*
+		$.ajax({
+            url:"css/bootstrap.min.css",
+            success:function(data){
+                 $("<style></style>").appendTo("head").html(data);
+            }
+        })
+*/
+
     	$.getScript( settings.hooks )
-  			.done(function( script, textStatus ) {
-    			console.log( textStatus );
-  			})
+			.done(function() {
+				setRDForm( rdform );
+			})
   			.fail(function( jqxhr, type, exception ) {
     			//$( "div.log" ).text( "Triggered ajaxError handler." );
     			alert('Error on loading JavaScript hooks file "'+settings.hooks+'". Is the filename right?');
-		});
+		}); 		
 
     	$.ajax({ 
 			url: settings.model,
@@ -72,7 +82,6 @@
 			}
 		});
 
-		
 
     	//return this;
 	};
@@ -83,16 +92,12 @@
 	 *
 	 *	@model Modell as a string from config file
 	 */
-	parseFormModel = function( model ) {
-		// regexp: http://de.selfhtml.org/perl/sprache/regexpr.htm#merken
-		// rdfa http://www.w3.org/TR/xhtml-rdfa-primer/#setting-a-default-vocabulary
+	parseFormModel = function( model ) {		
 		var dom_model = $.parseHTML( model );
 
 		if ( $(dom_model).attr("prefix") ) {
 			prefixes = $(dom_model).attr("prefix").split(" ");
 		}
-
-		// TODO: maybe without each..., just $(dom_model).find("div[typeof]").addClass("row-fluid");
 
 		$(dom_model).find("div[typeof]").addClass("row-fluid"); // add row-fluid to every class
 
@@ -100,8 +105,7 @@
 		$(dom_model).find('input[type="resource"]').attr("resource", "resource");
 		$(dom_model).find('input[type="resource"]').attr("type", "hidden");
 
-		// add type="text" to other inputs
-		//$(this).find('input[type!="hidden"]').attr("type", "text");
+		// add type="text" to inputs without
 		$(dom_model).find('input').not("[type]").attr("type", "text");
 
 		// parse global variables
@@ -123,12 +127,12 @@
 		})
 
 		// radio labels
-		$(dom_model).find("input:radio").wrap('<label class="radio"><label>');
 		$(dom_model).find("input:radio").each(function() {
+			$(this).wrap('<label class="radio">');
 			$(this).after( $(this).attr("label") );
 		})
 
-		// TODO: checkbox
+		// TODO: implementcheckbox
 
 		// add small inputs
 		var smallInput = $(dom_model).find('input[datatype*="date"]');
@@ -189,17 +193,16 @@
 				weekStart: 1
 			});
 		});​
-		*/
-
-		__initFormHandlers();
+		*/		
+		__initFormHandlers();		
 
 		// validate input values
-		$("form.rdform input").change(function() {
+		rdform.find("input").change(function() {
 			userInputValidation( $(this) );
 		});
 
 		// duplicate dataset button
-		$("form.rdform").on("click", ".duplicate-dataset", function() {
+		rdform.on("click", ".duplicate-dataset", function() {
 			var dataset = $(this).parents("div[typeof]").clone();			
 			dataset.find('input[type="text"]').val(""); // reset values
 			dataset.find("legend").remove(); // remove labels
@@ -229,7 +232,7 @@
 		});
 
 		// text inputs with wildcard values -> bind handlers to dynamically change the value
-		$('form.rdform').find('input[type="text"][value*="{"]').each(function() {
+		rdform.find('input[type="text"][value*="{"]').each(function() {
 			var wcdPointerVals = new Object();
 			var wildcardTxtInput = $(this);
 			$(this).attr("modvalue",  $(this).val() );
@@ -237,11 +240,11 @@
 			var strWcds = $(this).val().match(/\{[^\}]*/gi);
 			for ( var i in strWcds ) {				
 				var wcd = strWcds[i].substring( 1 );
-				if ( $('form.rdform input[name="'+wcd+'"]').length == 0 ) {
+				if ( rdform.find('input[name="'+wcd+'"]').length == 0 ) {
 					alert( 'Error: property "' + wcd + '" does not exist.' );
 				} 
 				// keyup handlers for the pointed inputs
-				$('form.rdform input[name="'+wcd+'"]').keyup( function() {
+				rdform.find('input[name="'+wcd+'"]').keyup( function() {
 					wcdPointerVals[$(this).attr("name")] = $(this).val();
 					var val = $(wildcardTxtInput).attr("modvalue");
 					for ( var j in wcdPointerVals) {
@@ -256,7 +259,7 @@
 		})
 
 		//select class, add selected template before
-		$("form.rdform div[select] select").change(function() {			
+		rdform.find("div[select] select").change(function() {			
 			selectTemplates[$(this).val()].hide();
 			$(this).parent("div[select]").before( selectTemplates[$(this).val()] );
 			selectTemplates[$(this).val()].show("slow");
@@ -264,16 +267,17 @@
 		})
 
 		// reset button, reset form and values
-		$("form.rdform button[type=reset]").click(function() {		
+		rdform.find("button[type=reset]").click(function() {		
 			$("#error-msg").hide();
-			$("form.rdform")[0].reset();
+			rdform[0].reset();
+			// TODO: remove duplicates, selects ...
 			$(".result").hide();
 			$(".result textarea").val( "" );
 			// TODO: remove duplicated datasets
 		});
 
 		// submit formular
-		$("form.rdform").submit(function() {			
+		rdform.submit(function() {			
 			$("#error-msg").hide();
 			var proceed = true;
 
@@ -308,7 +312,7 @@
 		classes = new Array();	
 
 		/* walk through every class in form */
-		$("form.rdform > div[typeof]").each(function( ci ) {
+		rdform.find("div[typeof]").each(function( ci ) {
 		//$(rdform).find("div[typeof]").each(function( ) {			
 			var curClass = new Object();
 			var properties = new Array();

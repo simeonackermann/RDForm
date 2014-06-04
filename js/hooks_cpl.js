@@ -1,20 +1,30 @@
-$(document).ready(function(){
+
+	var rdform;
+
+	function setRDForm( rdform ) {
+		this.rdform = rdform;		
+	}
 
 	// after model is parsed - init form handlers
-	__initFormHandlers = function () {
+	__initFormHandlers = function () {	
 
-		// on change forename -> insert all forenames to prof. label
-		$('form.rdform').on("keyup", 'input[name="cpm:forename"]', function() {
+		// on change forename insert all forenames (rufname) into global input
+		rdform.on("keyup change", 'div[typeof="cpm:Forename"]', function() {
 			var forenames = "";
-			// TODO: nur rufnamen
-			$('form.rdform input[name="cpm:forename"]').each(function() {
-				forenames += $(this).val() + " ";
-			})
+			
+			rdform.find('div[typeof="cpm:Forename"]').each(function() {
+
+				if ( $(this).find('input[name^="cpm:isFirstName"]:checked').val() == "1" ) {
+					forenames += $(this).find('input[name="cpm:forename"]').val() + " ";
+				}
+			});
+
 			forenames = forenames.trim();
-			$('form.rdform input[name="global:forenames"]').val( forenames );
+			rdform.find('input[name="global:forenames"]').val( forenames );
 			// trigger keyup handler to input
-			$('form.rdform input[name="global:forenames"]').trigger( "keyup" );
-		});		
+			rdform.find('input[name="global:forenames"]').trigger( "keyup" );
+
+		});
 
 	}
 
@@ -44,7 +54,7 @@ $(document).ready(function(){
 		/*
 		// add ID to creer class...
 		if ( $(curClass).attr("typeof") == "cpm:Career" ) {
-			var classRes = $("form.rdform").find('div[typeof="cpm:Career"]').attr( "resource" );
+			var classRes = rdform.find('div[typeof="cpm:Career"]').attr( "resource" );
 			$("form.rdform").find('div[typeof="cpm:Career"]').attr( "resource", "cpl:Karriere_" + Math.floor( Math.random() * 10 ) );
 		}
 		*/
@@ -54,9 +64,9 @@ $(document).ready(function(){
 
 	// generate unique prof id
 	createPID = function() {
-		var forename = $("form.rdform").find('input[name="cpm:forename"]').val();
-		var surname = $("form.rdform").find('input[name="cpm:surname"]').val();
-		var birth = $('form.rdform div[typeof="cpm:Birth"] input[name="cpm:date"]').val();
+		var forename = rdform.find('input[name="cpm:forename"]').val();
+		var surname = rdform.find('input[name="cpm:surname"]').val();
+		var birth = rdform.find('div[typeof="cpm:Birth"] input[name="cpm:date"]').val();
 
 		// TODO: explode birth (-) sum parts lengths
 
@@ -64,4 +74,3 @@ $(document).ready(function(){
 		$("form.rdform").find('input[name="global:pid"]').val( pid );
 	}
 
-});
