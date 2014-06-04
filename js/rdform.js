@@ -1,43 +1,92 @@
-$(document).ready(function(){
+(function ( $ ) {
+	/**
+	  * default plugin settings
+	  *
+	  */
+	var settings = {
+		model: "form.html",
+		hooks: "js/hooks.js"
+	}	
 
-	/*
-	Result Classes:
-	Array => (
-			['classID']	 = class ID (attr=resource),
-			['typeof']			= type of class,
-			['properties']=> (
-								Array => (
-										['name'] = Property name,
-										['value']	 = Property value,
-										['datatype']= Property datatype or not defined
-										),
-								)
-			),
-			[subClassOf] = parent classname (for select classes) or null
-			[tmpProperties] => (
-								Array => (
-										['value'] = property name (e.g. cpm:has-period),
-										['resource'] = resource value (e.g. cpm:Career)
-								),
-			),			
-	),
-	*/
-
-	/* init some vars */
+	// init default vars
+	var rdform;
 	var prefixes = new Array();	// RDF prefixes
-	var classes = new Array();
+	var classes = new Array(); // classes erray
 	var globals = new Object(); // gloabel variables
 	var selectTemplates = new Object(); // templates for select classes
 
 	/*
+	structure of classes array:
+	[] => (
+		['classID'] = class ID (attr=resource),
+		['typeof'] = type of class,
+		['properties']=> (
+						[] => (
+							['name'] = Property name,
+							['value']	 = Property value,
+							['datatype']= Property datatype or not defined
+						),
+					)
+		),
+		['subClassOf'] = parent classname (for select classes) or null
+		['tmpProperties'] => (
+							[] => (
+								['value'] = property name (e.g. cpm:has-period),
+								['resource'] = resource value (e.g. cpm:Career)
+							),
+		),			
+	),
+	*/
+	
+	/**
+	  * plugin base constructor
+	  *
+	  * @param[] options
+	  * @return void
+	  */
+	$.fn.RDForm = function( options ) {
+
+		// overide defaults
+        var opts = $.extend(settings, options);
+		
+		rdform = $(this);
+
+    	$.getScript( settings.hooks )
+  			.done(function( script, textStatus ) {
+    			console.log( textStatus );
+  			})
+  			.fail(function( jqxhr, type, exception ) {
+    			//$( "div.log" ).text( "Triggered ajaxError handler." );
+    			alert('Error on loading JavaScript hooks file "'+settings.hooks+'". Is the filename right?');
+		});
+
+    	$.ajax({ 
+			url: settings.model,
+			type: "GET",
+			dataType: "text",
+			success: function( model ) {
+				parseFormModel( model );
+			},
+			error: function() {
+				alert('Error when calling data model file "'+settings.model+'". Is the filename right?');
+			}
+		});
+
+		
+
+    	//return this;
+	};
+
+
+	/*
 	 *	Parse form modell config file from user and build HTML formula
 	 *
-	 *	@data Modell as a string from config file
+	 *	@model Modell as a string from config file
 	 */
-	parseFormModel = function( data ) {
+	parseFormModel = function( model ) {
 		// regexp: http://de.selfhtml.org/perl/sprache/regexpr.htm#merken
 		// rdfa http://www.w3.org/TR/xhtml-rdfa-primer/#setting-a-default-vocabulary
-		var dom_model = $.parseHTML( data );
+		var dom_model = $.parseHTML( model );
 
 		if ( $(dom_model).attr("prefix") ) {
 			prefixes = $(dom_model).attr("prefix").split(" ");
@@ -121,28 +170,12 @@ $(document).ready(function(){
 		})
 
 		// add to form
-		$("form.rdform").prepend( $(dom_model).html() );
-		$("form.rdform").prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );				
+		rdform.prepend( $(dom_model).html() );
+		rdform.prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );				
 
 		initFormHandler();
 		
 	} // end of parseFormModel
-
-
-	/*
-	### GET formula ###
-	*/
-	$.ajax({ 
-		url: "form.html",
-		type: "GET",
-		dataType: "text",
-		success: function(data) {
-				parseFormModel( data );
-		},
-		error: function() {
-			alert("Error when calling form.html. Is the filename right?");
-		}
-	});
 
 	/*
 	 *	Init form button handlers after building the form
@@ -558,4 +591,7 @@ $(document).ready(function(){
 		}
 		$(property).val( value );
 	}
-});
+
+	
+
+}( jQuery ));
