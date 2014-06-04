@@ -2,7 +2,7 @@ $(document).ready(function(){
 
 	// after model is parsed - init form handlers
 	__initFormHandlers = function () {
-
+			
 		
 	}
 

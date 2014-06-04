@@ -14,7 +14,7 @@
 	<!--<link href="css/smoothness/jquery-ui.custom.min.css" rel="stylesheet">-->
 
 	<!-- style -->
-	<link href="css/style.css" rel="stylesheet" media="screen">
+	<link href="css/rdform.css" rel="stylesheet" media="screen">
 
 	<title>RDForm</title>
 </head>
@@ -35,7 +35,7 @@
 				<button type="reset" class="btn">zurücksetzen</button>
 				<button type="submit" class="btn btn-large btn-primary">Datensatz anlegen</button>
 			</div>
-		</div>	
+		</div>
 
 	</form>	
 
@@ -50,18 +50,30 @@
 
 </div>
 
+
     <!-- jQuery -->
     <script src="js/jquery.min.js"></script>
     <!-- Bootstrap -->
-    <script src="js/bootstrap.min.js"></script>
+    <!--<script src="js/bootstrap.min.js"></script>-->
+    
     <!-- Datepicker  http://www.eyecon.ro/bootstrap-datepicker/ -->
     <!--<script src="js/bootstrap-datepicker.js"></script>-->
     <!-- JQuery UI -->
     <!--<script src="js/jquery-ui.custom.min.js"></script>-->
     <!-- own stuff -->
-    <script src="js/script.js"></script>
-    <!-- professorum-cataloge spezific functions -->
-    <script src="js/hooks.js"></script>
+    <script src="js/rdform.js"></script>
+
+    <script type="text/javascript">
+	
+	$(document).ready(function(){
+		$(".rdform").RDForm({
+			model: "form_cpl.html",
+			hooks: "js/hooks_cpl.js"
+		});
+	});
+
+
+	</script>
 
 </body>
 </html>
