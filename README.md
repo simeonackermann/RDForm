@@ -63,31 +63,39 @@ is parsed to (the label value comes from user input):
 
 	* `name` name of the property
 	* `datatype` datatype of the proprty (eg string, int, date)	
-	* `type` [resource|global|hidden] if given, proprty is another resource (class), global variable, or hidden property (hidden in the form)
+	* `type` [resource|global|hidden] if given, the input is not a normal property, see above for input types
 	* `value` value of the property or resource pointer to another class 
 	* `placeholder` help text
 	* `required` required field
 	* `readonly` read only field
- 
+
+
+
+## input types ###
+
+Without the type attribute an input is a normal class property. Otherwiese it can be:
+
+* `type="resource"` a resource with the name of another class
+* `type="global"` a global variable without any effects to the class
+* `type="hidden"` a hidden property is only not visible in the form
+
 
 ### wildcards {} and global vars ###
 
-With wildcards the class identifier can point to a specific property value of the same class. Just write the name of the property into {}. eg:
+With wildcards the class identifier or a property value can point to a specific property value of the same class. Just write the name of the property into {}. eg:
 
 	<div typeof="Person" resource="Person-{label}">
 		<input name="label" />
 		<input name="label_ref" type="hidden" value="{label}" />
 	</div>
 
-They can also used in property values or global variables. 
-
-Global variables are properties with type="global" which can also referenced in other classes.
+Global variables are properties with type="global" which can also referenced with wildcards in other classes.
 
 	<div typeof="Person" resource="Person-ID">
 		<input name="global:my_unique_id" type="global" value="..." />
 	</div>
 	
-	<div typeof="" resource="global:my_unique_id">
+	<div typeof="MyClass" resource="Class-{global:my_unique_id}">
 		...
 	</div>
 
