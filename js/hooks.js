@@ -1,27 +1,27 @@
-$(document).ready(function(){
+var rdform;
 
-	// after model is parsed - init form handlers
-	__initFormHandlers = function () {
-			
-		
-	}
+function setRDForm( rdform ) {
+	this.rdform = rdform;		
+}
 
-	// after pressing the duplicate button
-	__afterDuplicateDataset = function ( dataset ) {
+// after model is parsed - init form handlers
+__initFormHandlers = function () {
 
-		
-	}
 
-	// before creating the class properties from input values
-	__createClassProperty = function( property ) {
+// after pressing the duplicate button
+__afterDuplicateDataset = function ( dataset ) {
 
-		
-	}
+	
+}
 
-	// before generating the class object from input values and properties
-	__createClass = function ( curClass ) {
-		
-		
-	}
+// before creating the class properties from input values
+__createClassProperty = function( property ) {
 
-});
+	
+}
+
+// before generating the class object from input values and properties
+__createClass = function ( curClass ) {
+	
+	
+}
