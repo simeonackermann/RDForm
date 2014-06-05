@@ -99,7 +99,7 @@
 			prefixes = $(dom_model).attr("prefix").split(" ");
 		}
 
-		$(dom_model).find("div[typeof]").addClass("row-fluid"); // add row-fluid to every class
+		//$(dom_model).find("div[typeof]").addClass("form-group"); // add row-fluid to every class
 
 		// parse resource properties
 		$(dom_model).find('input[type="resource"]').attr("resource", "resource");
@@ -113,7 +113,9 @@
 		$(dom_model).find('input[type="global"]').attr("type", "hidden");
 		
 		// wrap not hidden inputs
-		$(dom_model).find('input[type!="hidden"]').wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
+		//$(dom_model).find('input[type!="hidden"]').wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
+		$(dom_model).find('input[type!="hidden"]').wrap('<div class="form-group"><div class="col-xs-9"></div></div>');
+		$(dom_model).find('input[type="text"]').addClass("form-control input-sm");
 
 		// put legens into classes
 		$(dom_model).find("legend").each(function() {
@@ -122,9 +124,17 @@
 
 		// add label class and move labels into control groups
 		$(dom_model).find("label").each(function() {
-			$(this).addClass("control-label");
-			$(this).next("div").children("div").prepend( $(this) );
+			$(this).addClass("col-xs-3 control-label");
+			//$(this).next("div").children("div").prepend( $(this) );
+			$(this).next("div").prepend( $(this) );
 		})
+
+		// add offset to inputs without label
+		$(dom_model).find(".form-group").each(function() {
+			if ( $(this).find(".control-label").length == 0 ) {
+				$(this).find(".col-xs-9").addClass("col-xs-offset-3");
+			}
+		});
 
 		// radio labels
 		$(dom_model).find("input:radio").each(function() {
@@ -132,12 +142,13 @@
 			$(this).after( $(this).attr("label") );
 		})
 
-		// TODO: implementcheckbox
+		// TODO: implement checkbox
 
 		// add small inputs
 		var smallInput = $(dom_model).find('input[datatype*="date"]');
-		smallInput.addClass("input-small");
-		smallInput.parents(".span10").removeClass("span4").addClass("span4");
+		//smallInput.addClass("input-small");
+		//smallInput.parents(".span10").removeClass("span4").addClass("span4");
+		smallInput.parents(".col-xs-9").removeClass("col-xs-9").addClass("col-xs-3");
 
 		// multiple classes
 		$(dom_model).find("div[multiple]").each( function() {
@@ -149,12 +160,12 @@
 				$(this).attr("name", $(this).attr("name") + "-1" );				
 			})
 
-			$(this).append('<div class="span10"><a class="btn btn-mini duplicate-dataset" href="#"><i class="icon-plus"></i> hinzufügen</a></div>');
+			$(this).append('<p class="col-xs-offset-3"><button type="button" class="btn btn-default btn-xs duplicate-dataset"><span class="glyphicon glyphicon-plus"></span> hinzufügen</button></p>');
 		});
 
 		// select classes
 		$(dom_model).find("div[select]").each( function(){
-			var selectElem = $("<select><option disabled selected>Klasse wählen...</option></select>");
+			var selectElem = $('<select class="form-control"><option disabled selected>Klasse wählen...</option></select>');
 			var selectTypeof = $(this).attr("typeof");
 
 			$(this).children("div[typeof]").each(function() {
@@ -171,6 +182,8 @@
 				$(this).remove();
 			})
 			$(this).append( selectElem );
+			$(this).addClass("form-group");
+			$(this).find("select").wrap('<div class="col-xs-6"></div>');
 		})
 
 		// add to form
@@ -261,7 +274,7 @@
 		//select class, add selected template before
 		rdform.find("div[select] select").change(function() {			
 			selectTemplates[$(this).val()].hide();
-			$(this).parent("div[select]").before( selectTemplates[$(this).val()] );
+			$(this).parents("div[select]").before( selectTemplates[$(this).val()] );
 			selectTemplates[$(this).val()].show("slow");
 			$(this).children('option[value="'+$(this).val()+'"]').attr("disabled", "disabled");
 		})
@@ -284,12 +297,12 @@
 			// validate required inputs
 			$("input[required]").each(function() {
 				if ( $(this).val() == "" ) {
-					$(this).parents(".control-group").addClass("error");
+					$(this).parents(".form-group").addClass("error");
 					$("#error-msg").text("Bitte alle rot hinterlegten Felder ausfüllen!");
 					$("#error-msg").show();
 					proceed = false;
 				} else {
-					$(this).parents(".control-group").removeClass("error");
+					$(this).parents(".form-group").removeClass("error");
 				}
 			});
 

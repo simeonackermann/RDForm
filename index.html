@@ -6,7 +6,9 @@
 	<meta name="description" content="">
     <meta name="author" content="">
 	<!-- Bootstrap -->
+	
 	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
 	<!-- Datepicker -->
 	<!--<link href="css/datepicker.css" rel="stylesheet" media="screen">-->
 	
@@ -26,24 +28,25 @@
     <!--<p>Modell des Formulars in <a href="./formular.html">formular.html</a> (siehe Quelltext)</p>-->
 
     <!-- The formular -->
-	<form action="#" class="form-horizontal rdform">
+	<form action="#" class="form-horizontal rdform" role="form">
 
 		<!-- Data will be included here -->
-	
-		<div class="row-fluid">		
-			<div class="span12" style="text-align:right">
-				<button type="reset" class="btn">zurücksetzen</button>
-				<button type="submit" class="btn btn-large btn-primary">Datensatz anlegen</button>
+
+
+		<div class="form-group">
+			<div class="col-xs-12 text-right">
+				<button type="reset" class="btn btn-default">zurücksetzen</button>
+				<button type="submit" class="btn btn-lg btn-primary">Datensatz anlegen</button>
 			</div>
 		</div>
 
 	</form>	
 
 	<!-- Result -->	
-	<div class="row-fluid result">
+	<div class="row result">
 		<legend>Ergebnis</legend>
-		<div class="span9">
-			<textarea class="input-block-level" rows="10"></textarea>
+		<div class="col-xs-12">
+			<textarea class="form-control" rows="10"></textarea>
 			<!-- TODO: export to file -->
 		</div>
 	</div>	
@@ -64,7 +67,7 @@
     <script src="js/rdform.js"></script>
 
     <script type="text/javascript">
-	
+
 	$(document).ready(function(){
 		$(".rdform").RDForm();
 	});

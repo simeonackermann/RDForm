@@ -3,21 +3,32 @@ body {
 }
 .container {
 	border: 1px solid lightGray;
-	padding: 10px;
+	padding: 2% 12%;
 	border-radius: 10px;
-	margin-top: 10px;
-	margin-bottom: 10px;
+	margin: 10px auto;
 	background: white;
+	max-width: 960px;
 }
 
-legend {
-	margin: 15px 0 10px 0;
+.result {
+	display: none;
+}
+
+.rdform .duplicate-dataset {
+	margin-left: 8px;
+}
+
+.rdform label {
+	font-weight: normal;
+}
+
+.rdform .form-group {
+	margin-bottom: 10px;
 }
 
 select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
 	padding: 2px 3px;
 	font-size: 0.9em;
-	border-radius: 0px;
 }
 textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, .uneditable-input:focus {
 	border-color: #999999;
@@ -26,47 +37,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[ty
 input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:focus { 
 	box-shadow: 0px 1px 2px #F8B9B7;
 }
-
-label {
-	margin: 0px;
+.form-control:focus { 
+	border-color: #999999;
+	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.102);
 }
-
-
-.row-fluid [class*="span"] {
-	margin-left: 0;
-}
-.control-group.error input, .control-group.error select, .control-group.error textarea {
-	border-color: #E9322D;
-	color: #E9322D;
-}
-.control-group.error input:focus, .control-group.error select:focus, .control-group.error textarea:focus {
-	border-color: #E9322D;
-	box-shadow: 0px 1px 2px #F8B9B7;
-}
-
-.form-horizontal .control-group {
-	margin-bottom: 12px;
-}
-
-div[typeof]:hover {
-	//background-color: #555;
-}
-
-
-.help-block {
-	display: none;
-}
-
-.duplicate-dataset {
-	/*display: none;*/
-	margin: 0px 0 10px 180px;
-}
-
-.ui-autocomplete-loading {
-    background: white url('img/loader.gif') right center no-repeat;
-  }
-
-
- .result {
- 	display: none;
- }

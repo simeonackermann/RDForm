@@ -52,7 +52,7 @@
 	__createClass = function ( curClass ) {
 		
 		/*
-		// add ID to creer class...
+		// add ID to career class...
 		if ( $(curClass).attr("typeof") == "cpm:Career" ) {
 			var classRes = rdform.find('div[typeof="cpm:Career"]').attr( "resource" );
 			$("form.rdform").find('div[typeof="cpm:Career"]').attr( "resource", "cpl:Karriere_" + Math.floor( Math.random() * 10 ) );
@@ -71,6 +71,6 @@
 		// TODO: explode birth (-) sum parts lengths
 
 		var pid = ( ( forename.length + surname.length ) % 90 ) + 10;
-		$("form.rdform").find('input[name="global:pid"]').val( pid );
+		rdform.find('input[name="global:pid"]').val( pid );
 	}
 
