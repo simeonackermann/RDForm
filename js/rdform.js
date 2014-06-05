@@ -50,6 +50,7 @@
         var opts = $.extend(settings, options);
 		
 		rdform = $(this);
+		rdform.append( '<div class="row"><p id="error-msg" class="alert alert-error hide"></p></div>' );				
 
 		// loading bootstrap
 		/*
@@ -75,23 +76,32 @@
 			type: "GET",
 			dataType: "text",
 			success: function( model ) {
-				parseFormModel( model );
+				rdform.append( parseFormModel( model ) );
+				rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
+									'<button type="reset" class="btn btn-default">zurücksetzen</button> ' + 
+									'<button type="submit" class="btn btn-lg btn-primary">Datensatz anlegen</button>' + 
+								'</div></div>' );
+				initFormHandler();
 			},
 			error: function() {
 				alert('Error when calling data model file "'+settings.model+'". Is the filename right?');
 			}
-		});
+		});		
+
+		// add result div
+		rdform.after( '<div class="row rdform-result"><legend>Ergebnis</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
 
 
     	//return this;
 	};
 
 
-	/*
-	 *	Parse form modell config file from user and build HTML formula
-	 *
-	 *	@model Modell as a string from config file
-	 */
+	/**
+	  *	Parse form modell config file from user and build HTML formula
+	  *
+	  * @param model Modell as a string from config file
+	  * @return DOM model
+	  */
 	parseFormModel = function( model ) {		
 		var dom_model = $.parseHTML( model );
 
@@ -186,11 +196,7 @@
 			$(this).find("select").wrap('<div class="col-xs-6"></div>');
 		})
 
-		// add to form
-		rdform.prepend( $(dom_model).html() );
-		rdform.prepend( '<div class="row-fluid"><p id="error-msg" class="alert alert-error span6 hide"></p></div>' );				
-
-		initFormHandler();
+		return $(dom_model).html();
 		
 	} // end of parseFormModel
 
@@ -284,8 +290,8 @@
 			$("#error-msg").hide();
 			rdform[0].reset();
 			// TODO: remove duplicates, selects ...
-			$(".result").hide();
-			$(".result textarea").val( "" );
+			$(".rdform-result").hide();
+			$(".rdform-result textarea").val( "" );
 			// TODO: remove duplicated datasets
 		});
 
@@ -469,11 +475,11 @@
 			}
 		}
 		
-		$(".result").show();
-		$(".result textarea").val( resultStr );		
+		$(".rdform-result").show();
+		$(".rdform-result textarea").val( resultStr );		
 		var lines = resultStr.split("\n");
-		$(".result textarea").attr( "rows" , ( lines.length ) );
-		$('html, body').animate({ scrollTop: $(".result").offset().top }, 200);		
+		$(".rdform-result textarea").attr( "rows" , ( lines.length ) );
+		$('html, body').animate({ scrollTop: $(".rdform-result").offset().top }, 200);		
 
 	} // end of creating result
 

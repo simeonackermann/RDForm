@@ -1,5 +1,6 @@
 body {
 	background: url("../img/noise.png"), -o-linear-gradient(top, #F4F4F4 0px, #EEEEEE 100%) transparent;	
+	background: url("../img/noise.png") repeat scroll 0% 0%, -moz-linear-gradient(center top , #F4F4F4 0%, #EEEEEE 100%) repeat scroll 0% 0% transparent;
 }
 .container {
 	border: 1px solid lightGray;
@@ -10,7 +11,7 @@ body {
 	max-width: 960px;
 }
 
-.result {
+.rdform-result {
 	display: none;
 }
 
@@ -35,6 +36,7 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[ty
 	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.102);
 }
 input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:focus { 
+	/*border-color: #F8B9B7;*/
 	box-shadow: 0px 1px 2px #F8B9B7;
 }
 .form-control:focus { 
