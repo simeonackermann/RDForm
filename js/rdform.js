@@ -285,6 +285,37 @@
 			$(this).children('option[value="'+$(this).val()+'"]').attr("disabled", "disabled");
 		})
 
+		//autocomplete
+		rdform.find("input[autocomplete]" ).autocomplete({
+			source: function( request, response ) {
+				$.ajax({
+					url: "http://dbpedia.org/sparql",
+					dataType: "json",
+					data: {
+						//'default-graph-uri': "http%3A%2F%2Fdbpedia.org",
+						query: "SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,'" + request.term + "','i')&&lang(?label)='de')}LIMIT 20",
+						formt: "json"
+					},
+					success: function( data ) {
+						response( $.map( data.results.bindings, function( item ) {
+							//console.log( "item=" , item );
+							return {
+								label: item.label.value, // wird angezeigt
+								value: item.label.value
+							}
+				              /*           
+				              return {
+				                label: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
+				                value: item.name
+				              }
+				              */
+		            	}));
+		            }
+				});
+	      	},
+			minLength: 2
+		});
+
 		// reset button, reset form and values
 		rdform.find("button[type=reset]").click(function() {		
 			$("#error-msg").hide();
