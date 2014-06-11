@@ -1,7 +1,6 @@
 (function ( $ ) {
 	/**
 	  * default plugin settings
-	  *
 	  */
 	var settings = {
 		model: "form.html",
@@ -61,17 +60,29 @@
             }
         })
 */
-
-    	$.getScript( settings.hooks )
-			.done(function() {
-				setRDForm( rdform );
+		// loading hooks js file
+		$.getScript( settings.hooks )
+			.done(function() {			
+				setRDForm( rdform ); // set rdform var in hooks
+				getModel(); // get model file
 			})
   			.fail(function( jqxhr, type, exception ) {
     			//$( "div.log" ).text( "Triggered ajaxError handler." );
     			alert('Error on loading JavaScript hooks file "'+settings.hooks+'". Is the filename right?');
-		}); 		
+		});
 
-    	$.ajax({ 
+		// add result div
+		rdform.after( '<div class="row rdform-result"><legend>Ergebnis</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
+
+
+    	//return this;
+	};
+
+	/**
+	  *	Get the form model file with ajax
+	  */
+	getModel = function() {
+		$.ajax({ 
 			url: settings.model,
 			type: "GET",
 			dataType: "text",
@@ -86,14 +97,8 @@
 			error: function() {
 				alert('Error when calling data model file "'+settings.model+'". Is the filename right?');
 			}
-		});		
-
-		// add result div
-		rdform.after( '<div class="row rdform-result"><legend>Ergebnis</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
-
-
-    	//return this;
-	};
+		});
+	}
 
 
 	/**
@@ -213,6 +218,8 @@
 			});
 		});​
 		*/		
+
+
 		__initFormHandlers();		
 
 		// validate input values
@@ -286,7 +293,7 @@
 		})
 
 		//autocomplete
-		rdform.find("input[autocomplete]" ).autocomplete({
+		rdform.find("input[autocomplete-ort]" ).autocomplete({
 			source: function( request, response ) {
 				$.ajax({
 					url: "http://dbpedia.org/sparql",
@@ -298,17 +305,10 @@
 					},
 					success: function( data ) {
 						response( $.map( data.results.bindings, function( item ) {
-							//console.log( "item=" , item );
 							return {
 								label: item.label.value, // wird angezeigt
 								value: item.label.value
 							}
-				              /*           
-				              return {
-				                label: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
-				                value: item.name
-				              }
-				              */
 		            	}));
 		            }
 				});
