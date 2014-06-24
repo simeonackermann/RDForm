@@ -1,0 +1,34 @@
+<form prefix="bio: http://vocab.org/bio/0.1/">
+
+  <legend>Person</legend>
+  <div typeof="foaf:Person" resource="Person-{pid}">
+
+    <input name="pid" type="hidden" value="{foaf:name}-123" />
+
+    <label>Name:</label>
+    <input name="foaf:name" type="literal" datatype="xsd:string" value="Ackermann" required />
+
+    <!-- property resource -->    
+    <input name="bio:event" type="resource" value="bio:Birth" additional />    
+    <input name="bio:has-forename" type="resource" value="bio:Forename" multiple />
+    <input name="foaf:knows" type="resource" value="foaf:Person" title="kennt Person hinzufügen" />   
+
+  </div> 
+
+  <!-- ### Vornamen ### -->
+  <legend>Vornamen</legend> 
+  <div typeof="bio:Forename" resource="Forename-{rdfs:label}">
+    <label>Vorname:</label>      
+    <input name="rdfs:label" type="literal" datatype="xsd:string" value="Simeon" required />
+  </div>
+
+  <legend>Geburt</legend>
+  <div typeof="bio:Birth" resource="Birth-{../pid}">
+    <label>Ort:</label>
+    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" />
+
+    <label>Datum:</label>
+    <input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+  </div>  
+
+</form> 
