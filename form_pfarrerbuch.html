@@ -1,0 +1,105 @@
+<form prefix="bio: http://vocab.org/bio/0.1/ hp: http://purl.org/vok/hp/">
+    <legend>Pfarrer</legend>
+    <div typeof="foaf:Person" resource="Person-{pid}">
+        <!-- hidden person name -->
+        <input name="pid" type="hidden" value="{foaf:name}" />
+
+        <label>Ist Geistlicher:</label>
+        <input name="hp:isPastor" type="boolean" datatype="xsd:boolean" required />
+
+        <label>Label:</label>
+        <input name="rdfs:label" value="{foaf:name} (*{hp:birthDate} †{hp:dateOfDeath})" datatype="xsd:string" required />
+
+        <label>Name:</label>
+        <input name="foaf:name" value="{foaf:firstName} {foaf:lastName}" datatype="xsd:string" required />
+
+        <label>Vorname:</label>
+        <input name="foaf:firstName" datatype="xsd:string" required />
+
+        <label>Alternativer Vorname:</label>
+        <input name="foaf:firstNameAlt" datatype="xsd:string" required />
+
+        <label>Nachname:</label>
+        <input name="foaf:lastName" datatype="xsd:string" required />
+
+        <label>Alternativer Nachname:</label>
+        <input name="foaf:lastNameAlt" datatype="xsd:string" required />
+
+        <label>Geschlecht:</label>
+        <input name="foaf:gender" datatype="xsd:string" required />
+
+        <label>Geburtsdatum:</label>
+        <input name="hp:birthDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
+
+        <label>Geburtsort:</label>
+        <input name="hp:birthPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
+
+        <label>Taufdatum:</label>
+        <input name="hp:babtismDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
+
+        <label>Taufort:</label>
+        <input name="hp:babtismPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
+
+        <label>Ordinationsdatum:</label>
+        <input name="hp:ordinationDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
+
+        <label>Ordinationsort:</label>
+        <input name="hp:ordinationPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
+
+        <label>Vater:</label>
+        <input name="hp:father" datatype="xsd:string" /> <!-- resource type person --> <!-- auswahl xsd:date, xsd:gYear, … -->
+
+        <label>Mutter:</label>
+        <input name="hp:mother" datatype="xsd:string" /> <!-- resource type person --> <!-- auswahl xsd:date, xsd:gYear, … -->
+
+        <label>Kinder:</label>
+        <input name="hp:child" datatype="xsd:string" /> <!-- resource type person --> <!-- auswahl xsd:date, xsd:gYear, … -->
+
+        <label>Sterbedatum:</label>
+        <input name="hp:dateOfDeath" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
+
+        <label>Sterbeort:</label>
+        <input name="hp:placeOfDeath" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
+
+
+        <input name="hp:attendedSchool" type="resource" value="hp:Event" />
+        <input name="hp:hasPosition" type="resource" value="hp:Event1" />
+    </div>
+
+    <legend>Ausbildung</legend>
+    <div typeof="hp:Event" resource="schulbesuch-{../pid}">
+        <label>Label:</label>
+        <input name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
+
+        <label>Schule:</label>
+        <!--<input name="rdf:object" type="resource" /> select places -->
+        <input name="rdf:object" type="literal" />
+
+        <label>Begin:</label>
+        <input name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+        <label>End:</label>
+        <input name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />        
+    </div>
+
+
+    <legend>Stelle</legend>
+    <div typeof="hp:Event1" resource="pfarrestelle-{../pid}">
+        <label>Label:</label>
+        <input name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
+
+        <label>Pfarrstelle:</label>
+        <!-- <input name="rdf:object" type="resource" /> select places -->
+        <input name="rdf:object" type="literal" />
+
+        <label>Begin:</label>
+        <input name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+        <label>End:</label>
+        <input name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+        
+        <label>Kommentar/Freitext:</label>
+        <input name="rdfs:comment" datatype="xsd:string" /> <!-- select places -->
+    </div>
+
+</form> 
