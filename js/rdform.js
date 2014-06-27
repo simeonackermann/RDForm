@@ -547,9 +547,8 @@
 
 		// duplicate dataset button
 		rdform.on("click", ".duplicate-class", function() {			
-			var classContainer = $(this).parent().parent("div.rdform-resource-group").clone();
-			var thisClass = classContainer.children("div[typeof]");
-			//var classResource = classContainer.children("input[resource]");			
+			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
+			var thisClass = classContainer.children("div[typeof]");			
 
 			classContainer.find('input[type="text"]').val(""); // reset values
 			classContainer.children().children("legend").remove(); // remove class legend
@@ -566,7 +565,7 @@
 			$(classContainer).show("slow");
 			$(this).remove(); // remove duplicate btn
 
-			__afterDuplicateClass( classContainer );
+			__afterDuplicateClass( thisClass );
 
 			return false;
 		});

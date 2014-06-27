@@ -46,9 +46,7 @@ __initFormHandlers = function () {
 }
 
 // after pressing the duplicate button
-__afterDuplicateClass = function ( classContainer ) {
-	var thisClass = classContainer.children("div[typeof]");
-	//var classResource = classContainer.children("input[resource]");
+__afterDuplicateClass = function ( thisClass ) {
 
 	if ( $(thisClass).attr("typeof").search(/cpm:Forename/) != -1 ) {
 			var index = $(thisClass).attr("index");
