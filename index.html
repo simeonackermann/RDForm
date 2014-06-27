@@ -25,9 +25,11 @@
 <div class="container">
     <h1>Wellcome to RDForm!</h1>
 
-    <!--<p>Modell des Formulars in <a href="./formular.html">formular.html</a> (siehe Quelltext)</p>-->
+    <p>
+    TODO: SUBCLASSES/SelectClasses PROBLEM, baseprefix (siehe Natan-mail) 
+    </p>
 
-    <!-- The formular -->
+    <!-- the form container -->
 	<form action="#" class="form-horizontal rdform" role="form"></form>	
 
 </div>
@@ -50,7 +52,8 @@
 
 	$(document).ready(function(){
 		$(".rdform").RDForm({
-			model: "form_knows.html",
+			model: "form_cpl.html",
+			hooks : "js/hooks_cpl.js"
 		});
 	});
 

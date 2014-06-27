@@ -52,3 +52,24 @@ input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:fo
 .rdform .rdform-class-group .form-group .rdform-class-group {
 	margin-left: 35px;
 }
+
+.rdform .rdform-resource-group .rdform-class-group {
+	//background: gray;
+	border-left: 1px solid #E5E5E5;
+	border-bottom: 1px solid #E5E5E5;
+	padding-left: 5px;
+	padding-bottom: 5px;
+	//box-shadow: 1px 1px 1px #ccc;
+}
+.rdform .rdform-resource-group .rdform-class-group legend {
+	font-size: 18px;
+}
+
+.rdform .rdform-resource-group + .rdform-resource-group {
+	margin-top: -11px;
+	border-top: 1px solid white;
+}
+
+.rdform .rdform-resource-group button {
+	margin: 10px 0px 5px;
+}

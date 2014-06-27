@@ -1,76 +1,92 @@
+var rdform;
 
-	var rdform;
+function setRDForm( rdform ) {
+	this.rdform = rdform;		
+}
 
-	function setRDForm( rdform ) {
-		this.rdform = rdform;		
-	}
+// after model is parsed - init form handlers
+__initFormHandlers = function () {
 
-	// after model is parsed - init form handlers
-	__initFormHandlers = function () {	
+	// example: check mail for @
+	/*
+	rdform.find('input[name="foaf:mbox"]').change(function() {
+		if ( $(this).val().search(/\@/) == -1 ) {
+			alert("wondering - no '@' in your mail...?!");
+		}
+	})
+	*/
 
-		// on change forename insert all forenames (rufname) into global input
-		rdform.on("keyup change", 'div[typeof="cpm:Forename"]', function() {
-			var forenames = "";
-			
-			rdform.find('div[typeof="cpm:Forename"]').each(function() {
+	// change isForename checkbox value to 1/0
+	rdform.on("change", 'input:checkbox', function() {
+		$(this).val( $(this).prop("checked") ? "1" : "0" );
+	});
 
-				if ( $(this).find('input[name^="cpm:isFirstName"]:checked').val() == "1" ) {
-					forenames += $(this).find('input[name="cpm:forename"]').val() + " ";
-				}
-			});
-
-			forenames = forenames.trim();
-			rdform.find('input[name="global:forenames"]').val( forenames );
-			// trigger keyup handler to input
-			rdform.find('input[name="global:forenames"]').trigger( "keyup" );
-
+	// on change forename insert all forenames (rufname) into global input
+	rdform.on("keyup change", 'div[typeof="cpm:Forename"]', function() {
+		var forenames = "";
+		
+		rdform.find('div[typeof="cpm:Forename"]').each(function() {
+			/*
+			if ( $(this).find('input[name="cpm:isFirstName"]:checked').val() == "1" ) {
+				forenames += $(this).find('input[name="cpm:forename"]').val() + " ";
+			}
+			*/
+			if ( $(this).find('input[name="cpm:isFirstName"]').prop("checked") ) {
+				forenames += $(this).find('input[name="cpm:forename"]').val() + " ";
+			}
 		});
 
-	}
+		forenames = forenames.trim();
+		rdform.find('input[name="forenames"]').val( forenames );
+		// trigger keyup handler to input
+		rdform.find('input[name="forenames"]').trigger( "keyup" );
 
-	// after pressing the duplicate button
-	__afterDuplicateDataset = function ( dataset ) {
+	});
 
-		// rewrite placeholder index and position in forenames...
-		if ( $(dataset).attr("typeof").search(/cpm:Forename/) != -1 ) {
-			var index = $(dataset).attr("index");
-			$(dataset).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
-			$(dataset).find('input[name="cpm:forenamePosition"]').val( index );
-		}
-	}
+}
 
-	// before creating the class properties from input values
-	__createClassProperty = function( property ) {
+// after pressing the duplicate button
+__afterDuplicateClass = function ( classContainer ) {
+	var thisClass = classContainer.children("div[typeof]");
+	//var classResource = classContainer.children("input[resource]");
 
-		// create pid for professor
-		if ( $(property).attr("name") == "global:pid" ) {
-			createPID();
-		}
-	}
-
-	// before generating the class object from input values and properties
-	__createClass = function ( curClass ) {
-		
-		/*
-		// add ID to career class...
-		if ( $(curClass).attr("typeof") == "cpm:Career" ) {
-			var classRes = rdform.find('div[typeof="cpm:Career"]').attr( "resource" );
-			$("form.rdform").find('div[typeof="cpm:Career"]').attr( "resource", "cpl:Karriere_" + Math.floor( Math.random() * 10 ) );
-		}
-		*/
+	if ( $(thisClass).attr("typeof").search(/cpm:Forename/) != -1 ) {
+			var index = $(thisClass).attr("index");
+			$(thisClass).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
+			$(thisClass).find('input[name="cpm:forenamePosition"]').val( index );
 	}
 	
-	/* own functions */
+	
+}
 
-	// generate unique prof id
-	createPID = function() {
-		var forename = rdform.find('input[name="cpm:forename"]').val();
-		var surname = rdform.find('input[name="cpm:surname"]').val();
-		var birth = rdform.find('div[typeof="cpm:Birth"] input[name="cpm:date"]').val();
+// before creating the class properties from input values
+__createResultClassProperty = function( propertyContainer ) {
 
-		// TODO: explode birth (-) sum parts lengths
 
-		var pid = ( ( forename.length + surname.length ) % 90 ) + 10;
-		rdform.find('input[name="global:pid"]').val( pid );
+	if ( $(propertyContainer).children("input").attr("name") == "pid" ) {
+
+		//$(propertyContainer).children("input").val( Math.floor( Math.random() * 10 ) );
+		createPID();
 	}
 
+}
+
+// before generating the class object from input values and properties
+__createClass = function ( thisClass ) {
+
+
+}
+
+/* own functions */
+
+// generate unique prof id
+createPID = function() {
+	var forename = rdform.find('input[name="cpm:forename"]').val();
+	var surname = rdform.find('input[name="cpm:surname"]').val();
+	var birth = rdform.find('div[typeof="cpm:Birth"] input[name="cpm:date"]').val();
+
+	// TODO: explode birth (-) sum parts lengths
+
+	var pid = ( ( forename.length + surname.length ) % 90 ) + 10;
+	rdform.find('input[name="pid"]').val( pid );
+}

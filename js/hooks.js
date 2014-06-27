@@ -8,32 +8,31 @@ function setRDForm( rdform ) {
 __initFormHandlers = function () {
 
 	// example: check mail for @
+	/*
 	rdform.find('input[name="foaf:mbox"]').change(function() {
 		if ( $(this).val().search(/\@/) == -1 ) {
 			alert("wondering - no '@' in your mail...?!");
 		}
 	})
+	*/
 
 }
 
 // after pressing the duplicate button
-__afterDuplicateDataset = function ( dataset ) {
-
+__afterDuplicateClass = function ( classContainer ) {
+	var thisClass = classContainer.children("div[typeof]");
+	
 	
 }
 
 // before creating the class properties from input values
-__createClassProperty = function( property ) {
+__createResultClassProperty = function( propertyContainer ) {
 
-	// example: adding random number to global:pid
-	if ( $(property).attr("name") == "global:pid" ) {
-		$(property).val( '{foaf:name}-' + Math.floor( Math.random() * 10 ) );
-	}
-	
+
+
 }
 
 // before generating the class object from input values and properties
-__createClass = function ( curClass ) {
-	
-	
+__createClass = function ( thisClass ) {
+		
 }
