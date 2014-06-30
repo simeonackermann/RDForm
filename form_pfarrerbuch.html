@@ -62,8 +62,11 @@
         <input name="hp:placeOfDeath" datatype="xsd:string" autocomplete /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
 
 
-        <input name="hp:attendedSchool" type="resource" value="hp:Event" />
-        <input name="hp:hasPosition" type="resource" value="hp:Event1" />
+        <input name="hp:attendedSchool" type="resource" value="hp:Event" additional />
+        <input name="hp:hasPosition" type="resource" value="hp:Event" />
+
+        <label>Kommentar/Freitext:</label>
+        <input name="rdfs:comment" datatype="xsd:string" /> <!-- select places -->
     </div>
 
     <legend>Ausbildung</legend>
@@ -97,9 +100,7 @@
 
         <label>End:</label>
         <input name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-        
-        <label>Kommentar/Freitext:</label>
-        <input name="rdfs:comment" datatype="xsd:string" /> <!-- select places -->
+                
     </div>
 
 </form> 

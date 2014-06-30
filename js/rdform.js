@@ -100,7 +100,6 @@
 		var dom_model = $.parseHTML( data );
 
 		if ( $(dom_model).attr("prefix") ) {
-			//PREFIXES = $(dom_model).attr("prefix").split(" ");
 			var prefixesArr = $(dom_model).attr("prefix").split(" ");
 			if ( prefixesArr.length % 2 != 0 ) {
 				alert( "Invalid prefix attribute format. Use: 'prefix: URL prefix: URL ...'" );
@@ -137,12 +136,21 @@
 				var success = true;
 				switch ( curProperty['type'] ) {
 					case "literal":
+						// TODO use a function to get all attributes
 						curProperty['datatype'] = $(this).attr("datatype");
 						curProperty['placeholder'] = $(this).attr("placeholder");
 						curProperty['required'] = $(this).attr("required");
 						curProperty['readonly'] = $(this).attr("readonly");
 						curProperty['autocomplete'] = $(this).attr("autocomplete");
 						curProperty['label'] = $(this).prev("label").text();
+
+						if ( $(this).attr("autocomplete") !== undefined )  {
+							console.log( "autocomplete literal:", $(this) );
+							curProperty['query-endpoint'] = $(this).attr("query-endpoint");
+							curProperty['query-apitype'] = $(this).attr("query-apitype");
+							curProperty['query'] = $(this).attr("query");
+						}
+
 						break;
 
 					case "boolean" :						
@@ -157,6 +165,10 @@
 						curProperty['title'] = $(this).attr("title");						
 						curProperty['multiple'] = $(this).attr("multiple"); 
 						curProperty['additional'] = $(this).attr("additional");
+
+						if ( $(this).attr( "argument" ) ) {
+							console.log( "argument resource", $(this) );
+						}
 
 						if ( $(dom_model).find('div[typeof="'+$(this).val()+'"]').length < 1 ) {
 							alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
@@ -459,10 +471,18 @@
 			'datatype': literal['datatype'],
 			'placeholder': literal['placeholder'],
 			'required': literal['required'],
-			'readonly': literal['readonly'],
-			'autocomplete': literal['autocomplete'],
+			'readonly': literal['readonly'],			
 			'checked': literal['checked'],
 		});
+
+		if ( literal['autocomplete'] !== undefined ) {
+			thisInput.attr({
+				'autocomplete': literal['autocomplete'],
+				'query-endpoint': literal['query-endpoint'],
+				'query-apitype': literal['query-apitype'],
+				'query': literal['query'],
+			});
+		}
 
 		if ( literal['datatype'] ) {
 
@@ -628,27 +648,36 @@
 		*/
 
 		//autocomplete
-		rdform.find('input[autocomplete]').autocomplete({
-			source: function( request, response ) {
-				$.ajax({
-					url: "http://dbpedia.org/sparql",
-					dataType: "json",
-					data: {
-						//'default-graph-uri': "http%3A%2F%2Fdbpedia.org",
-						query: "SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,'" + request.term + "','i')&&lang(?label)='de')}LIMIT 20",
-						format: "json"
-					},
-					success: function( data ) {
-						response( $.map( data.results.bindings, function( item ) {
-							return {
-								label: item.label.value, // wird angezeigt
-								value: item.label.value
-							}
-		            	}));
-		            }
-				});
-	      	},
-			minLength: 2
+		// TODO BUG doesnt work on additional resource class/multiple
+		rdform.find('input[autocomplete]').each( function() {	
+			var queryEndpoint = $(this).attr( "query-endpoint" );
+			var queryStr = $(this).attr("query");
+			$(this).autocomplete({
+				source: function( request, response ) {		
+					queryStr = queryStr.replace(/%s/g, "'" + request.term + "'");
+					console.log( queryStr );
+					$.ajax({
+						url: queryEndpoint,
+						dataType: "json",
+						data: {
+							//'default-graph-uri': "http%3A%2F%2Fdbpedia.org",
+							query: queryStr,
+							format: "json"
+						},
+						success: function( data ) {						
+							response( $.map( data.results.bindings, function( item ) {
+								return {
+									label: item.label.value, // wird angezeigt
+									value: item.label.value
+								}
+			            	}));
+			            }
+					});
+		      	},
+				minLength: 2
+			});
+
+
 		});
 
 		// reset button, reset form and values
@@ -715,7 +744,7 @@
 
 			var property = new Object();
 
-			__createResultClassProperty( $(this) );
+			__createResultClassProperty( $(this) ); // TODO: give input or resource class
 
 			if ( $(this).hasClass(_ID_ + "-hidden-group") ) {
 

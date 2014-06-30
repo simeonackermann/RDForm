@@ -1,8 +1,9 @@
-<form prefix="bio: http://vocab.org/bio/0.1/">
+<form prefix="bio http://vocab.org/bio/0.1/ cpm ... foaf ... rdfs ... dc ...  ">
 
   <legend>Person</legend>
   <div typeof="foaf:Person" resource="Person-{pid}">
 
+    <!-- hidden vars -->
     <input name="pid" type="hidden" value="{foaf:name}" />
     <input name="forenames" type="hidden" />
 
@@ -13,7 +14,11 @@
     <input name="foaf:name" type="literal" datatype="xsd:string" value="Ackermann" required />
 
     <!-- property resource -->    
-    <input name="bio:event" type="resource" value="bio:Birth" title="Geburt" additional />    
+    <input name="bio:event" type="resource" value="bio:Birth" title="Geburt"
+      argument="pid:{pid}"
+    />
+      <!-- übergabe argemant als attribut an resource-klasse, suche in parent klasse... -->
+
     <input name="bio:has-forename" type="resource" value="cpm:Forename" multiple additional />
     <input name="foaf:knows" type="resource" value="foaf:Person" title="kennt Person" />   
 
@@ -32,9 +37,13 @@
   </div>
 
   <legend>Geburt</legend>
-  <div typeof="bio:Birth" resource="Birth-{../pid}">
+  <div typeof="bio:Birth" resource="Birth-{pid}">
     <label>Ort:</label>
-    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" />
+    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" autocomplete 
+      query-endpoint="http://dbpedia.org/sparql"
+      query-apitype="sparql"
+      query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
+    />
 
     <label>Datum:</label>
     <input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
