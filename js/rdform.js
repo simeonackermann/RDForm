@@ -137,6 +137,7 @@
 				switch ( curProperty['type'] ) {
 					case "literal":
 						// TODO use a function to get all attributes
+						// -> http://stackoverflow.com/questions/14645806/get-all-attributes-of-an-element-using-jquery
 						curProperty['datatype'] = $(this).attr("datatype");
 						curProperty['placeholder'] = $(this).attr("placeholder");
 						curProperty['required'] = $(this).attr("required");
@@ -145,7 +146,6 @@
 						curProperty['label'] = $(this).prev("label").text();
 
 						if ( $(this).attr("autocomplete") !== undefined )  {
-							console.log( "autocomplete literal:", $(this) );
 							curProperty['query-endpoint'] = $(this).attr("query-endpoint");
 							curProperty['query-apitype'] = $(this).attr("query-apitype");
 							curProperty['query'] = $(this).attr("query");
@@ -165,10 +165,7 @@
 						curProperty['title'] = $(this).attr("title");						
 						curProperty['multiple'] = $(this).attr("multiple"); 
 						curProperty['additional'] = $(this).attr("additional");
-
-						if ( $(this).attr( "argument" ) ) {
-							console.log( "argument resource", $(this) );
-						}
+						curProperty['argument'] = $(this).attr("argument");
 
 						if ( $(dom_model).find('div[typeof="'+$(this).val()+'"]').length < 1 ) {
 							alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
@@ -364,46 +361,25 @@
 		var thisClass = $("<div></div>");
 		thisClass.attr( {
 			'id': _ID_ + '-class-' + dataClass['typeof'], // TODO: sub-ID ... (e.g. Person/Forename)
-			'typeof': dataClass['typeof'],
-			'resource': dataClass['resource'],
 			'class': _ID_  + '-class-group',
+			/*'typeof': dataClass['typeof'],
+			'resource': dataClass['resource'],			
 			'name': dataClass['name'],
+			'argument': dataClass['argument'],*/
 		});
+
+		for ( var attr in dataClass ) {
+			if ( $.type(dataClass[attr]) === "string" ) {
+				thisClass.attr( attr, dataClass[attr] );
+			}
+		}
+		
 
 		thisClass.append( "<legend>"+ dataClass['legend'] +"</legend>" );		
 
 		for ( var pi in dataClass['properties'] ) {
 			var property =  dataClass['properties'][pi];
-			thisClass.append( createHTMLProperty( property ) );
-			/*
-			var thisProperty;
-
-			switch ( property['type'] ) {
-
-				case "hidden":
-					thisProperty = $( '<div class="'+_ID_+'-hidden-group"><input type="hidden" name="'+ property['name'] +'" id="" value="'+ property['value'] +'" /></div>' );
-					break;
-
-				case "literal":
-					thisProperty = createHTMLiteral( property );
-					break;
-
-				case "boolean":
-					thisProperty = createHTMLiteral( property );
-					break;
-
-				case "resource":
-					thisProperty = createHTMLResource( property );
-					break;			
-
-				default:
-					alert("Unknown property type \""+property['type']+"\" detected on creating HTML property.");
-					continue;
-			}
-
-			thisClass.append( thisProperty );
-			*/
-						
+			thisClass.append( createHTMLProperty( property ) );						
 		}
 
 		if ( dataClass['multiple'] ) {
@@ -537,6 +513,7 @@
 			'name': resource['name'],
 			'additional': resource['additional'],
 			'multiple': resource['multiple'],
+			'argument': resource['argument'],
 		});
 		curFormGroup.append( resourceClass );
 
@@ -595,6 +572,9 @@
 			var classModel = $.extend( true, {}, getClassModel( $(this).val() ) );
 			if ( $(this).attr("multiple") ) {
 				classModel['multiple'] = true;
+			}
+			if ( $(this).attr("argument") ) {
+				classModel['argument'] = $(this).attr("argument");
 			}
 
 			var thisClass = createHTMLClass( classModel );
@@ -655,7 +635,6 @@
 			$(this).autocomplete({
 				source: function( request, response ) {		
 					queryStr = queryStr.replace(/%s/g, "'" + request.term + "'");
-					console.log( queryStr );
 					$.ajax({
 						url: queryEndpoint,
 						dataType: "json",
@@ -1038,18 +1017,18 @@
 				var wcd = strWcds[i].substring( 1 );
 				var env = envClass;
 
-				if ( wcd.search(/\//) != -1 ) {
-					// TODO real maybe recursive path search
-					var wcdPaths = wcd.split( "/" );
-					//wcd = wcdPaths[1];
-					if ( wcdPaths[0] == ".." ) { // search in parent class
-						env = envClass.parentsUntil("div[typeof]").parent();
+				var wcdVal = env.find('input[name="'+wcd+'"]');
+
+				if ( wcdVal.length == 0 && env.attr( "argument" ) ) {
+					var args = env.attr( "argument" ).split(" ");
+					for ( var ai in args ) {
+						var thisArg = args[ai].split(":");
+						if ( wcd == thisArg[0] ) {
+							wcdVal = $( '<input type="hidden" name="' + thisArg[0] + '" value="' + thisArg[1] + '" />' );
+							env = envClass.parentsUntil("div[typeof]").parent();
+							break;
+						}
 					}
-					var wcdVal = env.find('input[name="'+wcdPaths[1]+'"]');
-					
-				} else {
-					// TODO search in sub class
-					var wcdVal = env.find('input[name="'+wcd+'"]');
 				}
 
 				// test if property exists
@@ -1169,6 +1148,15 @@
 		return false;		
 
 	}
+
+	/*
+	TODO: write this helper function...
+	getParentClass = function( env ) {
+		var thisClass = env.parentsUntil("div[typeof]").parent().clone();
+		thisClass.find( "div[typeof]" ).remove();
+		return thisClass;
+	}
+	*/
 	
 
 	/* 
