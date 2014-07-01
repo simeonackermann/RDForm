@@ -367,9 +367,14 @@
 		thisClass.attr( attrs );
 		
 		var thisLegend = $( "<legend>"+ dataClass['legend'] +"</legend>" );
-		if ( dataClass['name'] ) {
-			thisLegend.prepend( "<small>"+ dataClass['name'] + "</small> " );
-		}
+		if ( dataClass['name'] ) 
+			thisLegend.prepend( "<small>"+ dataClass['name'] +"</small> " );
+
+		thisLegend.append(	'<div class="rdform-edit-class-resource">' +
+								'<small>'+ dataClass['resource'] +'</small>' +
+								'<span class="glyphicon glyphicon-pencil"></span>' +
+								'<input type="text" value="'+ dataClass['resource'] +'" class="form-control" />' +
+							'</div>' );
 		thisClass.append( thisLegend );		
 
 		for ( var pi in dataClass['properties'] ) {
@@ -641,6 +646,32 @@
 			$(this).children('option[value="'+$(this).val()+'"]').attr("disabled", "disabled");
 		})
 		*/
+
+		rdform.find('div.rdform-edit-class-resource span').click(function() {
+
+			$(this).next("input").show();
+
+			$(this).prev("small").hide();
+			$(this).hide();
+
+		});
+
+		rdform.find('div.rdform-edit-class-resource input').change(function() {
+			var val = $(this).val();
+
+			if ( val != "" ) {
+
+				$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
+				$(this).prev().prev("small").text( val );
+
+
+			}
+			$(this).prev().prev("small").show();
+			$(this).prev("span").show();
+
+			$(this).hide();
+			//$(this).css( "display", "hidden" );
+		});
 
 		//autocomplete
 		// TODO BUG doesnt work on additional resource class/multiple

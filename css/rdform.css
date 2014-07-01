@@ -23,6 +23,28 @@ body {
 	font-weight: normal;
 }
 
+.rdform legend small {
+	color: #555;
+}
+
+.rdform-edit-class-resource {
+	display: inline;
+	margin: 0 5px;
+}
+.rdform-edit-class-resource span {
+	font-size: 0.7em;
+	margin: 0 3px;
+	opacity: 0.5;
+}
+.rdform-edit-class-resource span:hover {
+	opacity: 1;	
+	cursor: pointer;
+}
+.rdform-edit-class-resource input {
+	display: none;
+	width: auto;
+}
+
 .rdform .form-group {
 	margin-bottom: 10px;
 }
