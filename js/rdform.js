@@ -489,8 +489,8 @@
 			classModel['multiple'] = resource['multiple'];
 			var resourceClass = createHTMLClass( classModel );
 		}
-		
 		resourceClass.attr( resource );
+		if ( typeof btnText !== undefined ) resourceClass.attr( 'type', 'button' );
 		curFormGroup.append( resourceClass );
 
 		return curFormGroup;
@@ -1020,7 +1020,7 @@
 	} // end of creating result
 
 
-	/* helper functions */
+	/************************** HELPER FUNCTIONS ******************************/
 
 	/*
 	 * Replacing wildcards {...} with the value of the property in the domain
@@ -1091,33 +1091,6 @@
 		}
 		return new Object( { 'str' : str.trim(), 'count' : counted } );
 	}
-
-	/*
-		
-
-	(function($) {
-
-		var oldattr = $.fn.attr;
-
-		$.fn.attr = function() {
-
-			if( arguments.length == 1 ) {
-
-				if ( typeof arguments === 'object' ) {
-					console.log( "my attr ", arguments );
-					//return this[0];
-				} 
-
-			}
-
-			return oldattr.apply(this, arguments);
-
-		};
-
-	})($);
-
-	*/
-	
 
 	validatePrefix = function( str ) {
 
