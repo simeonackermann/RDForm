@@ -348,15 +348,13 @@
 	}
 
 	createHTMLClass = function( dataClass ) {
-		/*
-		TODO: max depth
+		/* TODO: max depth
 		if( typeof(depth) === 'undefined' ) var depth = 0;
 		depth += 1;
 		if ( depth > 1 ) {
 			console.log( "Reached max class depth." );
 			return "";
-		}
-		*/
+		} */
 
 		var thisClass = $("<div></div>");
 		thisClass.attr( {
@@ -373,9 +371,12 @@
 				thisClass.attr( attr, dataClass[attr] );
 			}
 		}
-		
 
-		thisClass.append( "<legend>"+ dataClass['legend'] +"</legend>" );		
+		var thisLegend = $( "<legend>"+ dataClass['legend'] +"</legend>" );
+		if ( dataClass['name'] ) {
+			thisLegend.prepend( "<small>"+ dataClass['name'] + "</small> " );
+		}
+		thisClass.append( thisLegend );		
 
 		for ( var pi in dataClass['properties'] ) {
 			var property =  dataClass['properties'][pi];
@@ -570,15 +571,11 @@
 		rdform.on("click", ".add-class-resource", function() {
 			//var classModel = getClassModel( $(this).val() );
 			var classModel = $.extend( true, {}, getClassModel( $(this).val() ) );
-			if ( $(this).attr("multiple") ) {
-				classModel['multiple'] = true;
-			}
-			if ( $(this).attr("argument") ) {
-				classModel['argument'] = $(this).attr("argument");
-			}
+			classModel['multiple'] = $(this).attr("multiple");;
+			classModel['argument'] = $(this).attr("argument");
+			classModel['name'] = $(this).attr("name"); 
 
 			var thisClass = createHTMLClass( classModel );
-			thisClass.attr( 'name', $(this).attr("name") );
 
 			$(thisClass).hide();	
 			$(this).before( thisClass );
