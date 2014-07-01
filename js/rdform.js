@@ -591,31 +591,74 @@
 
 		// text inputs with wildcard values -> bind handlers to dynamically change the value
 		// TODO: doesnt work for dynamically added fields
-		rdform.find('input[type="text"][value*="{"]').each(function() {
-			var wcdPointerVals = new Object();
-			var wildcardTxtInput = $(this);
-			$(this).attr("modvalue",  $(this).val() );
+		rdform.find('input[value*="{"]').each(function() {			
+			var wildcards = new Object();
+			var thisInput = $(this);
+			var envClass = $(this).parentsUntil("div[typeof]").parent();
+			$(this).attr("modvalue",  $(this).val() );			
 
 			var strWcds = $(this).val().match(/\{[^\}]*/gi);
 			for ( var i in strWcds ) {				
-				var wcd = strWcds[i].substring( 1 );
-				if ( rdform.find('input[name="'+wcd+'"]').length == 0 ) {
-					alert( 'Error: property "' + wcd + '" does not exist.' );
-				} 
-				// keyup handlers for the pointed inputs
-				rdform.find('input[name="'+wcd+'"]').keyup( function() {
-					wcdPointerVals[$(this).attr("name")] = $(this).val();
-					var val = $(wildcardTxtInput).attr("modvalue");
-					for ( var j in wcdPointerVals) {
-						if ( val.search(j) != -1 ) {
-							var regex = new RegExp( '\{' + j + '\}', "g");
-							val = val.replace(regex, wcdPointerVals[j]);
-						}
-					}
-					$(wildcardTxtInput).val( val.trim() );
+				var wcd = strWcds[i].substring( 1 );	
+
+				wildcards[wcd] = getWildcardTarget( wcd, envClass );	
+
+				$(wildcards[wcd]).keyup(function() {
+
+					writeWildcardValue( thisInput, wildcards );
+
 				});
+
+				if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) {
+					$(wildcards[wcd]).trigger( "keyup" );
+				}
 			}
 		});
+
+
+		function getWildcardTarget( wcd, envClass ) {
+
+			var wcdTarget = envClass.find('input[name="'+wcd+'"]');
+
+			if ( wcdTarget.length == 0 && envClass.attr( "argument" ) ) {
+				var args = envClass.attr( "argument" ).split(" ");
+				for ( var ai in args ) {
+					var thisArg = args[ai].split(":");
+					if ( wcd == thisArg[0] ) {
+						thisArg[1] = thisArg[1].replace(/[{}]/g, '');
+
+						wcdTarget = getWildcardTarget( thisArg[1], envClass.parentsUntil("div[typeof]").parent() );
+						break;
+					}
+				}
+			}
+
+			// test if property exists
+			if ( wcdTarget.length == 0 ) {
+				alert( 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
+			}
+
+			return wcdTarget;
+		}
+
+
+		function writeWildcardValue( src, wildcards ) {
+			var val = $(src).attr("modvalue");
+
+			for ( wcd in wildcards ) {
+				if ( wildcards[wcd].val() != "" ) {
+					var regex = new RegExp( '\{' + wcd + '\}', "g");
+					val = val.replace( regex, wildcards[wcd].val() );
+				}
+
+			}
+			$(src).val( val.trim() );
+
+			if ( $(src).attr("type") == "hidden" ) {
+				$(src).trigger( "keyup" );
+			}
+
+		}
 
 		//select class, add selected template before
 		/*

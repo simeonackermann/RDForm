@@ -4,21 +4,20 @@
   <div typeof="foaf:Person" resource="Person-{pid}">
 
     <!-- hidden vars -->
-    <input name="pid" type="hidden" value="{foaf:name}" />
+    <input name="pid" type="hidden" value="123" />
     <input name="forenames" type="hidden" />
 
     <label>Bezeichnung:</label>                                                                            
-    <input name="rdfs:label" type="literal" datatype="xsd:string" value="{forenames} {foaf:name}" required readonly />
+    <input name="rdfs:label" type="literal" datatype="xsd:string" value="{forenames} {foaf:name} {pid}" required readonly />
 
     <label>Name:</label>
-    <input name="foaf:name" type="literal" datatype="xsd:string" value="Ackermann" required />
+    <input name="foaf:name" type="literal" datatype="xsd:string" required />
 
     <!-- property resource -->    
     <input name="bio:event" type="resource" value="bio:Birth" title="Geburt"
       argument="pid:{pid}"
     />
-      <!-- übergabe argemant als attribut an resource-klasse, suche in parent klasse... -->
-
+    
     <input name="bio:has-forename" type="resource" value="cpm:Forename" multiple additional />
     <input name="foaf:knows" type="resource" value="foaf:Person" title="kennt Person" />   
 
@@ -44,6 +43,8 @@
       query-apitype="sparql"
       query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
     />
+
+    <input name="bid" type="literal" value="{pid}" readonly />
 
     <label>Datum:</label>
     <input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
