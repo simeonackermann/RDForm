@@ -19,9 +19,13 @@ __initFormHandlers = function () {
 }
 
 // after pressing the duplicate button
-__afterDuplicateClass = function ( classContainer ) {
-	var thisClass = classContainer.children("div[typeof]");
-	
+__afterDuplicateClass = function ( thisClass ) {
+
+	if ( $(thisClass).attr("typeof").search(/cpm:Forename/) != -1 ) {
+			var index = $(thisClass).attr("index");
+			$(thisClass).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
+			$(thisClass).find('input[name="cpm:forenamePosition"]').val( index );
+	}
 	
 }
 
