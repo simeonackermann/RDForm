@@ -339,7 +339,7 @@
 		var elem = $('<form></form>');
 		
 		for ( var mi in MODEL ) {
-			if ( MODEL[mi]['isRootClass'] ) {
+			if ( MODEL[mi]['isRootClass'] ) {				
 				elem.append( createHTMLClass( MODEL[mi] ) );
 			}
 		}
@@ -347,7 +347,7 @@
 		return elem.html();
 	}
 
-	createHTMLClass = function( dataClass ) {
+	createHTMLClass = function( dataClass ) {		
 		/* TODO: max depth
 		if( typeof(depth) === 'undefined' ) var depth = 0;
 		depth += 1;
@@ -360,18 +360,13 @@
 		thisClass.attr( {
 			'id': _ID_ + '-class-' + dataClass['typeof'], // TODO: sub-ID ... (e.g. Person/Forename)
 			'class': _ID_  + '-class-group',
-			/*'typeof': dataClass['typeof'],
-			'resource': dataClass['resource'],			
-			'name': dataClass['name'],
-			'argument': dataClass['argument'],*/
-		});
+		});		
+		
+		var attrs = $.extend( true, {}, dataClass );
+		delete attrs['properties'];
+		thisClass.attr( attrs );
 
-		for ( var attr in dataClass ) {
-			if ( $.type(dataClass[attr]) === "string" ) {
-				thisClass.attr( attr, dataClass[attr] );
-			}
-		}
-
+		
 		var thisLegend = $( "<legend>"+ dataClass['legend'] +"</legend>" );
 		if ( dataClass['name'] ) {
 			thisLegend.prepend( "<small>"+ dataClass['name'] + "</small> " );
@@ -441,25 +436,10 @@
 		var thisInput = $("<input />");
 		thisInput.attr({
 			//'type': literal['type'],
-			'name': literal['name'],
-			'value': literal['value'],
 			//'id': literalID,
 			'class': 'form-control input-sm',
-			'datatype': literal['datatype'],
-			'placeholder': literal['placeholder'],
-			'required': literal['required'],
-			'readonly': literal['readonly'],			
-			'checked': literal['checked'],
 		});
-
-		if ( literal['autocomplete'] !== undefined ) {
-			thisInput.attr({
-				'autocomplete': literal['autocomplete'],
-				'query-endpoint': literal['query-endpoint'],
-				'query-apitype': literal['query-apitype'],
-				'query': literal['query'],
-			});
-		}
+		thisInput.attr( literal );
 
 		if ( literal['datatype'] ) {
 
@@ -501,21 +481,14 @@
 
 		if ( resource['typeof'] == resource['value'] || typeof(resource['additional']) !== "undefined" ) {					
 			var btnText = resource['title'] ? resource['title'] : "add " + resource['name'] + " - " + resource['value'];			
-			var resourceClass = $( '<button type="button" class="btn btn-default add-class-resource" name="'+resource['name']+'" value="'+resource['value']+'"><span class="glyphicon glyphicon-plus"></span> '+btnText+'</button>' );
+			var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'">' + 
+										'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
+									'</button>' );
 		} else {
-			var classModel = $.extend( true, {}, getClassModel(resource['value']) );
-			classModel['name'] = resource['name'];
-			classModel['multiple'] = resource['multiple'];
-
-			var resourceClass = createHTMLClass( classModel );
-			
+			var resourceClass = createHTMLClass( getClassModel(resource['value']) );
 		}
-		resourceClass.attr({
-			'name': resource['name'],
-			'additional': resource['additional'],
-			'multiple': resource['multiple'],
-			'argument': resource['argument'],
-		});
+		
+		resourceClass.attr( resource );
 		curFormGroup.append( resourceClass );
 
 		return curFormGroup;
@@ -1047,6 +1020,15 @@
 
 	/* helper functions */
 
+	/*
+	 * Replacing wildcards {...} with the value of the property in the domain
+	 *
+	 * @str String value with the wildcards
+	 * @domain DOM element where to find inputs (properties)
+	 * @adaptFct passing wildcard value to that function
+	 * 
+	 * return Object. Keys: 'str', 'count'
+	 */
 	replaceWildcards = function( str, envClass, strFct ) {
 		var counted = 0;
 
@@ -1109,66 +1091,31 @@
 	}
 
 	/*
-	 * Replacing wildcards {...} with the value of the property in the domain
-	 *
-	 * @str String value with the wildcards
-	 * @domain DOM element where to find inputs (properties)
-	 * @adaptFct passing wildcard value to that function
-	 * 
-	 * return Object. Keys: 'str', 'count'
-	 */
-	replaceWildcards_OLD = function ( str, domain, adaptFct ) {
-		var result = new Object();
-		var counted = 0;
+		
 
-		if ( str.search(/\{.*\}/) != -1 ) {
-			var strWcds = str.match(/\{[^\}]*/gi);
-			for ( var i in strWcds ) {
-				var wcd = strWcds[i].substring( 1 );
+	(function($) {
 
-				// test if its a pointer to a global var
-				if ( wcd.search(/^global:/) != -1 ) {
-					if ( GLOBALS[wcd] === undefined ) {
-						alert('Error: the global var "' + wcd + '" does not exist but required for the wildcard "' + str + '"');
-					} else {
-						var wcdVal = GLOBALS[wcd];
-					}
+		var oldattr = $.fn.attr;
+
+		$.fn.attr = function() {
+
+			if( arguments.length == 1 ) {
+
+				if ( typeof arguments === 'object' ) {
+					console.log( "my attr ", arguments );
+					//return this[0];
 				} 
-				// but its a pointer to a property
-				else {
-					var wcdVal = $(domain).find('input[name="' + wcd + '"]');
-					if ( $(wcdVal).attr("type") == "radio" ) {						
-						wcdVal = $(domain).find('input[name="' + wcd + '"]:checked');
-					}
 
-					// test if property exists
-					if ( wcdVal.length == 0 ) {
-						alert( 'Error: cannot find property "' + strWcds[i].substring( 1 ) + '"\n\n str = ' + str );
-					}
-					var wcdVal = wcdVal.val();
-				}				
-
-				// passing wildcard value to the function
-				if ( adaptFct !== undefined ) {
-					wcdVal = adaptFct(wcdVal);
-				}
-
-				if ( wcdVal != "" ) // count not empty properties 
-					++counted;
-
-				// regex: replace the {wildard pointer} with the value
-				var regex = new RegExp("\{" + wcd + "\}", "g");
-				if ( wcdVal != "" ) {										
-					str = str.replace(regex, wcdVal );
-				} else {
-					str = str.replace(regex, '' );
-				}
 			}
-		}
-		result['str'] = str.trim();
-		result['count'] = counted;
-		return result;
-	}
+
+			return oldattr.apply(this, arguments);
+
+		};
+
+	})($);
+
+	*/
+	
 
 	validatePrefix = function( str ) {
 
