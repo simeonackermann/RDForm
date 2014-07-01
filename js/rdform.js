@@ -365,7 +365,6 @@
 		var attrs = $.extend( true, {}, dataClass );
 		delete attrs['properties'];
 		thisClass.attr( attrs );
-
 		
 		var thisLegend = $( "<legend>"+ dataClass['legend'] +"</legend>" );
 		if ( dataClass['name'] ) {
@@ -485,7 +484,10 @@
 										'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 									'</button>' );
 		} else {
-			var resourceClass = createHTMLClass( getClassModel(resource['value']) );
+			var classModel = $.extend( true, {}, getClassModel(resource['value']) );
+			classModel['name'] = resource['name'];
+			classModel['multiple'] = resource['multiple'];
+			var resourceClass = createHTMLClass( classModel );
 		}
 		
 		resourceClass.attr( resource );
