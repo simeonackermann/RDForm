@@ -16,7 +16,7 @@
 	var MODEL = new Array();
 	var RESULT = new Array();
 	var PREFIXES = new Object();	// RDF prefixes		
-	var BASEPREFIX = "";
+	var BASEPREFIX;
 
 	// TODO: put PREFIXES and BASEPREFIX into MODEL is Objects
 	
@@ -63,7 +63,7 @@
 			})
 			.done(function() {			
 				setRDForm( rdform ); // set rdform var in hooks file
-				
+
 				$.ajax({ 
 					url: settings.model,
 					type: "GET",
@@ -155,7 +155,7 @@
 				var success = true;
 				switch ( curProperty['type'] ) {
 					case "literal":
-						// TODO use a function to get all attributes
+						// TODO use a function to get all optiional/required attributes
 						// -> http://stackoverflow.com/questions/14645806/get-all-attributes-of-an-element-using-jquery
 						curProperty['datatype'] = $(this).attr("datatype");
 						curProperty['placeholder'] = $(this).attr("placeholder");
@@ -181,14 +181,18 @@
 					case "resource":
 						// TODO: test if resource class exists
 						curProperty['typeof'] = curClass['typeof'];
-						curProperty['title'] = $(this).attr("title");						
+						curProperty['title'] = $(this).attr("title");		
+						//curProperty['resource'] = $(this).attr("resource");				
 						curProperty['multiple'] = $(this).attr("multiple"); 
 						curProperty['additional'] = $(this).attr("additional");
-						curProperty['argument'] = $(this).attr("argument");
+						curProperty['argument'] = $(this).attr("argument");						
+						curProperty['external'] = $(this).attr("external");
 
-						if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
-							alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
-							success = false;
+						if ( curProperty['external'] === undefined ) {
+							if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
+								alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
+								success = false;
+							}
 						}
 
 						break;										
@@ -408,17 +412,29 @@
 	createHTMLResource = function( resource ) {		
 
 		var curFormGroup = $('<div class="form-group '+_ID_+'-resource-group"></div>');
+		var resourceClass;
 
-		if ( resource['typeof'] == resource['value'] || typeof(resource['additional']) !== "undefined" ) {					
-			var btnText = resource['title'] ? resource['title'] : "add " + resource['name'] + " - " + resource['value'];			
-			var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'">' + 
-										'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
-									'</button>' );
-		} else {
-			var classModel = $.extend( true, {}, getClassModel(resource['value']) );
-			classModel['name'] = resource['name'];
-			classModel['multiple'] = resource['multiple'];
-			var resourceClass = createHTMLClass( classModel );
+		if ( resource['external'] !== undefined ) {			
+			resourceClass = $("<input />");		
+			resourceClass.attr({
+				'type': "text", 
+				'external': 'external',
+				'class': 'form-control input-sm'
+			});			
+		}
+		else {
+
+			if ( resource['typeof'] == resource['value'] || typeof(resource['additional']) !== "undefined" ) {					
+				var btnText = resource['title'] ? resource['title'] : "add " + resource['name'] + " - " + resource['value'];			
+				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'">' + 
+											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
+										'</button>' );
+			} else {
+				var classModel = $.extend( true, {}, getClassModel(resource['value']) );
+				classModel['name'] = resource['name'];
+				classModel['multiple'] = resource['multiple'];
+				resourceClass = createHTMLClass( classModel );
+			}
 		}
 		/*
 		resourceClass.attr( resource ); // BUG: adds the parent typeof
@@ -430,7 +446,26 @@
 			'multiple': resource['multiple'],
 			'argument': resource['argument'],
 		});
+
+		//if ( resource['resource'] ) {
+		//	resourceClass.attr( 'resource', resource['resource'] );
+		//}		
+
 		curFormGroup.append( resourceClass );
+
+		if ( resource['external'] !== undefined ) {
+			//console.log( "external resource", resource );
+			var thisLabel = $("<label>...</label>");
+			thisLabel.attr({
+				//'for': curPropertyID,
+				'class': 'col-xs-3 control-label'
+			});
+			//thisLabel.text( literal['label'] );
+			curFormGroup.prepend( thisLabel );
+			var thisInputContainer = $('<div class="col-xs-9"></div>');	
+			//resourceClass = thisInputContainer.append( resourceClass );
+			resourceClass.wrap( thisInputContainer );
+		}
 
 		return curFormGroup;
 
@@ -626,7 +661,7 @@
 		//autocomplete
 		// TODO BUG: search works only once!!!
 		rdform.on("focus", "input[autocomplete]", function() {			
-		//rdform.find('input[autocomplete]').each( function() {	
+			// TODO: check if attrs query-endpoint etc exists
 			var queryEndpoint = $(this).attr( "query-endpoint" );
 			var queryStr = $(this).attr("query");
 			$(this).autocomplete({
@@ -705,7 +740,10 @@
 
 			createResultClass( $(this) );
 
-		})
+		});
+
+		if ( typeof __filterRESULT !== undefined )
+			RESULT = __filterRESULT( RESULT );
 
 		console.log( "Result = ", RESULT );
 
@@ -829,16 +867,31 @@
 
 		var resource = new Object();
 		var resourceID = false;
+		var resourceGroup;
 
-		var resourceGroup = $(env).children('div[typeof]');
+		if ( $(env).find('input[external]').length > 0 ) {
+			
+			/*
+			resource['type'] = 'resource';
+			resource['value'] = $(env).children('input[external]').val();
+			resource['name'] = $(env).children('input[external]').attr("name");
+			return resource;
+			*/
+		}
+		
+		resourceGroup = $(env).children('div[typeof]');
 		if ( resourceGroup.length > 0 ) { 
 			resourceID = createResultClass( resourceGroup );
+		}
+		else if ( $(env).find('input[external]').length > 0 ) {
+			resourceGroup = $(env).find('input[external]');
+			console.log( "create Resulr Resource", $(env).children('input[external]') );
+			resourceID = $(resourceGroup).val();
 		}
 
 		if ( resourceID ) {
 			resource['type'] = 'resource';
 			resource['value'] = resourceID;
-			//resource['name'] = $(env).find('input').attr("name");
 			resource['name'] = $(resourceGroup).attr("name");
 		}
 
@@ -851,8 +904,10 @@
 	outputResult = function() {
 		var resultStr = "";
 
+		//__beforeOutputResult();	
+
 		if ( BASEPREFIX != "" ) {
-			resultStr += "@base " + BASEPREFIX + "> .\n";
+			resultStr += "@base <" + BASEPREFIX + "> .\n";
 		}
 
 		//create prefixes
