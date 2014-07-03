@@ -13,10 +13,10 @@
 	  */
 	var _ID_ = "rdform"; // TODO: add id to html form
 	var rdform; // rdform DOM object
-	var PREFIXES = new Object();	// RDF prefixes	
 	var MODEL = new Array();
 	var RESULT = new Array();
-
+	var PREFIXES = new Object();	// RDF prefixes		
+	var BASE = "";
 	
 	/**
 	  * plugin base constructor
@@ -972,16 +972,26 @@
 
 		// output classes
 		for ( var ci in RESULT ) {
-			resultStr += "\n" + RESULT[ci]['resource'] + " a " + RESULT[ci]['typeof'] + " ;\n";
+			resultStr += "\n<" + RESULT[ci]['resource'] + "> a " + RESULT[ci]['typeof'] + " ;\n";
 
 			for ( var pi in RESULT[ci]['properties']) {
 				var property = RESULT[ci]['properties'][pi];
 
-				if ( property['type'] == 'hidden' ) continue;
+				switch ( property['type'] ) {
+					case 'literal' :
+						resultStr += "	" + property['name'] + " " + property['value'];
+						break;
 
-				resultStr += "	" + property['name'] + " " + property['value'];
+					case 'resource' :
+						resultStr += "	" + property['name'] + " <" + property['value'] + ">";
+						break;
+
+					default : continue;
+				}				
+				
 				// add datatype if exist
 				resultStr += property.hasOwnProperty('datatype') ? "^^" + property['datatype'] : "";
+
 				// end of property or end of class (add ; or .)
 				resultStr += ( ( 1 + parseInt(pi) ) == RESULT[ci]['properties'].length ) ? " .\n" : " ;\n";
 			}
