@@ -46,8 +46,12 @@ __createClass = function ( thisClass ) {
 		
 }
 
-
 __filterResultPropertyAfterCreating = function( property ) {
+
+	if ( property.name == "hp:hasPosition" ) {
+
+		property.value = rdform.find('div[name="hp:hasPosition"] input[name="rdf:object"]').val();
+	}
 
 	return property;
 

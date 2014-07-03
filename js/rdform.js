@@ -735,6 +735,9 @@
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
 
+			if ( typeof __filterResultPropertyAfterCreating !== undefined )
+				property = __filterResultPropertyAfterCreating( property );
+
 			if ( ! $.isEmptyObject( property ) ) {
 					properties.push( property );
 			}

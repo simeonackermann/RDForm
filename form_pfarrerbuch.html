@@ -1,4 +1,4 @@
-<form prefix="bio http://vocab.org/bio/0.1/ hp: http://purl.org/vok/hp/ foaf ... hp ... rdfs ... rdf ...">
+<form base="..." prefix="bio http://vocab.org/bio/0.1/ hp: http://purl.org/vok/hp/ foaf ... hp ... rdfs ... rdf ...">
     <legend>Pfarrer</legend>
     <div typeof="foaf:Person" resource="Person-{pid}">
         <!-- hidden person name -->
@@ -14,19 +14,19 @@
         <input type="literal" name="foaf:name" value="{foaf:firstName} {foaf:lastName}" datatype="xsd:string" required />
 
         <label>Vorname:</label>
-        <input type="literal" name="foaf:firstName" datatype="xsd:string" required />
+        <input type="literal" name="foaf:firstName" datatype="xsd:string" value="Simeon" required />
 
         <label>Alternativer Vorname:</label>
-        <input type="literal" name="foaf:firstNameAlt" datatype="xsd:string" required />
+        <input type="literal" name="foaf:firstNameAlt" datatype="xsd:string" />
 
         <label>Nachname:</label>
-        <input type="literal" name="foaf:lastName" datatype="xsd:string" required />
+        <input type="literal" name="foaf:lastName" datatype="xsd:string" value="Ackermann" required />
 
         <label>Alternativer Nachname:</label>
-        <input type="literal" name="foaf:lastNameAlt" datatype="xsd:string" required />
+        <input type="literal" name="foaf:lastNameAlt" datatype="xsd:string" />
 
         <label>Geschlecht:</label>
-        <input type="literal" name="foaf:gender" datatype="xsd:string" required />
+        <input type="literal" name="foaf:gender" datatype="xsd:string" />
 
         <label>Geburtsdatum:</label>
         <input type="literal" name="hp:birthDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
@@ -70,49 +70,74 @@
         /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
 
         
-        <input type="hidden" name="schulstelle" value="schulstelle">
-        <input name="hp:attendedSchool" type="resource" value="hp:Event"
-            argument="pid:{pid} type:{schulstelle}"            
-            label="Ausbildung"
+        <!--<input name="hp:attendedSchool" type="resource" value="SchuleQuery" />-->
+        <label>Schule</label>
+        <!-- Blöd: Schule ist nicht in eingerückte unter-klasse -->
+        <input type="literal" name="hp:attendedSchool" />
+        <input type="hidden" name="sid" value="{hp:attendedSchool}" />
+        <input name="tmp" type="resource" value="EventAusbildung"
+            argument="pid:{pid} sid:{sid}"
         />
+        <!-- tmp property mittels hook entfernen -->
 
-        <input type="hidden" name="pfarrstelle" value="pfarrstelle">
-        <input name="hp:hasPosition" type="resource" value="hp:Event"
-            argument="pid:{pid} type:{pfarrstelle} "
-            label="Stelle"
+        <input name="hp:hasPosition" type="resource" value="EventPfarrstelle"
+            argument="pid:{pid}"
         />
+        <!--
+        Möglichkeit: lokal resource angeben: resource="{gStelle}" -> verweis auf global-var
+        -->
 
         <label>Kommentar/Freitext:</label>
         <input type="literal" name="rdfs:comment" datatype="xsd:string" /> <!-- select places -->
     </div>
 
+    <!--
+    <legend>Schule</legend>
+    <div typeof="SchuleQuery" resource="{rdf:object}" id="SchuleQuery" >
+        <label>Schule:</label>
+        <input type="literal" name="rdf:object" autocomplete />  
+    </div>
+    -->
+
     <legend>Ausbildung</legend>
-    <div typeof="hp:Event" resource="attendingSchool-{pid}" label="{label}" id="">
+    <div typeof="hp:Event" resource="attendingSchool-{pid}" id="EventAusbildung">
+
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
 
-        <label>Schule/Pfarrstelle:</label>
-        <!--<input name="rdf:object" type="resource" /> select places -->
-        <input type="resource" name="rdf:object" value="SchuleQuery" />
+        <label>Person:</label>
+        <!--<input name="rdf:object" type="resource" /> select places -->            
+        <input type="literal" name="rdf:subject" value="Person-{pid}" readonly />
+        <!--
+        Möglichkeit 1: mittels hook person pid finden
+                    2: die wiedergeburt der globals, globaler Verweis auf Person-PID
+        -->    
+
+        <input type="literal" name="rdf:predicate" value="hp:attendedSchool" readonly />
+
+        <label>Schule:</label>
+        <input type="literal" name="rdf:object" value="{sid}" readonly /> 
 
         <label>Begin:</label>
         <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
         <label>End:</label>
         <input type="literal" name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />        
-    </div>
+    </div>    
 
-    <div query="SchuleQuery" typeof="..." >
-    query
-    </div>
-
-
-    <legend>Ausbildung/Stelle</legend>
-    <div typeof="hp:Event" resource="pfarrstelle-{pid}" label="{label}">
+    <legend>Stelle</legend>
+    <div typeof="hp:Event" resource="hp:hasPosition-{pid}" id="EventPfarrstelle">
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
 
-        <label>Schule/Pfarrstelle:</label>
+        <label>Person</label>
+        <input type="literal" name="rdf:subject" value="Person-{pid}" readonly />
+
+        <label>Beziehung</label>
+        <input type="literal" name="rdf:predicate" value="hp:hasPosition" readonly />
+        <!-- evtl mittels stylesheet ausblenden -->
+
+        <label>Pfarrstelle:</label>
         <!--<input name="rdf:object" type="resource" /> select places -->
         <input type="literal" name="rdf:object" />
 
@@ -122,7 +147,5 @@
         <label>End:</label>
         <input type="literal" name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />        
     </div>
-
-
 
 </form> 
