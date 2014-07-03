@@ -4,15 +4,15 @@
 	  */
 	var settings = {
 		model: "form.html",
-		hooks: "js/hooks.js"
-	}	
+		hooks: "js/hooks.js",
+		lang: "",
+	}
 
 	/**
 	  * init default variables
 	  */
 	var _ID_ = "rdform"; // TODO: add id to html form
 	var rdform; // rdform DOM object
-	//var PREFIXES = new Array();	// RDF prefixes	
 	var PREFIXES = new Object();	// RDF prefixes	
 	var MODEL = new Array();
 	var RESULT = new Array();
@@ -42,6 +42,17 @@
         })
 		*/
 
+		if ( settings.lang != "" ) {
+			var langFile = "lang/" + settings.lang + ".js";
+			$.getScript( langFile )
+				.fail(function( jqxhr, type, exception ) {
+	    			alert('Error on loading language file "'+ langFile +'"...');
+				})
+				.done(function() {			
+					
+			});
+		}
+
 		// loading hooks js file
 		$.getScript( settings.hooks )
 			.fail(function( jqxhr, type, exception ) {
@@ -61,8 +72,8 @@
 						rdform.append( createHTMLForm() );
 
 						rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
-											'<button type="reset" class="btn btn-default">zurücksetzen</button> ' + 
-											'<button type="submit" class="btn btn-lg btn-primary">Datensatz anlegen</button>' + 
+											'<button type="reset" class="btn btn-default">'+ l("reset") +'</button> ' + 
+											'<button type="submit" class="btn btn-lg btn-primary">'+ l("create") +'</button>' + 
 										'</div></div>' );
 						initFormHandler();
 					},
@@ -73,7 +84,7 @@
 		});
 
 		// add result div
-		rdform.after( '<div class="row rdform-result"><legend>Ergebnis</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
+		rdform.after( '<div class="row rdform-result"><legend>'+ l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
 
     	return this;
 	};
@@ -102,7 +113,7 @@
 		if ( $(dom_model).attr("prefix") ) {
 			var prefixesArr = $(dom_model).attr("prefix").split(" ");
 			if ( prefixesArr.length % 2 != 0 ) {
-				alert( "Invalid prefix attribute format. Use: 'prefix: URL prefix: URL ...'" );
+				alert( "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
 			}
 			for (var i = 0; i < prefixesArr.length - 1; i += 2) {
 				PREFIXES[ prefixesArr[i] ] = prefixesArr[i+1];
@@ -113,9 +124,11 @@
 			var curClass = new Object();
 			var properties = new Array();	
 
-			curClass['typeof'] = $(this).attr("typeof"); // TODO: test if all importants attrs exists !!!
+			curClass['typeof'] = $(this).attr("typeof"); // TODO: test if all importants attrs exists !!!			
 			curClass['resource'] = $(this).attr("resource"); 
 			curClass['legend'] = $(this).prev("legend").text();
+			if ( $(this).attr("id") )
+				curClass['id'] = $(this).attr("id");			
 
 			validatePrefix( curClass['typeof'] );
 
@@ -167,7 +180,7 @@
 						curProperty['additional'] = $(this).attr("additional");
 						curProperty['argument'] = $(this).attr("argument");
 
-						if ( $(dom_model).find('div[typeof="'+$(this).val()+'"]').length < 1 ) {
+						if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
 							alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
 							success = false;
 						}
@@ -204,7 +217,9 @@
 					var thisProperty = MODEL[mi2]['properties'][mi2pi];
 					if (   MODEL[mi]['typeof'] != MODEL[mi2]['typeof']
 						&& thisProperty['type'] == 'resource' 
-						&& thisProperty['value'] == MODEL[mi]['typeof'] 
+						&& (   thisProperty['value'] == MODEL[mi]['typeof'] 
+							|| thisProperty['value'] == MODEL[mi]['id'] 
+							)
 					) {
 						isRootClass = false;
 					}
@@ -216,113 +231,18 @@
 		}
 		console.log( "Model = ", MODEL );		
 
-		/**
-		  * OBSOLETE PARSER
-		  */
-		{
-
-			//$(dom_model).find("div[typeof]").addClass("form-group"); // add row-fluid to every class
-
-			// parse resource properties as hidden
-			$(dom_model).find('input[type="resource"]').attr("resource", "resource");
-			$(dom_model).find('input[type="resource"]').attr("type", "hidden");
-
-			// add type="text" to literal inputs
-			//$(dom_model).find('input').not("[type]").attr("type", "text");
-			$(dom_model).find('input[type="literal"]').attr("type", "text");
-
-			// parse global variables
-			$(dom_model).find('input[type="global"]').attr("global", "global");
-			$(dom_model).find('input[type="global"]').attr("type", "hidden");
-			
-			// wrap not hidden inputs
-			//$(dom_model).find('input[type!="hidden"]').wrap('<div class="span10"><div class="control-group"><div class="controls"></div></div></div>');
-			$(dom_model).find('input[type!="hidden"]').wrap('<div class="form-group"><div class="col-xs-9"></div></div>');
-			$(dom_model).find('input[type="text"]').addClass("form-control input-sm");
-
-			// put legens into classes
-			$(dom_model).find("legend").each(function() {
-				$(this).next("div").prepend( $(this) );
-			})
-
-			// add label class and move labels into control groups
-			$(dom_model).find("label").each(function() {
-				$(this).addClass("col-xs-3 control-label");
-				//$(this).next("div").children("div").prepend( $(this) );
-				$(this).next("div").prepend( $(this) );
-			})
-
-			// add offset to inputs without label
-			$(dom_model).find(".form-group").each(function() {
-				if ( $(this).find(".control-label").length == 0 ) {
-					$(this).find(".col-xs-9").addClass("col-xs-offset-3");
-				}
-			});
-
-			// radio labels
-			$(dom_model).find("input:radio").each(function() {
-				$(this).wrap('<label class="radio">');
-				$(this).after( $(this).attr("label") );
-			})
-
-			// TODO: implement checkbox
-
-			// add small inputs
-			var smallInput = $(dom_model).find('input[datatype*="date"]');
-			//smallInput.addClass("input-small");
-			//smallInput.parents(".span10").removeClass("span4").addClass("span4");
-			smallInput.parents(".col-xs-9").removeClass("col-xs-9").addClass("col-xs-3");
-
-			// multiple classes
-			$(dom_model).find("div[multiple]").each( function() {
-				// TODO: replace references in other inputs in same classes
-				$(this).attr("index", "1" );
-				$(this).find('input[type=radio]').each(function() {
-					var regex = new RegExp( $(this).attr("name") + '\}', "g");
-					$(this).parents("div[typeof]").attr("resource", $(this).parents("div[typeof]").attr("resource").replace( regex , $(this).attr("name") + "-1}" ) );				
-					$(this).attr("name", $(this).attr("name") + "-1" );				
-				})
-
-				$(this).append('<p class="col-xs-offset-3"><button type="button" class="btn btn-default btn-xs duplicate-dataset"><span class="glyphicon glyphicon-plus"></span> hinzufügen</button></p>');
-			});
-
-			// select classes
-			$(dom_model).find("div[select]").each( function(){
-				var selectElem = $('<select class="form-control"><option disabled selected>Klasse wählen...</option></select>');
-				var selectTypeof = $(this).attr("typeof");
-
-				$(this).children("div[typeof]").each(function() {
-					$(this).attr("subclassof", selectTypeof);
-
-					var t = $(this).attr("typeof");
-
-					if ( $(this).find("legend").length ) {
-						t = $(this).find("legend").text() + " - " + t;
-					}				
-					selectTemplates[t] = $(this);
-					$(selectElem).append('<option value="'+t+'">'+t+'</option>');
-
-					$(this).remove();
-				})
-				$(this).append( selectElem );
-				$(this).addClass("form-group");
-				$(this).find("select").wrap('<div class="col-xs-6"></div>');
-			})
-
-		}
-
 		return $(dom_model).html();
 		
 	} // end of parseFormModel
 
 	/**
-	  * Get the model of a class by the class name (typeof)
+	  * Get the model of a class by the class name (typeof) or id
 	  *
 	  */
 	getClassModel = function( classTypeof ) {
 		var classModel = false;
 		for ( mi in MODEL ) {
-			if ( MODEL[mi]['typeof'] == classTypeof ) {
+			if ( MODEL[mi]['typeof'] == classTypeof || MODEL[mi]['id'] == classTypeof ) {
 				classModel = MODEL[mi];
 				break;
 			}
@@ -384,7 +304,7 @@
 
 		if ( dataClass['multiple'] ) {
 			thisClass.attr('index', 1);
-			thisClass.append('<button type="button" class="btn btn-default btn-xs duplicate-class" title="Klasse '+dataClass['typeof']+' duplizieren"><span class="glyphicon glyphicon-plus"></span> hinzufügen</button>');
+			thisClass.append('<button type="button" class="btn btn-default btn-xs duplicate-class" title="'+ l("Duplicate class %s", dataClass['typeof']) +'"><span class="glyphicon glyphicon-plus"></span> '+ l("add") +'</button>');
 		}
 
 		return thisClass;
@@ -442,7 +362,7 @@
 			//'type': literal['type'],
 			//'id': literalID,
 			'class': 'form-control input-sm',
-		});
+		});		
 		thisInput.attr( literal );
 
 		if ( literal['datatype'] ) {
@@ -494,8 +414,16 @@
 			classModel['multiple'] = resource['multiple'];
 			var resourceClass = createHTMLClass( classModel );
 		}
-		resourceClass.attr( resource );
+		/*
+		resourceClass.attr( resource ); // BUG: adds the parent typeof
 		if ( typeof btnText !== undefined ) resourceClass.attr( 'type', 'button' );
+		*/
+		resourceClass.attr({
+			'name': resource['name'],
+			'additional': resource['additional'],
+			'multiple': resource['multiple'],
+			'argument': resource['argument'],
+		});
 		curFormGroup.append( resourceClass );
 
 		return curFormGroup;
@@ -519,7 +447,7 @@
 		__initFormHandlers();		
 
 		// validate input values on change
-		rdform.find("input").change(function() {
+		rdform.on("change", "input", function() {
 			userInputValidation( $(this) );
 		});
 
@@ -528,9 +456,9 @@
 			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
 			var thisClass = classContainer.children("div[typeof]");			
 
-			classContainer.find('input[type="text"]').val(""); // reset values
-			classContainer.children().children("legend").remove(); // remove class legend
-			classContainer.find("div").removeClass("error");
+			thisClass.find('input[type="text"]').val(""); // reset values
+			thisClass.children("legend").remove(); // remove class legend
+			thisClass.find("div").removeClass("error");
 			//classContainer.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
 
 			// rewrite index, radio input names index and references in wildcards
@@ -539,7 +467,7 @@
 			$(thisClass).attr("index", index);
 
 			$(classContainer).hide();	
-			$(this).parent().parent("div.rdform-resource-group").after( classContainer );
+			$(this).parentsUntil("div.rdform-resource-group").parent().after( classContainer );
 			$(classContainer).show("slow");
 			$(this).remove(); // remove duplicate btn
 
@@ -566,9 +494,11 @@
 			return false;
 		});
 
+
 		// text inputs with wildcard values -> bind handlers to dynamically change the value
 		// TODO: doesnt work for dynamically added fields
 		rdform.find('input[value*="{"]').each(function() {			
+		//rdform.on("change", 'input[value*="{"]', function() {
 			var wildcards = new Object();
 			var thisInput = $(this);
 			var envClass = $(this).parentsUntil("div[typeof]").parent();
@@ -580,16 +510,27 @@
 
 				wildcards[wcd] = getWildcardTarget( wcd, envClass );	
 
+				// TODO: maybe its not a wildcard but a string
+
 				$(wildcards[wcd]).keyup(function() {
-
 					writeWildcardValue( thisInput, wildcards );
-
 				});
 
 				if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) {
 					$(wildcards[wcd]).trigger( "keyup" );
 				}
 			}
+		});
+
+		rdform.find('div[typeof][resource*="{"]').each(function() {			
+
+			//console.log( "div-class with wildcard", $(this) );
+
+			//console.log( $(this).children("legend").find("input").val() );
+
+			// TODO: dynamically change class resource
+
+
 		});
 
 
@@ -603,6 +544,9 @@
 					var thisArg = args[ai].split(":");
 					if ( wcd == thisArg[0] ) {
 						thisArg[1] = thisArg[1].replace(/[{}]/g, '');
+
+						// TODO BUG: maybe ist not a wildcard but a string value like:
+						// argument="val:{val} string:'My string...'"
 
 						wcdTarget = getWildcardTarget( thisArg[1], envClass.parentsUntil("div[typeof]").parent() );
 						break;
@@ -631,9 +575,9 @@
 			}
 			$(src).val( val.trim() );
 
-			if ( $(src).attr("type") == "hidden" ) {
+			//if ( $(src).attr("type") == "hidden" ) {
 				$(src).trigger( "keyup" );
-			}
+			//}
 
 		}
 
@@ -647,16 +591,16 @@
 		})
 		*/
 
-		rdform.find('div.rdform-edit-class-resource span').click(function() {
+		rdform.on("click", "div.rdform-edit-class-resource span", function() {
 
-			$(this).next("input").show();
+			$(this).next("input").show().focus();
 
 			$(this).prev("small").hide();
 			$(this).hide();
 
 		});
 
-		rdform.find('div.rdform-edit-class-resource input').change(function() {
+		rdform.on("change blur", "div.rdform-edit-class-resource input", function() {
 			var val = $(this).val();
 
 			if ( val != "" ) {
@@ -674,8 +618,9 @@
 		});
 
 		//autocomplete
-		// TODO BUG doesnt work on additional resource class/multiple
-		rdform.find('input[autocomplete]').each( function() {	
+		// TODO BUG: search works only once!!!
+		rdform.on("focus", "input[autocomplete]", function() {			
+		//rdform.find('input[autocomplete]').each( function() {	
 			var queryEndpoint = $(this).attr( "query-endpoint" );
 			var queryStr = $(this).attr("query");
 			$(this).autocomplete({
@@ -787,7 +732,7 @@
 
 			}
 			else {
-				console.log("Unknown RDForm group. Class = " + $(this).attr("class") );
+				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
 
 			if ( ! $.isEmptyObject( property ) ) {
@@ -1230,6 +1175,23 @@
 			}
 		}
 		$(property).val( value );
+	}
+
+	l = function( str, param ) {
+
+		if ( typeof TRANSLATIONS !== "undefined" ) {
+
+			if ( TRANSLATIONS[str] ) {
+				str = TRANSLATIONS[str];
+			}
+			if ( typeof param !== undefined ) {
+				str = str.replace( /%s/g, param );
+			}
+
+		}
+
+		
+		return str;
 	}
 
 	

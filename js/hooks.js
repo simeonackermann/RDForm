@@ -32,6 +32,11 @@ __afterDuplicateClass = function ( thisClass ) {
 // before creating the class properties from input values
 __createResultClassProperty = function( propertyContainer ) {
 
+	//console.log( propertyContainer );
+
+	if ( $(propertyContainer).children("input").attr("name") == "pid" ) {
+		$(propertyContainer).children("input").val( Math.floor( Math.random() * 10 ) );
+	}
 
 
 }

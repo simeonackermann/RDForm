@@ -25,10 +25,6 @@
 <div class="container">
     <h1>Wellcome to RDForm!</h1>
 
-    <p>
-    TODO: SUBCLASSES/SelectClasses PROBLEM, baseprefix (siehe Natan-mail) 
-    </p>
-
     <!-- the form container -->
 	<form action="#" class="form-horizontal rdform" role="form"></form>	
 
@@ -53,7 +49,8 @@
 	$(document).ready(function(){
 		$(".rdform").RDForm({
 			model: "form_knows.html",
-			hooks : "js/hooks.js"
+			hooks : "js/hooks.js",
+			lang: "de"
 		});
 	});
 

@@ -4,28 +4,28 @@
   <div typeof="foaf:Person" resource="Person-{pid}">
 
     <!-- hidden vars -->
-    <input name="pid" type="hidden" />
-    <input name="forenames" type="hidden" />
+    <input type="hidden" name="pid" value="123" />
+    <input type="hidden" name="forenames" />
 
     <label>Bezeichnung:</label>                                                                            
-    <input name="rdfs:label" type="literal" datatype="xsd:string" value="{forenames} {foaf:name} {pid}" required readonly />
+    <input type="literal" name="rdfs:label" datatype="xsd:string" value="{forenames} {foaf:name} {pid}" required readonly />
 
     <label>Name:</label>
-    <input name="foaf:name" type="literal" datatype="xsd:string" required />
+    <input type="literal" name="foaf:name" datatype="xsd:string" required />
 
     <!-- property resource -->    
-    <input name="bio:event" type="resource" value="bio:Birth"
+    <input type="resource" name="bio:event" value="bio:Birth" additional
       argument="pid:{pid}"
     />
     
-    <input name="bio:has-forename" type="resource" value="cpm:Forename" multiple additional />
-    <input name="foaf:knows" type="resource" value="foaf:Person" title="kennt Person" />   
+    <input type="resource" name="bio:has-forename" value="ClassForename" multiple />
+    <input type="resource" name="foaf:knows" value="foaf:Person" title="knows Person" />   
 
   </div> 
 
   <!-- ### Vornamen ### -->
   <legend>Vornamen</legend> 
-  <div typeof="cpm:Forename" resource="Forename-{cpm:forename}-{cpm:forenamePosition}-{cpm:isFirstName}">
+  <div typeof="cpm:Forename" resource="Forename-{cpm:forename}-{cpm:forenamePosition}-{cpm:isFirstName}" id="ClassForename">
     <label>Vorname:</label>      
     <input name="cpm:forename" type="literal" datatype="xsd:string" placeholder="1. Vorname" required />
 
