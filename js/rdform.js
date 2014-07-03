@@ -462,7 +462,7 @@
 			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
 			var thisClass = classContainer.children("div[typeof]");			
 
-			thisClass.find('input[type="text"]').val(""); // reset values
+			thisClass.find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
 			thisClass.children("legend").remove(); // remove class legend
 			thisClass.find("div").removeClass("error");
 			//classContainer.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');

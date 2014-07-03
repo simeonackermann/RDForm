@@ -88,8 +88,11 @@ input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:fo
 }
 
 .rdform .rdform-resource-group + .rdform-resource-group {
-	margin-top: -11px;
+	margin-top: -10px;	
 	border-top: 1px solid white;
+}
+.rdform .rdform-resource-group + .rdform-resource-group div {
+	padding-top: 4px;
 }
 
 .rdform .rdform-resource-group button {
