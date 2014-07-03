@@ -16,7 +16,9 @@
 	var MODEL = new Array();
 	var RESULT = new Array();
 	var PREFIXES = new Object();	// RDF prefixes		
-	var BASE = "";
+	var BASEPREFIX = "";
+
+	// TODO: put PREFIXES and BASEPREFIX into MODEL is Objects
 	
 	/**
 	  * plugin base constructor
@@ -109,6 +111,10 @@
 	  */
 	parseRDFormModel = function( data ) {
 		var dom_model = $.parseHTML( data );
+
+		if ( $(dom_model).attr("base") ) {
+			BASEPREFIX = $(dom_model).attr("base");
+		}		
 
 		if ( $(dom_model).attr("prefix") ) {
 			var prefixesArr = $(dom_model).attr("prefix").split(" ");
@@ -845,6 +851,10 @@
 	outputResult = function() {
 		var resultStr = "";
 
+		if ( BASEPREFIX != "" ) {
+			resultStr += "@base " + BASEPREFIX + "> .\n";
+		}
+
 		//create prefixes
 		for ( var prefix in PREFIXES ) {
 			resultStr += "@prefix " + prefix + ": <" + PREFIXES[prefix] + "> .\n";
@@ -978,7 +988,7 @@
 	}
 
 	/*
-	TODO: write this helper function...
+	TODO: maybe write this helper function:
 	getParentClass = function( env ) {
 		var thisClass = env.parentsUntil("div[typeof]").parent().clone();
 		thisClass.find( "div[typeof]" ).remove();
