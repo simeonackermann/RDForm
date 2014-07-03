@@ -75,7 +75,7 @@
         />        
 
         <input type="resource" name="hp:hasPosition" value="EventPfarrstelle"
-            argument="pid:{pid}" resource="{rdf:object}" multiple
+            argument="pid:{pid}" multiple
         />
         <!--
         Möglichkeit: lokal resource angeben: resource="{gStelle}" -> verweis auf global-var: BLÖD: ist garnicht lokal wenn ins sub-class div geschrieben. Bräuchte extra input (wie am Anfang)
@@ -98,7 +98,7 @@
     <!-- tmp klasse mittels hook vor result ausgabe entfernen -->
 
 
-    <div typeof="hp:Event" resource="attendingSchool-{pid}" return-resource="SchuleID" id="EventAusbildung">
+    <div typeof="hp:Event" resource="attendingSchool-{pid}" id="EventAusbildung">
 
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
@@ -123,22 +123,19 @@
     </div>    
 
     <legend>Stelle</legend>
-    <div typeof="hp:Event" resource="hp:hasPosition-{pid}" id="EventPfarrstelle">
+    <div typeof="hp:Event" resource="hp:hasPosition-{pid}" return-resource="{rdf:object}" id="EventPfarrstelle">
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
 
         <label>Person</label>
-        <input type="literal" name="rdf:subject" value="Person-{pid}" readonly />
+        <input type="resource" name="rdf:subject" value="Person-{pid}" external readonly />
 
         <label>Beziehung</label>
         <input type="literal" name="rdf:predicate" value="hp:hasPosition" readonly />
         <!-- evtl mittels stylesheet ausblenden -->
 
         <label>Pfarrstelle:</label>
-        <!--
-        <input type="resource-external" name="rdf:object" />
-        -->
-        <input type="literal" name="rdf:object" />
+        <input type="resource" name="rdf:object" external />
 
         <label>Begin:</label>
         <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />

@@ -35,13 +35,7 @@ __afterDuplicateClass = function ( thisClass ) {
 }
 
 // before creating the class properties from input values
-__createResultClassProperty = function( propertyContainer ) {
-
-	//console.log( propertyContainer );
-
-	if ( $(propertyContainer).children("input").attr("name") == "pid" ) {
-		$(propertyContainer).children("input").val( Math.floor( Math.random() * 10 ) );
-	}
+__createResultClassProperty = function( propertyContainer ) {	
 
 
 }
@@ -61,8 +55,8 @@ __filterResultPropertyAfterCreating = function( property ) {
 
 	if ( property.name == "hp:hasPosition" ) {
 
-		console.log( "Hook for Pfarrerbuch: set hasPosition to rdf:object value." );
-		property.value = rdform.find('div[name="hp:hasPosition"] input[name="rdf:object"]').val();
+		//console.log( "Hook for Pfarrerbuch: set hasPosition to rdf:object value." );
+		//property.value = rdform.find('div[name="hp:hasPosition"] input[name="rdf:object"]').val();
 	}
 
 	return property;
@@ -75,8 +69,8 @@ __filterRESULT = function( RESULT ) {
 
 	for ( var ri in RESULT ) {
 		if ( RESULT[ri]['typeof'] == 'SchuleQuery' ) {
-			console.log( "Hook for Pfarrerbuch: delete tmp SchuleQuery class in RESULT." );
-			delete RESULT[ri];
+			//console.log( "Hook for Pfarrerbuch: delete tmp SchuleQuery class in RESULT." );
+			//delete RESULT[ri];
 		}		
 	}
 

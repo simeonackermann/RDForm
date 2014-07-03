@@ -134,7 +134,9 @@
 			curClass['resource'] = $(this).attr("resource"); 
 			curClass['legend'] = $(this).prev("legend").text();
 			if ( $(this).attr("id") )
-				curClass['id'] = $(this).attr("id");			
+				curClass['id'] = $(this).attr("id");
+			if ( $(this).attr("return-resource") )
+				curClass['return-resource'] = $(this).attr("return-resource");
 
 			validatePrefix( curClass['typeof'] );
 
@@ -187,6 +189,7 @@
 						curProperty['additional'] = $(this).attr("additional");
 						curProperty['argument'] = $(this).attr("argument");						
 						curProperty['external'] = $(this).attr("external");
+						curProperty['label'] = $(this).prev("label").text();
 
 						if ( curProperty['external'] === undefined ) {
 							if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
@@ -419,7 +422,8 @@
 			resourceClass.attr({
 				'type': "text", 
 				'external': 'external',
-				'class': 'form-control input-sm'
+				'class': 'form-control input-sm',
+				'value': resource['value'],
 			});			
 		}
 		else {
@@ -456,6 +460,7 @@
 		if ( resource['external'] !== undefined ) {
 			//console.log( "external resource", resource );
 			var thisLabel = $("<label>...</label>");
+			thisLabel.text( resource['label'] );
 			thisLabel.attr({
 				//'for': curPropertyID,
 				'class': 'col-xs-3 control-label'
@@ -815,6 +820,11 @@
 		//TODO test if this class may already exists...
 
 		RESULT.unshift( thisClass ); // TODO maybe deccide if push/unshift to control the class range
+
+		if ( $(cls).attr("return-resource") ) {
+			console.log( "using return resource for this class", cls );
+			classResource = replaceWildcards( $(cls).attr("return-resource"), $(cls), getWebsafeString )['str'];
+		}
 
 		return classResource; // class resource ID
 	}
