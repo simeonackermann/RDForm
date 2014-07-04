@@ -70,6 +70,11 @@ input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:fo
 	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.102);
 }
 
+.resizable(@direction: vertical) {
+  resize: @direction;
+  overflow: auto;
+}
+
 .rdform .rdform-class-group .form-group {
 	margin: 0px 0px 10px;
 }

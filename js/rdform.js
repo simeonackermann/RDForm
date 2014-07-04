@@ -166,6 +166,7 @@
 						curProperty['required'] = $(this).attr("required");
 						curProperty['readonly'] = $(this).attr("readonly");
 						curProperty['autocomplete'] = $(this).attr("autocomplete");
+						curProperty['textarea'] = $(this).attr("textarea");
 
 						if ( $(this).attr("autocomplete") !== undefined )  {
 							curProperty['query-endpoint'] = $(this).attr("query-endpoint");
@@ -367,7 +368,12 @@
 
 		var thisInputContainer = $('<div class="col-xs-9"></div>');		
 
-		var thisInput = $("<input />");
+		if ( literal['textarea'] ) {			
+			var thisInput = $("<textarea></textarea>");
+		}
+		else {
+			var thisInput = $("<input />");
+		}	
 		thisInput.attr({
 			//'type': literal['type'],
 			//'id': literalID,
@@ -376,12 +382,10 @@
 		thisInput.attr( literal );
 
 		if ( literal['datatype'] ) {
-
 			if (  literal['datatype'].search(/.*date/) != -1 || literal['name'].search(/.*date/) != -1 ) {
 				thisInputContainer.removeClass( "col-xs-9" );
 				thisInputContainer.addClass( "col-xs-3" );
 			}
-
 		}		
 
 		switch ( literal['type'] ) {
@@ -526,7 +530,7 @@
 		// duplicate literal button
 		rdform.on("click", "button.duplicate-literal", function() {			
 			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent().clone();
-			var thisLiteral = $(literalContainer).find("input");
+			var thisLiteral = $(literalContainer).find("input,textarea");
 
 			if ( thisLiteral.val().search("{") == -1 ) {
 				thisLiteral.val("");
@@ -544,13 +548,13 @@
 			$(literalContainer).show("slow");
 			$(this).remove(); // remove duplicate btn
 
-			if ( typeof __afterDuplicateLiteral !== undefined )
+			if ( typeof __afterDuplicateLiteral !== "undefined" )
 				__afterDuplicateLiteral( thisLiteral );
 
 			return false;
 		});
 
-		rdform.on("click", ".add-class-resource", function() {
+		rdform.on("click", "button.add-class-resource", function() {
 			//var classModel = getClassModel( $(this).val() );
 			var classModel = $.extend( true, {}, getClassModel( $(this).val() ) );
 			classModel['multiple'] = $(this).attr("multiple");;
@@ -786,7 +790,7 @@
 			}
 			else if ( $(this).hasClass(_ID_ + "-literal-group") ) {
 
-				property = createResultLiteral( $(this).find('input') );
+				property = createResultLiteral( $(this).find('input,textarea') );
 
 			}
 			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
@@ -836,7 +840,6 @@
 		RESULT.unshift( thisClass ); // TODO maybe deccide if push/unshift to control the class range
 
 		if ( $(cls).attr("return-resource") ) {
-			console.log( "using return resource for this class", cls );
 			classResource = replaceWildcards( $(cls).attr("return-resource"), $(cls), getWebsafeString )['str'];
 		}
 
