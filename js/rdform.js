@@ -151,6 +151,7 @@
 				curProperty['type'] = $(this).attr("type");
 				curProperty['name'] = $(this).attr("name");
 				curProperty['value'] = $(this).val();
+				curProperty['label'] = $(this).prev("label").text();
 
 				validatePrefix( curProperty['name'] );
 
@@ -164,7 +165,6 @@
 						curProperty['required'] = $(this).attr("required");
 						curProperty['readonly'] = $(this).attr("readonly");
 						curProperty['autocomplete'] = $(this).attr("autocomplete");
-						curProperty['label'] = $(this).prev("label").text();
 
 						if ( $(this).attr("autocomplete") !== undefined )  {
 							curProperty['query-endpoint'] = $(this).attr("query-endpoint");
@@ -177,19 +177,17 @@
 					case "boolean" :						
 						curProperty['datatype'] = $(this).attr("datatype");
 						curProperty['checked'] = $(this).attr("checked");
-						curProperty['label'] = $(this).prev("label").text();
 						break;
 
 					case "resource":
 						// TODO: test if resource class exists
 						curProperty['typeof'] = curClass['typeof'];
 						curProperty['title'] = $(this).attr("title");		
-						//curProperty['resource'] = $(this).attr("resource");				
 						curProperty['multiple'] = $(this).attr("multiple"); 
 						curProperty['additional'] = $(this).attr("additional");
 						curProperty['argument'] = $(this).attr("argument");						
 						curProperty['external'] = $(this).attr("external");
-						curProperty['label'] = $(this).prev("label").text();
+						
 
 						if ( curProperty['external'] === undefined ) {
 							if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
@@ -197,7 +195,6 @@
 								success = false;
 							}
 						}
-
 						break;										
 
 					case "hidden":						
@@ -418,13 +415,7 @@
 		var resourceClass;
 
 		if ( resource['external'] !== undefined ) {			
-			resourceClass = $("<input />");		
-			resourceClass.attr({
-				'type': "text", 
-				'external': 'external',
-				'class': 'form-control input-sm',
-				'value': resource['value'],
-			});			
+			resourceClass = $("<input />");						
 		}
 		else {
 
@@ -458,17 +449,22 @@
 		curFormGroup.append( resourceClass );
 
 		if ( resource['external'] !== undefined ) {
-			//console.log( "external resource", resource );
+			resourceClass.attr({
+				'type': "text", 
+				'external': 'external',
+				'class': 'form-control input-sm',
+				'value': resource['value'],
+			});
+
 			var thisLabel = $("<label>...</label>");
 			thisLabel.text( resource['label'] );
 			thisLabel.attr({
 				//'for': curPropertyID,
 				'class': 'col-xs-3 control-label'
 			});
-			//thisLabel.text( literal['label'] );
 			curFormGroup.prepend( thisLabel );
+			
 			var thisInputContainer = $('<div class="col-xs-9"></div>');	
-			//resourceClass = thisInputContainer.append( resourceClass );
 			resourceClass.wrap( thisInputContainer );
 		}
 
@@ -627,16 +623,6 @@
 
 		}
 
-		//select class, add selected template before
-		/*
-		rdform.find("div[select] select").change(function() {			
-			selectTemplates[$(this).val()].hide();
-			$(this).parents("div[select]").before( selectTemplates[$(this).val()] );
-			selectTemplates[$(this).val()].show("slow");
-			$(this).children('option[value="'+$(this).val()+'"]').attr("disabled", "disabled");
-		})
-		*/
-
 		rdform.on("click", "div.rdform-edit-class-resource span", function() {
 
 			$(this).next("input").show().focus();
@@ -650,17 +636,13 @@
 			var val = $(this).val();
 
 			if ( val != "" ) {
-
 				$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
 				$(this).prev().prev("small").text( val );
-
-
 			}
+
 			$(this).prev().prev("small").show();
 			$(this).prev("span").show();
-
 			$(this).hide();
-			//$(this).css( "display", "hidden" );
 		});
 
 		//autocomplete
@@ -671,13 +653,13 @@
 			var queryStr = $(this).attr("query");
 			$(this).autocomplete({
 				source: function( request, response ) {		
-					queryStr = queryStr.replace(/%s/g, "'" + request.term + "'");
+					var query = queryStr.replace(/%s/g, "'" + request.term + "'");in
 					$.ajax({
 						url: queryEndpoint,
 						dataType: "json",
 						data: {
 							//'default-graph-uri': "http%3A%2F%2Fdbpedia.org",
-							query: queryStr,
+							query: query,
 							format: "json"
 						},
 						success: function( data ) {						
@@ -878,16 +860,6 @@
 		var resource = new Object();
 		var resourceID = false;
 		var resourceGroup;
-
-		if ( $(env).find('input[external]').length > 0 ) {
-			
-			/*
-			resource['type'] = 'resource';
-			resource['value'] = $(env).children('input[external]').val();
-			resource['name'] = $(env).children('input[external]').attr("name");
-			return resource;
-			*/
-		}
 		
 		resourceGroup = $(env).children('div[typeof]');
 		if ( resourceGroup.length > 0 ) { 
@@ -895,7 +867,6 @@
 		}
 		else if ( $(env).find('input[external]').length > 0 ) {
 			resourceGroup = $(env).find('input[external]');
-			console.log( "create Resulr Resource", $(env).children('input[external]') );
 			resourceID = $(resourceGroup).val();
 		}
 
