@@ -19,6 +19,10 @@ body {
 	margin-left: 8px;
 }
 
+.rdform .duplicate-literal {
+	margin: 4px 0px;
+}
+
 .rdform label {
 	font-weight: normal;
 }

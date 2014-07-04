@@ -152,6 +152,7 @@
 				curProperty['name'] = $(this).attr("name");
 				curProperty['value'] = $(this).val();
 				curProperty['label'] = $(this).prev("label").text();
+				curProperty['multiple'] = $(this).attr("multiple"); 
 
 				validatePrefix( curProperty['name'] );
 
@@ -182,8 +183,7 @@
 					case "resource":
 						// TODO: test if resource class exists
 						curProperty['typeof'] = curClass['typeof'];
-						curProperty['title'] = $(this).attr("title");		
-						curProperty['multiple'] = $(this).attr("multiple"); 
+						curProperty['title'] = $(this).attr("title");								
 						curProperty['additional'] = $(this).attr("additional");
 						curProperty['argument'] = $(this).attr("argument");						
 						curProperty['external'] = $(this).attr("external");
@@ -406,6 +406,11 @@
 		thisInputContainer.append( thisInput );
 		thisFormGroup.append( thisInputContainer );
 
+		if ( literal['multiple'] ) {
+			thisInput.attr('index', 1);
+			thisInputContainer.append('<button type="button" class="btn btn-default btn-xs duplicate-literal" title="'+ l("Duplicate literal %s", literal['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ l("add") +'</button>');
+		}
+
 		return thisFormGroup;
 	}
 
@@ -493,8 +498,8 @@
 			userInputValidation( $(this) );
 		});
 
-		// duplicate dataset button
-		rdform.on("click", ".duplicate-class", function() {			
+		// duplicate class button
+		rdform.on("click", "button.duplicate-class", function() {			
 			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
 			var thisClass = classContainer.children("div[typeof]");			
 
@@ -514,6 +519,33 @@
 			$(this).remove(); // remove duplicate btn
 
 			__afterDuplicateClass( thisClass );
+
+			return false;
+		});
+
+		// duplicate literal button
+		rdform.on("click", "button.duplicate-literal", function() {			
+			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent().clone();
+			var thisLiteral = $(literalContainer).find("input");
+
+			if ( thisLiteral.val().search("{") == -1 ) {
+				thisLiteral.val("");
+			}
+			//literalContainer.removeClass("error");
+			//literalContainer.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
+
+			// rewrite index, radio input names index and references in wildcards
+			var index = $(thisLiteral).attr("index");
+			++index;
+			$(thisLiteral).attr("index", index);
+
+			$(literalContainer).hide();	
+			$(this).parentsUntil("div.rdform-literal-group").parent().after( literalContainer );
+			$(literalContainer).show("slow");
+			$(this).remove(); // remove duplicate btn
+
+			if ( typeof __afterDuplicateLiteral !== undefined )
+				__afterDuplicateLiteral( thisLiteral );
 
 			return false;
 		});
@@ -653,7 +685,7 @@
 			var queryStr = $(this).attr("query");
 			$(this).autocomplete({
 				source: function( request, response ) {		
-					var query = queryStr.replace(/%s/g, "'" + request.term + "'");in
+					var query = queryStr.replace(/%s/g, "'" + request.term + "'");
 					$.ajax({
 						url: queryEndpoint,
 						dataType: "json",
