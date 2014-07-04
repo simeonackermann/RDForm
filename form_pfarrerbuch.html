@@ -25,8 +25,17 @@
         <label>Alternativer Nachname:</label>
         <input type="literal" name="foaf:lastNameAlt" datatype="xsd:string" />
 
+        <!--<select type="literal" name="foaf:gender" datatype="xsd:string">
+            <option value="undefined">K.a.</option>
+            <option value="man">Mann</option>
+            <option value="woman">Frau</option>            
+        </select>-->
+
         <label>Geschlecht:</label>
-        <input type="literal" name="foaf:gender" datatype="xsd:string" />
+        <input type="literal" name="foaf:gender" datatype="xsd:string" autocomplete
+            query-apitype="local"
+            query-values='["k.A.", "Frau", "Mann"]'
+        />
 
         <label>Geburtsdatum:</label>
         <input type="literal" name="hp:birthDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
@@ -36,7 +45,7 @@
             query-endpoint="http://dbpedia.org/sparql"
             query-apitype="sparql"
             query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
-        /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
+        />
 
         <label>Taufdatum:</label>
         <input type="literal" name="hp:babtismDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
@@ -71,8 +80,9 @@
 
         
         <input type="resource" name="hp:attendedSchool" value="SchuleQuery" title="Schule" additional multiple
-            argument="pid:{pid}"
+            argument="pid:{pid}"            
         />        
+        <!--arguments='[{"pid":"{pid}"}]'-->
 
         <input type="resource" name="hp:hasPosition" value="EventPfarrstelle"
             argument="pid:{pid}" multiple

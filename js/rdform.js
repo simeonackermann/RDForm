@@ -173,20 +173,20 @@
 						if ( $(this).attr("autocomplete") !== undefined )  {
 							curProperty['query-endpoint'] = $(this).attr("query-endpoint");
 							curProperty['query-apitype'] = $(this).attr("query-apitype");
-							curProperty['query'] = $(this).attr("query");
+							curProperty['query-values'] = $(this).attr("query-values");
+							curProperty['query'] = $(this).attr("query");							
 						}
 
 						break;			
 					
 					case "resource":
-						// TODO: test if resource class exists
 						curProperty['typeof'] = curClass['typeof'];
 						curProperty['title'] = $(this).attr("title");								
 						curProperty['additional'] = $(this).attr("additional");
 						curProperty['argument'] = $(this).attr("argument");						
 						curProperty['external'] = $(this).attr("external");
-						
 
+						// test if resource class exists if its not an external resource
 						if ( curProperty['external'] === undefined ) {
 							if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
 								alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
@@ -682,32 +682,55 @@
 			// TODO: check if attrs query-endpoint etc exists
 			var queryEndpoint = $(this).attr( "query-endpoint" );
 			var queryStr = $(this).attr("query");
-			$(this).autocomplete({
-				source: function( request, response ) {		
-					var query = queryStr.replace(/%s/g, "'" + request.term + "'");
-					$.ajax({
-						url: queryEndpoint,
-						dataType: "json",
-						data: {
-							//'default-graph-uri': "http%3A%2F%2Fdbpedia.org",
-							query: query,
-							format: "json"
-						},
-						success: function( data ) {						
-							response( $.map( data.results.bindings, function( item ) {
-								return {
-									label: item.label.value, // wird angezeigt
-									value: item.label.value
-								}
-			            	}));
-			            }
-					});
-		      	},
-				minLength: 2
-			});
+			var apitype = $(this).attr("query-apitype");
+			var queryValues = $(this).attr("query-values");
+
+				switch (apitype) {
+
+					case "sparql" :
+
+						$(this).autocomplete({
+							source: function( request, response ) {		
+								var query = queryStr.replace(/%s/g, "'" + request.term + "'");
+								$.ajax({
+									url: queryEndpoint,
+									dataType: "json",
+									data: {
+										//'default-graph-uri': "http%3A%2F%2Fdbpedia.org",
+										query: query,
+										format: "json"
+									},
+									success: function( data ) {						
+										response( $.map( data.results.bindings, function( item ) {
+											return {
+												label: item.label.value, // wird angezeigt
+												value: item.label.value
+											}
+						            	}));
+						            }
+								});
+					      	},
+							minLength: 2
+						});
+
+						break;
+
+					case "local" :
+
+						$(this).autocomplete({
+							source: $.parseJSON( queryValues )
+						});
+
+						break;
+
+					default :
+						console.log( "Unknown autocomplete apitype " + apitype );
+				}			
 
 
 		});
+
+
 
 		// reset button, reset form and values
 		rdform.find("button[type=reset]").click(function() {		
@@ -749,6 +772,8 @@
 		});
 
 	} // end of initFormHandler	
+
+
 
 	createResult = function() {
 
