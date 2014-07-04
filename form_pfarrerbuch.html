@@ -4,8 +4,8 @@
         <!-- hidden person name -->
         <input name="pid" type="hidden" value="{foaf:name}" />
 
-        <label>Ist Geistlicher:</label>
-        <input type="boolean" name="hp:isPastor" datatype="xsd:boolean" required />
+        <label>Ist Geistlicher</label>
+        <input type="literal" boolean name="hp:isPastor" datatype="xsd:boolean" />
 
         <label>Label:</label>
         <input type="literal" name="rdfs:label" value="{foaf:name} (*{hp:birthDate} †{hp:dateOfDeath})" datatype="xsd:string" readonly required />
@@ -82,7 +82,7 @@
         -->
 
         <label>Kommentar/Freitext:</label>
-        <input type="literal" textarea="true" name="rdfs:comment" datatype="xsd:string" multiple />
+        <input type="literal" textarea name="rdfs:comment" datatype="xsd:string" multiple />
     </div>
         
     

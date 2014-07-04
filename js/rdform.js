@@ -167,6 +167,8 @@
 						curProperty['readonly'] = $(this).attr("readonly");
 						curProperty['autocomplete'] = $(this).attr("autocomplete");
 						curProperty['textarea'] = $(this).attr("textarea");
+						curProperty['boolean'] = $(this).attr("boolean");
+						curProperty['checked'] = $(this).attr("checked");
 
 						if ( $(this).attr("autocomplete") !== undefined )  {
 							curProperty['query-endpoint'] = $(this).attr("query-endpoint");
@@ -174,13 +176,8 @@
 							curProperty['query'] = $(this).attr("query");
 						}
 
-						break;
-
-					case "boolean" :						
-						curProperty['datatype'] = $(this).attr("datatype");
-						curProperty['checked'] = $(this).attr("checked");
-						break;
-
+						break;			
+					
 					case "resource":
 						// TODO: test if resource class exists
 						curProperty['typeof'] = curClass['typeof'];
@@ -354,9 +351,12 @@
 	createHTMLiteral = function( literal ) {
 
 		var thisFormGroup = $('<div class="form-group '+_ID_+'-literal-group"></div>');
+		var thisInputContainer = $('<div class="col-xs-9"></div>');		
 			
 		// TODO: add ID and sub-ID
 		//curPropertyID = _ID_ + '-property-' +  literal['typeof'] + "/" + curProperty['name']
+
+		// TODO: cleanup this spaghettic code....!
 
 		var thisLabel = $("<label></label>");
 		thisLabel.attr({
@@ -365,17 +365,15 @@
 		});
 		thisLabel.text( literal['label'] );
 		thisFormGroup.append( thisLabel );
+		
 
-		var thisInputContainer = $('<div class="col-xs-9"></div>');		
-
-		if ( literal['textarea'] ) {			
+		if ( literal['textarea'] !==  undefined ) {			
 			var thisInput = $("<textarea></textarea>");
 		}
 		else {
 			var thisInput = $("<input />");
 		}	
 		thisInput.attr({
-			//'type': literal['type'],
 			//'id': literalID,
 			'class': 'form-control input-sm',
 		});		
@@ -386,34 +384,31 @@
 				thisInputContainer.removeClass( "col-xs-9" );
 				thisInputContainer.addClass( "col-xs-3" );
 			}
-		}		
+		}
 
-		switch ( literal['type'] ) {
-			case "literal" :
-				thisInput.attr( "type", "text" );
-				break;
+		if ( literal['boolean'] !== undefined ) {
+			thisInput.attr( "type", "checkbox" );
+			thisInputContainer.addClass( "checkbox" );
+			thisInput.removeClass( "form-control input-sm" );
+			thisInput = $("<label></label>").append( thisInput );
+			thisInput.append( literal['label'] );
+			thisLabel.text( "" );
+		}
+		else if ( literal['textarea'] ) {
 
-			case "boolean" :
-				thisInput.attr( "type", "checkbox" );
-				thisInputContainer.addClass( "checkbox" );
-				thisInput.removeClass( "form-control input-sm" );
-				thisInput = $("<label></label>").append( thisInput );
-				thisInput.append( literal['label'] );
-				thisLabel.text( "" );
-				break;
-
-			default :
-				alert("Unknown literal type \"" + literal['type'] + "\" detected on creating HTML form.");
-				return $();
+		}
+		else {
+			thisInput.attr( "type", "text" );
 		}
 
 		thisInputContainer.append( thisInput );
-		thisFormGroup.append( thisInputContainer );
 
 		if ( literal['multiple'] ) {
 			thisInput.attr('index', 1);
 			thisInputContainer.append('<button type="button" class="btn btn-default btn-xs duplicate-literal" title="'+ l("Duplicate literal %s", literal['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ l("add") +'</button>');
 		}
+
+		thisFormGroup.append( thisInputContainer );		
 
 		return thisFormGroup;
 	}
