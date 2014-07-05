@@ -153,6 +153,7 @@
 				curProperty['value'] = $(this).val();
 				curProperty['label'] = $(this).prev("label").text();
 				curProperty['multiple'] = $(this).attr("multiple"); 
+				curProperty['readonly'] = $(this).attr("readonly");
 
 				validatePrefix( curProperty['name'] );
 
@@ -163,8 +164,7 @@
 						// -> http://stackoverflow.com/questions/14645806/get-all-attributes-of-an-element-using-jquery
 						curProperty['datatype'] = $(this).attr("datatype");
 						curProperty['placeholder'] = $(this).attr("placeholder");
-						curProperty['required'] = $(this).attr("required");
-						curProperty['readonly'] = $(this).attr("readonly");
+						curProperty['required'] = $(this).attr("required");						
 						curProperty['autocomplete'] = $(this).attr("autocomplete");
 						curProperty['textarea'] = $(this).attr("textarea");
 						curProperty['boolean'] = $(this).attr("boolean");
@@ -297,13 +297,22 @@
 		var thisLegend = $( "<legend>"+ dataClass['legend'] +"</legend>" );
 		if ( dataClass['name'] ) 
 			thisLegend.prepend( "<small>"+ dataClass['name'] +"</small> " );
+		/*
+		if ( dataClass['isRootClass'] ) {
+			thisLegend.prepend( "<small class='rdform-class-baseprefix'>"+ BASEPREFIX +"</small> " );
+		}
 
+		if ( dataClass['return-resource'] ) {
+			thisLegend.append( "<small>"+ dataClass['return-resource'] +"</small> " );
+		} 
+		*/
 		thisLegend.append(	'<div class="rdform-edit-class-resource">' +
 								'<small>'+ dataClass['resource'] +'</small>' +
 								'<span class="glyphicon glyphicon-pencil"></span>' +
 								'<input type="text" value="'+ dataClass['resource'] +'" class="form-control" />' +
-							'</div>' );
-		thisClass.append( thisLegend );		
+							'</div>' );		
+
+		thisClass.append( thisLegend );
 
 		for ( var pi in dataClass['properties'] ) {
 			var property =  dataClass['properties'][pi];
@@ -331,11 +340,11 @@
 			case "literal":
 				thisProperty = createHTMLiteral( property );
 				break;
-
+			/*
 			case "boolean":
 				thisProperty = createHTMLiteral( property );
 				break;
-
+			*/
 			case "resource":
 				thisProperty = createHTMLResource( property );
 				break;			
@@ -458,6 +467,7 @@
 				'external': 'external',
 				'class': 'form-control input-sm',
 				'value': resource['value'],
+				'readonly': resource['readonly'],
 			});
 
 			var thisLabel = $("<label>...</label>");
@@ -661,6 +671,10 @@
 			$(this).prev("small").hide();
 			$(this).hide();
 
+		});
+
+		rdform.on("focus", "div.rdform-edit-class-resource input", function() {
+			$(this).val( getWebsafeString( $(this).val() ) );
 		});
 
 		rdform.on("change blur", "div.rdform-edit-class-resource input", function() {
@@ -923,6 +937,8 @@
 		else if ( $(env).find('input[external]').length > 0 ) {
 			resourceGroup = $(env).find('input[external]');
 			resourceID = $(resourceGroup).val();
+
+			resourceID = replaceWildcards( resourceID, $(env).parent("div[typeof]"), getWebsafeString )['str'];
 		}
 
 		if ( resourceID ) {
@@ -1116,8 +1132,7 @@
 			return dict[char] || char;
 		});
 
-		//return str.replace(/[^a-z0-9-_]/gi,'');
-		return str;
+		return str.replace(/[^a-z0-9-_]/gi,'');
 	}
 
 	/*

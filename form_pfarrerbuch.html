@@ -1,6 +1,6 @@
-<form base="..." prefix="bio http://vocab.org/bio/0.1/ hp: http://purl.org/vok/hp/ foaf ... hp ... rdfs ... rdf ...">
+<form base="http://pfarrerbuch.de/" prefix="bio http://vocab.org/bio/0.1/ hp: http://purl.org/vok/hp/ foaf ... hp ... rdfs ... rdf ...">
     <legend>Pfarrer</legend>
-    <div typeof="foaf:Person" resource="Person-{pid}">
+    <div typeof="foaf:Person" resource="{pid}">
         <!-- hidden person name -->
         <input name="pid" type="hidden" value="{foaf:name}" />
 
@@ -31,30 +31,36 @@
             <option value="woman">Frau</option>            
         </select>-->
 
+        <!--
+        <input type="literal" select name="foaf:gender" datatype="xsd:string"
+            select-values='["k.A.", "Frau", "Mann"]'
+        />
+        -->
+
         <label>Geschlecht:</label>
         <input type="literal" name="foaf:gender" datatype="xsd:string" autocomplete
             query-apitype="local"
             query-values='["k.A.", "Frau", "Mann"]'
-        />
+        />        
 
         <label>Geburtsdatum:</label>
-        <input type="literal" name="hp:birthDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
+        <input type="literal" name="hp:birthDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
         <label>Geburtsort:</label>
         <input type="literal" name="hp:birthPlace" datatype="xsd:string" autocomplete
-            query-endpoint="http://dbpedia.org/sparql"
             query-apitype="sparql"
+            query-endpoint="http://dbpedia.org/sparql"            
             query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
         />
 
         <label>Taufdatum:</label>
-        <input type="literal" name="hp:babtismDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
+        <input type="literal" name="hp:babtismDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
         <label>Taufort:</label>
         <input type="literal" name="hp:babtismPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
 
         <label>Ordinationsdatum:</label>
-        <input type="literal" name="hp:ordinationDate" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
+        <input type="literal" name="hp:ordinationDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
         <label>Ordinationsort:</label>
         <input type="literal" name="hp:ordinationPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
@@ -69,7 +75,7 @@
         <input type="literal" name="hp:child" datatype="xsd:string" /> <!-- resource type person --> <!-- auswahl xsd:date, xsd:gYear, … -->
 
         <label>Sterbedatum:</label>
-        <input type="literal" name="hp:dateOfDeath" datatype="xsd:date" /> <!-- auswahl xsd:date, xsd:gYear, … -->
+        <input type="literal" name="hp:dateOfDeath" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
         <label>Sterbeort:</label>
         <input type="literal" name="hp:placeOfDeath" datatype="xsd:string" autocomplete
@@ -78,17 +84,24 @@
             query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
         />
 
-        
+        <!--
         <input type="resource" name="hp:attendedSchool" value="SchuleQuery" title="Schule" additional multiple
             argument="pid:{pid}"            
-        />        
+        />  
+        -->              
+
+        <input type="resource" name="hp:attendedSchoold" value="EventAusbildung" title="Schule" 
+            argument="pid:{pid}" multiple additional
+        />
         <!--arguments='[{"pid":"{pid}"}]'-->
 
-        <input type="resource" name="hp:hasPosition" value="EventPfarrstelle"
-            argument="pid:{pid}" multiple
+        <input type="resource" name="hp:hasPosition" value="EventPfarrstelle" title="Pfarrstelle"
+            argument="pid:{pid}" multiple additional
         />
         <!--
-        Möglichkeit: lokal resource angeben: resource="{gStelle}" -> verweis auf global-var: BLÖD: ist garnicht lokal wenn ins sub-class div geschrieben. Bräuchte extra input (wie am Anfang)
+        <fieldset type="resource" name="hp:hasPosition" value="EventPfarrstelle" multiple>
+            <pid="{pid}" />
+        </fieldset>
         -->
 
         <label>Kommentar/Freitext:</label>
@@ -96,6 +109,7 @@
     </div>
         
     
+    <!--
     <legend>Schule</legend>
     <div typeof="SchuleQuery" resource="{sid}" id="SchuleQuery"  >
 
@@ -106,25 +120,23 @@
             argument="pid:{pid} sid:{sid}"
         />        
     </div>
+    -->
     <!-- tmp klasse mittels hook vor result ausgabe entfernen -->
 
-
-    <div typeof="hp:Event" resource="attendingSchool-{pid}" id="EventAusbildung">
+    <legend>Schule</legend>
+    <div typeof="hp:Event" resource="attendingSchool-{pid}" return-resource="{rdf:object}" id="EventAusbildung">
 
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
 
-        <label>Person:</label>
-        <input type="literal" name="rdf:subject" value="Person-{pid}" readonly />
-        <!--
-        Möglichkeit 1: mittels hook person pid finden
-                    2: die wiedergeburt der globals, globaler Verweis auf Person-PID
-        -->    
+        <label>Person</label>
+        <input type="resource" external name="rdf:subject" value="{pid}" readonly />
 
-        <input type="literal" name="rdf:predicate" value="hp:attendedSchool" readonly />
+        <label>Beziehung</label>
+        <input type="resource" external name="rdf:predicate" value="hp:attendedSchool" readonly />
 
         <label>Schule:</label>
-        <input type="literal" name="rdf:object" value="{sid}" readonly style="" /> 
+        <input type="resource" external name="rdf:object" /> 
 
         <label>Begin:</label>
         <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
@@ -139,7 +151,7 @@
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
 
         <label>Person</label>
-        <input type="resource" name="rdf:subject" value="Person-{pid}" external readonly />
+        <input type="resource" name="rdf:subject" value="{pid}" external readonly />
 
         <label>Beziehung</label>
         <input type="literal" name="rdf:predicate" value="hp:hasPosition" readonly />
