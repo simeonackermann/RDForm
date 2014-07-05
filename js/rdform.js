@@ -310,7 +310,9 @@
 								'<small>'+ dataClass['resource'] +'</small>' +
 								'<span class="glyphicon glyphicon-pencil"></span>' +
 								'<input type="text" value="'+ dataClass['resource'] +'" class="form-control" />' +
-							'</div>' );		
+							'</div>' );	
+
+		thisLegend.append( '<small> a '+ dataClass['typeof'] +'</small>' );	
 
 		thisClass.append( thisLegend );
 
@@ -513,6 +515,10 @@
 			var thisClass = classContainer.children("div[typeof]");			
 
 			thisClass.find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
+			thisClass.find('input[modvalue]').each(function() { // set wildcard inputs to default
+				$(this).val( $(this).attr('modvalue') );
+			});
+
 			thisClass.children("legend").remove(); // remove class legend
 			thisClass.find("div").removeClass("error");
 			//classContainer.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
@@ -528,6 +534,8 @@
 			$(this).remove(); // remove duplicate btn
 
 			__afterDuplicateClass( thisClass );
+
+			findWildcardInputs( classContainer );
 
 			return false;
 		});
@@ -556,6 +564,8 @@
 			if ( typeof __afterDuplicateLiteral !== "undefined" )
 				__afterDuplicateLiteral( thisLiteral );
 
+			findWildcardInputs( literalContainer );
+
 			return false;
 		});
 
@@ -574,44 +584,50 @@
 
 			$(this).remove();
 
+			findWildcardInputs( thisClass );
+
 			return false;
 		});
 
+		function findWildcardInputs( env ) {
 
-		// text inputs with wildcard values -> bind handlers to dynamically change the value
-		// TODO: doesnt work for dynamically added fields
-		rdform.find('input[value*="{"]').each(function() {			
-		//rdform.on("change", 'input[value*="{"]', function() {
-			var wildcards = new Object();
-			var thisInput = $(this);
-			var envClass = $(this).parentsUntil("div[typeof]").parent();
-			$(this).attr("modvalue",  $(this).val() );			
+			// text inputs with wildcard values -> bind handlers to dynamically change the value
+			// TODO: doesnt work for dynamically added fields
+			$(env).find('input[value*="{"]').each(function() {			
+			//rdform.on("change", 'input[value*="{"]', function() {
+				var wildcards = new Object();
+				var thisInput = $(this);
+				var envClass = $(this).parentsUntil("div[typeof]").parent();
+				$(this).attr("modvalue",  $(this).val() );
 
-			var strWcds = $(this).val().match(/\{[^\}]*/gi);
-			for ( var i in strWcds ) {				
-				var wcd = strWcds[i].substring( 1 );	
+				var strWcds = $(this).val().match(/\{[^\}]*/gi);
+				for ( var i in strWcds ) {				
+					var wcd = strWcds[i].substring( 1 );	
 
-				wildcards[wcd] = getWildcardTarget( wcd, envClass );	
+					wildcards[wcd] = getWildcardTarget( wcd, envClass );	
 
-				// TODO: maybe its not a wildcard but a string
+					// TODO: maybe its not a wildcard but a string
 
-				$(wildcards[wcd]).keyup(function() {
-					writeWildcardValue( thisInput, wildcards );
-				});
+					$(wildcards[wcd]).keyup(function() {
+						writeWildcardValue( thisInput, wildcards );
+					});
 
-				if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) {
-					$(wildcards[wcd]).trigger( "keyup" );
+					if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) {
+						$(wildcards[wcd]).trigger( "keyup" );
+					}
 				}
-			}
-		});
+			});
 
+		}
+		findWildcardInputs( rdform );
+		
+
+		// TODO: dynamically change class resource
 		rdform.find('div[typeof][resource*="{"]').each(function() {			
 
 			//console.log( "div-class with wildcard", $(this) );
 
-			//console.log( $(this).children("legend").find("input").val() );
-
-			// TODO: dynamically change class resource
+			//console.log( $(this).children("legend").find("input").val() );			
 
 
 		});
@@ -658,10 +674,7 @@
 			}
 			$(src).val( val.trim() );
 
-			//if ( $(src).attr("type") == "hidden" ) {
-				$(src).trigger( "keyup" );
-			//}
-
+			$(src).trigger( "keyup" );
 		}
 
 		rdform.on("click", "div.rdform-edit-class-resource span", function() {
@@ -691,7 +704,6 @@
 		});
 
 		//autocomplete
-		// TODO BUG: search works only once!!!
 		rdform.on("focus", "input[autocomplete]", function() {			
 			// TODO: check if attrs query-endpoint etc exists
 			var queryEndpoint = $(this).attr( "query-endpoint" );
@@ -743,8 +755,6 @@
 
 
 		});
-
-
 
 		// reset button, reset form and values
 		rdform.find("button[type=reset]").click(function() {		
