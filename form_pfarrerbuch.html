@@ -31,12 +31,12 @@
             <option value="woman">Frau</option>            
         </select>-->
 
-        <label>Geschlecht 1:</label>
+        <label>Geschlecht (select):</label>
         <input type="literal" select name="foaf:gender" datatype="xsd:string"
             select-options='["k.A.", "Frau", "Mann"]'
         />
 
-        <label>Geschlecht:</label>
+        <label>Geschlecht (autocomplete):</label>
         <input type="literal" name="foaf:gender" datatype="xsd:string" autocomplete
             query-apitype="local"
             query-values='["k.A.", "Frau", "Mann"]'
