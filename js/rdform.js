@@ -18,7 +18,7 @@
 	var PREFIXES = new Object();	// RDF prefixes		
 	var BASEPREFIX;
 
-	// TODO: put PREFIXES and BASEPREFIX into MODEL is Objects
+	// TODO: put PREFIXES and BASEPREFIX into MODEL as Objects
 	
 	/**
 	  * plugin base constructor
@@ -177,6 +177,11 @@
 							curProperty['query'] = $(this).attr("query");							
 						}
 
+						if ( $(this).attr("select") !== undefined ) {
+							curProperty["select"] = $(this).attr("select");
+							curProperty["select-options"] = $(this).attr("select-options");
+						}
+
 						break;			
 					
 					case "resource":
@@ -320,8 +325,14 @@
 
 		for ( var pi in dataClass['properties'] ) {
 			var property =  dataClass['properties'][pi];
-			thisClass.append( createHTMLProperty( property ) );						
+			thisClass.append( createHTMLProperty( property ) );				
 		}
+
+		/*
+		if ( dataClass['additional'] !== undefined ) {
+			thisClass.append('<button type="button" class="btn btn-link btn-xs remove-class" title="'+ l("Remove class %s", dataClass['typeof']) +'"><span class="glyphicon glyphicon-remove"></span> '+ l("remove") +'</button>');
+		}
+		*/
 
 		if ( dataClass['multiple'] ) {
 			thisClass.attr('index', 1);
@@ -383,6 +394,9 @@
 		if ( literal['textarea'] !==  undefined ) {			
 			var thisInput = $("<textarea></textarea>");
 		}
+		else if ( literal['select'] !==  undefined ) {
+			var thisInput = $("<select></select>");
+		}
 		else {
 			var thisInput = $("<input />");
 		}	
@@ -407,7 +421,14 @@
 			thisInput.append( literal['label'] );
 			thisLabel.text( "" );
 		}
-		else if ( literal['textarea'] ) {
+		else if ( literal['select'] !== undefined ) {
+			var selectOptions = $.parseJSON( literal['select-options'] );
+			thisInput.append( '<option value="" disabled selected>choose...</option>' );
+			for ( var soi in selectOptions ) {
+				thisInput.append( '<option value="'+ selectOptions[soi] +'">'+ selectOptions[soi] +'</option>' );
+			}			
+		}
+		else if ( literal['textarea'] !== undefined ) {
 
 		}
 		else {
@@ -574,7 +595,8 @@
 		rdform.on("click", "button.add-class-resource", function() {
 			//var classModel = getClassModel( $(this).val() );
 			var classModel = $.extend( true, {}, getClassModel( $(this).val() ) );
-			classModel['multiple'] = $(this).attr("multiple");;
+			classModel['multiple'] = $(this).attr("multiple");
+			classModel['additional'] = $(this).attr("additional");
 			classModel['argument'] = $(this).attr("argument");
 			classModel['name'] = $(this).attr("name"); 
 
@@ -588,6 +610,12 @@
 
 			findWildcardInputs( thisClass );
 
+			return false;
+		});
+
+		rdform.on("click", "button.remove-class", function() {
+			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent();
+			classContainer.remove();
 			return false;
 		});
 
@@ -836,7 +864,7 @@
 			}
 			else if ( $(this).hasClass(_ID_ + "-literal-group") ) {
 
-				property = createResultLiteral( $(this).find('input,textarea') );
+				property = createResultLiteral( $(this).find('input,textarea,select') );
 
 			}
 			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
@@ -917,12 +945,25 @@
 		}
 		//&& ( ( $(this).attr("type") == "radio" && $(this).prop("checked") || $(this).attr("type") != "radio" ) )
 
+		switch ( $(literal).get(0).tagName ) {
+
+			case 'INPUT' :
+				break;
+
+			case 'TEXTAREA' :
+				break;
+
+			case 'SELECT' :
+				val = $( ":selected", $(literal) ).val();
+				break;
+
+		}
+
 		if ( val != "" ) {
 
 			thisLiteral['type'] = 'literal';
 
 			var name = $(literal).attr("name");
-
 			thisLiteral['name'] = name;
 
 			if ( $(literal).attr("datatype") ) {
