@@ -678,7 +678,6 @@
 		}
 
 		rdform.on("click", "div.rdform-edit-class-resource span", function() {
-
 			$(this).next("input").show().focus();
 
 			$(this).prev("small").hide();
@@ -691,16 +690,19 @@
 		});
 
 		rdform.on("change blur", "div.rdform-edit-class-resource input", function() {
+			$(this).prev().prev("small").show();
+			$(this).prev("span").show();
+			$(this).trigger( "keyup" );
+			$(this).hide();
+		});
+
+		rdform.on("keyup", "div.rdform-edit-class-resource input", function() {
 			var val = $(this).val();
 
 			if ( val != "" ) {
 				$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
-				$(this).prev().prev("small").text( val );
+				$(this).prev().prev("small").text( getWebsafeString( val ) );
 			}
-
-			$(this).prev().prev("small").show();
-			$(this).prev("span").show();
-			$(this).hide();
 		});
 
 		//autocomplete
@@ -752,8 +754,6 @@
 					default :
 						console.log( "Unknown autocomplete apitype " + apitype );
 				}			
-
-
 		});
 
 		// reset button, reset form and values
