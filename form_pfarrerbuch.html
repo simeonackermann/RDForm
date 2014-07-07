@@ -1,5 +1,5 @@
 <form base="http://pfarrerbuch.de/" prefix="bio http://vocab.org/bio/0.1/ hp: http://purl.org/vok/hp/ foaf ... hp ... rdfs ... rdf ...">
-    <legend>Pfarrer</legend>
+    <legend>l(Parson)</legend>
     <div typeof="foaf:Person" resource="{pid}">
         <!-- hidden person name -->
         <input name="pid" type="hidden" value="{foaf:name}" />
@@ -90,7 +90,7 @@
         />  
         -->              
 
-        <input type="resource" name="hp:attendedSchoold" value="EventAusbildung" title="Schule" 
+        <input type="resource" name="hp:attendedSchool" value="EventAusbildung" title="Schule" 
             argument="pid:{pid}" multiple additional
         />
         <!--arguments='[{"pid":"{pid}"}]'-->
@@ -124,7 +124,7 @@
     <!-- tmp klasse mittels hook vor result ausgabe entfernen -->
 
     <legend>Schule</legend>
-    <div typeof="hp:Event" resource="attendingSchool-{pid}" return-resource="{rdf:object}" id="EventAusbildung">
+    <div typeof="hp:Event" resource="hp:attendingSchool-{pid}" return-resource="{rdf:object}" id="EventAusbildung">
 
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
@@ -154,7 +154,7 @@
         <input type="resource" name="rdf:subject" value="{pid}" external readonly />
 
         <label>Beziehung</label>
-        <input type="literal" name="rdf:predicate" value="hp:hasPosition" readonly />
+        <input type="resource" external name="rdf:predicate" value="hp:hasPosition" readonly />
         <!-- evtl mittels stylesheet ausblenden -->
 
         <label>Pfarrstelle:</label>

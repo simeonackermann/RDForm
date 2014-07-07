@@ -1,6 +1,7 @@
 
 
 var TRANSLATIONS = {
+	'Parson': 'Pfarrer',
 	'create': 'erstellen',
 	'reset': 'zurücksetzen',
 	'Result': 'Ergebnis',

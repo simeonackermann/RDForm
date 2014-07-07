@@ -132,7 +132,7 @@
 
 			curClass['typeof'] = $(this).attr("typeof"); // TODO: test if all importants attrs exists !!!			
 			curClass['resource'] = $(this).attr("resource"); 
-			curClass['legend'] = $(this).prev("legend").text();
+			curClass['legend'] = l( $(this).prev("legend").text() );
 			if ( $(this).attr("id") )
 				curClass['id'] = $(this).attr("id");
 			if ( $(this).attr("return-resource") )
@@ -151,7 +151,7 @@
 				curProperty['type'] = $(this).attr("type");
 				curProperty['name'] = $(this).attr("name");
 				curProperty['value'] = $(this).val();
-				curProperty['label'] = $(this).prev("label").text();
+				curProperty['label'] = l( $(this).prev("label").text() );
 				curProperty['multiple'] = $(this).attr("multiple"); 
 				curProperty['readonly'] = $(this).attr("readonly");
 
@@ -163,7 +163,7 @@
 						// TODO use a function to get all optiional/required attributes
 						// -> http://stackoverflow.com/questions/14645806/get-all-attributes-of-an-element-using-jquery
 						curProperty['datatype'] = $(this).attr("datatype");
-						curProperty['placeholder'] = $(this).attr("placeholder");
+						curProperty['placeholder'] = l( $(this).attr("placeholder") );
 						curProperty['required'] = $(this).attr("required");						
 						curProperty['autocomplete'] = $(this).attr("autocomplete");
 						curProperty['textarea'] = $(this).attr("textarea");
@@ -181,7 +181,7 @@
 					
 					case "resource":
 						curProperty['typeof'] = curClass['typeof'];
-						curProperty['title'] = $(this).attr("title");								
+						curProperty['title'] = l( $(this).attr("title") );
 						curProperty['additional'] = $(this).attr("additional");
 						curProperty['argument'] = $(this).attr("argument");						
 						curProperty['external'] = $(this).attr("external");
@@ -295,9 +295,11 @@
 		thisClass.attr( attrs );
 		
 		var thisLegend = $( "<legend>"+ dataClass['legend'] +"</legend>" );
+		/*
+		// TODO: maybe add baseprefix, name, return-resource...
 		if ( dataClass['name'] ) 
 			thisLegend.prepend( "<small>"+ dataClass['name'] +"</small> " );
-		/*
+		
 		if ( dataClass['isRootClass'] ) {
 			thisLegend.prepend( "<small class='rdform-class-baseprefix'>"+ BASEPREFIX +"</small> " );
 		}
@@ -312,7 +314,7 @@
 								'<input type="text" value="'+ dataClass['resource'] +'" class="form-control" />' +
 							'</div>' );	
 
-		thisLegend.append( '<small> a '+ dataClass['typeof'] +'</small>' );	
+		thisLegend.append( '<small>a '+ dataClass['typeof'] +'</small>' );	
 
 		thisClass.append( thisLegend );
 
@@ -1068,9 +1070,9 @@
 				}
 
 				// passing wildcard value to the function
-				if ( strFct !== undefined ) {
+				/*if ( strFct !== undefined ) {
 					wcdVal = strFct(wcdVal);
-				}
+				}*/
 
 				// regex: replace the {wildard pointer} with the value
 				var regex = new RegExp("\{" + wcd + "\}", "g");
@@ -1082,7 +1084,12 @@
 				}
 			}
 		}
-		return new Object( { 'str' : str.trim(), 'count' : counted } );
+
+		// passing wildcard value to the function
+		if ( strFct !== undefined ) {
+			str = strFct(str);
+		}
+		return new Object( { 'str' : str, 'count' : counted } );
 	}
 
 	validatePrefix = function( str ) {
@@ -1141,8 +1148,7 @@
 		str = str.replace(/[^\w ]/gi, function(char) {
 			return dict[char] || char;
 		});
-
-		return str.replace(/[^a-z0-9-_]/gi,'');
+		return str.replace(/[^a-z0-9-:_]/gi,'');
 	}
 
 	/*
@@ -1195,7 +1201,9 @@
 
 	l = function( str, param ) {
 
-		if ( typeof TRANSLATIONS !== "undefined" ) {
+		if ( typeof TRANSLATIONS === "object" && typeof str === "string" && str != "" ) {
+
+			str = str.replace(/l\((.*)\)/, '$1');
 
 			if ( TRANSLATIONS[str] ) {
 				str = TRANSLATIONS[str];
@@ -1205,7 +1213,6 @@
 			}
 
 		}
-
 		
 		return str;
 	}
