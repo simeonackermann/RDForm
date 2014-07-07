@@ -6,6 +6,7 @@
 		model: "form.html",
 		hooks: "js/hooks.js",
 		lang: "",
+		ontologie: "",
 	}
 
 	/**
@@ -50,8 +51,17 @@
 				.fail(function( jqxhr, type, exception ) {
 	    			alert('Error on loading language file "'+ langFile +'"...');
 				})
-				.done(function() {			
-					
+				.done(function() {				
+			});
+		}
+
+		if ( settings.ontologie != "" ) {
+			var ontFile = settings.ontologie;
+			$.getScript( ontFile )
+				.fail(function( jqxhr, type, exception ) {
+	    			alert('Error on loading ontologie file "'+ ontFile +'"...');
+				})
+				.done(function() {	
 			});
 		}
 
@@ -1242,18 +1252,22 @@
 
 	l = function( str, param ) {
 
-		if ( typeof TRANSLATIONS === "object" && typeof str === "string" && str != "" ) {
+		if ( typeof str === "string" && str != "" ) {
 
 			str = str.replace(/l\((.*)\)/, '$1');
 
-			if ( TRANSLATIONS[str] ) {
-				str = TRANSLATIONS[str];
-			}
-			if ( typeof param !== undefined ) {
-				str = str.replace( /%s/g, param );
+			if ( typeof TRANSLATIONS === "object" ) {
+
+				if ( TRANSLATIONS[str] ) {
+					str = TRANSLATIONS[str];
+				}
+				if ( typeof param !== undefined ) {
+					str = str.replace( /%s/g, param );
+				}
+
 			}
 
-		}
+		}		
 		
 		return str;
 	}
