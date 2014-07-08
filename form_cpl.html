@@ -6,32 +6,99 @@
     <!-- Variablen (werden nicht als properties angelegt!) -->
     <input name="forenames" type="hidden" />
     <input name="pid" type="hidden" />
-    <input name="puri" type="hidden" value="{cpm:surname}_{pid}" />
+    <input name="puri" type="hidden" value="{cpm:surname}_{pid}" />    
 
     <label>Bezeichnung:</label>                                                                            
     <input name="rdfs:label" type="literal" datatype="xsd:string" value="{cpm:fullAcademicalTitle} {forenames} {cpm:surname}" required readonly />
+
+    <label>öffentlich</label>
+    <input type="literal" boolean name="hp:public" datatype="xsd:boolean" checked />
+
     <label>Akademischer Titel:</label>
     <input name="cpm:fullAcademicalTitle" type="literal" datatype="xsd:string" placeholder="Bsp: Prof. Dr." />
+
     <label>Nachname:</label>
     <input name="cpm:surname" type="literal" datatype="xsd:string" required />
+
+    <label>Alternativer Name:</label>
+    <input name="cpm:alternativeWritingOfSurname" type="literal" datatype="xsd:string" />
 
     <input name="cpm:has-forename" type="resource" value="cpm:Forename" multiple />
 
     <input name="cpm:has-period" type="resource" value="cpm:Birth"
       arguments='{"puri":"{puri}"}'
     />
+
+    <input name="cpm:has-period" type="resource" value="cpm:Death" title="Tod" 
+      arguments='{"puri":"{puri}"}' additional
+    />
     
-    <input name="cpm:religion" type="literal" datatype="xsd:string" placeholder="Religion" />        
+    <label>Religion</label>
+    <input name="cpm:religion" type="literal" datatype="xsd:string" placeholder="Religion" />
+
+    <label>Vater:</label>
+    <input name="cpm:father" type="literal" datatype="xsd:string"  />
+
+    <label>Mutter:</label>
+    <input name="cpm:mother" type="literal" datatype="xsd:string" />
     
-    <input name="cpm:has-period" type="resource" value="cpm:Study" title="Studium"
+    <input name="cpm:has-period" type="resource" value="cpm:Study" title="Studium / Schule"
       arguments='{"puri":"{puri}"}' multiple additional 
     />    
     <input name="cpm:has-period" type="resource" value="cpm:Career" title="Karriere" 
       arguments='{"puri":"{puri}"}' multiple additional 
     />
-    <input name="cpm:has-period" type="resource" value="cpm:Office" title="Amt" 
+
+    <input name="cpm:has-period" type="resource" value="cpm:Qualification" title="Qualifikation" 
       arguments='{"puri":"{puri}"}' multiple additional 
     />
+
+    <input name="cpm:has-period" type="resource" value="cpm:Office" title="Universitätsämter" 
+      arguments='{"puri":"{puri}"}' multiple additional 
+    />
+
+    <input name="cpm:has-period" type="resource" value="cpm:membership" title="sonstige Funktionen Mitgliedschaften" 
+      arguments='{"puri":"{puri}"}' multiple additional 
+    />
+
+    <input name="cpm:has-period" type="resource" value="cpm:Faculty" title="Fakultät" 
+      arguments='{"puri":"{puri}"}' additional
+    />
+    
+    <input name="cpm:has-period" type="resource" value="cpm:Honour" title="Ehrungen" 
+      arguments='{"puri":"{puri}"}' additional multiple
+    />
+
+    <!--
+    <input name="cpm:Publication" type="resource" value="cpm:Publication" title="Veröffentlichungen" 
+      arguments='{"puri":"{puri}"}' additional multiple
+    />
+    -->
+
+    <label>Veröffentlichungen</label>
+    <input type="literal" name="cpm:publication" multiple />
+
+    <label>DNB-Link:</label>
+    <!-- TODO: link http://dn-b ... generieren -->
+    <input type="resource" external name="cpm:gnd" datatype="xsd:string" placeholder="Bsp. 645320599" />
+
+    <label>Literatur</label>
+    <input type="literal" name="cpm:literature" multiple />
+
+    <!--
+    <input name="cpm:Literatur" type="resource" value="cpm:Literatur" title="Literatur" 
+      arguments='{"puri":"{puri}"}' additional multiple
+    />  
+    -->
+
+    <label>Referenzen und Quellen</label>
+    <input name="cpm:references" type="literal" multiple />
+
+    <label>Links:</label>
+    <input type="literal" name="cpm:weblinks" datatype="xsd:string" multiple />
+
+    <label>Weitere Informationen / Kommentare:</label>
+    <input name="cpm:furtherInformaiton" textarea type="literal" datatype="xsd:string" multiple />
 
   </div>  
 
@@ -50,16 +117,41 @@
 
   <legend>Geburt</legend>
   <div typeof="cpm:Birth" resource="cpl:Birth/{puri}">
+    <label>Datum:</label>
+    <input name="cpm:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+    <!-- TODO: add class shv spatialArea -->
+
     <label>Ort:</label>
     <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" autocomplete />
 
-    <label>Datum:</label>
-    <input name="cpm:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <label>Administrative Einheit:</label>
+    <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string"  />
+
+    <label>Land:</label>
+    <input name="cpm:country" type="literal" datatype="xsd:string"  />    
   </div>  
 
-  <legend>Studium</legend>
+  <legend>Tod</legend>
+  <div typeof="cpm:Death" resource="cpl:Death/{puri}">
+    <label>Datum:</label>
+    <input name="cpm:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+    <!-- TODO: add class shv spatialArea -->
+
+    <label>Ort:</label>
+    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" autocomplete />
+
+    <label>Administrative Einheit:</label>
+    <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string"  />
+
+    <label>Land:</label>
+    <input name="cpm:country" type="literal" datatype="xsd:string"  />    
+  </div>  
+
+  <legend>Studium / Schule</legend>
   <div typeof="cpm:Study" resource="cpl:Study/{puri}/{rdfs:label}">
-    <label>Studium</label>
+    <label>Ausbildungsabschnitt</label>
     <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
 
     <label>von:</label>
@@ -71,7 +163,19 @@
 
   <legend>Karriere</legend>
   <div typeof="cpm:Career" resource="cpl:Career/{puri}/{rdfs:label}">
-    <label>Akademische Karriere</label>
+    <label>Bezeichnung</label>
+    <input type="literal" name="rdfs:label" datatype="xsd:string" />
+
+    <label>von:</label>
+    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+    <label>bis:</label>
+    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+  </div>
+
+  <legend>Qualifikation</legend>
+  <div typeof="cpm:Qualification" resource="cpl:Qualification/{puri}/{rdfs:label}" multiple>
+    <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
     <label>von:</label>
@@ -81,7 +185,31 @@
     <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
   </div>
 
-  <legend>Amt</legend>
+  <legend>Mitgliedschaften</legend>
+  <div typeof="cpm:membership" resource="cpl:membership/{puri}/{rdfs:label}" multiple>
+    <label>Bezeichnung</label>
+    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
+
+    <label>von:</label>
+    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+    <label>bis:</label>
+    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+  </div>
+
+  <legend>Fakultät</legend>
+  <div typeof="cpm:Faculty" resource="cpl:Faculty/{puri}/{rdfs:label}" multiple>
+    <label>Fakultät</label>
+    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="" />
+
+    <label>Sektion</label>
+    <input type="literal" name="rdfs:section" datatype="xsd:string" />
+
+    <label>Institut</label>
+    <input type="literal" name="rdfs:institute" datatype="xsd:string" />
+  </div>
+
+  <legend>Universitätsämter</legend>
   <div typeof="cpm:Office" resource="cpl:Office/{puri}/{rdfs:label}" multiple>
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
@@ -92,5 +220,38 @@
     <label>bis:</label>
     <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
   </div>
+
+  <legend>Ehrungen</legend>
+  <div typeof="cpm:Honour" resource="cpl:Honour/{puri}/{rdfs:label}" multiple>
+    <label>Bezeichnung</label>
+    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
+
+    <label>Jahr:</label>
+    <input type="literal" name="cpm:date" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+  </div>
+
+  <!--
+  <legend>Veröffentlichungen</legend>
+  <div typeof="cpm:Publication" resource="cpl:Publication/{puri}/{rdfs:label}" multiple>
+    <label>Bezeichnung</label>
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Titel, Verlag, ..." />
+  </div>
+  -->
+
+  <!--
+  <legend>Literatur</legend>
+  <div typeof="cpm:Literatur" resource="cpl:Literatur/{puri}/{rdfs:label}" multiple>
+    <label>Bezeichnung</label>
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Verfasser, Titel, Verlag, Jahr ..." />
+  </div>
+  -->
+
+  <!--
+  <legend>Referenzen und Quellen</legend>
+  <div typeof="cpm:references" resource="cpl:Quellen/{puri}/{rdfs:seeAlso}" multiple>
+    <label>Bezeichnung</label>
+    <input type="literal" textarea name="rdfs:seeAlso" datatype="xsd:string" />
+  </div>
+  -->
 
 </form> 
