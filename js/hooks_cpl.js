@@ -49,6 +49,7 @@ __initFormHandlers = function () {
 __afterDuplicateClass = function ( thisClass ) {
 
 	if ( $(thisClass).attr("typeof").search(/cpm:Forename/) != -1 ) {
+		// TODO get this from arguments attr
 			var index = $(thisClass).attr("index");
 			$(thisClass).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
 			$(thisClass).find('input[name="cpm:forenamePosition"]').val( index );
