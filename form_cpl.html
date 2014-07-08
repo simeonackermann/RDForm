@@ -1,4 +1,4 @@
-<form vocab="" prefix="cpm ... cpl ...">
+<form base="http://catalogus-professorum.org/cpm/" prefix="cpm ... cpl ...">
   <legend>Professor</legend>
   <!--  ### Main Class ### -->
   <div typeof="cpm:Professor" resource="cpl:Professor/{puri}">
@@ -17,13 +17,21 @@
 
     <input name="cpm:has-forename" type="resource" value="cpm:Forename" multiple />
 
-    <input name="cpm:has-period" type="resource" value="cpm:Birth" />
+    <input name="cpm:has-period" type="resource" value="cpm:Birth"
+      arguments='{"puri":"{puri}"}'
+    />
     
     <input name="cpm:religion" type="literal" datatype="xsd:string" placeholder="Religion" />        
     
-    <input name="cpm:has-period" type="resource" value="cpm:Study" title="Studium" multiple additional />    
-    <input name="cpm:has-period" type="resource" value="cpm:Career" title="Karriere" multiple additional />    
-    <input name="cpm:has-period" type="resource" value="cpm:Office" title="Amt" multiple additional />    
+    <input name="cpm:has-period" type="resource" value="cpm:Study" title="Studium"
+      arguments='{"puri":"{puri}"}' multiple additional 
+    />    
+    <input name="cpm:has-period" type="resource" value="cpm:Career" title="Karriere" 
+      arguments='{"puri":"{puri}"}' multiple additional 
+    />
+    <input name="cpm:has-period" type="resource" value="cpm:Office" title="Amt" 
+      arguments='{"puri":"{puri}"}' multiple additional 
+    />
 
   </div>  
 
@@ -37,11 +45,11 @@
     <input name="cpm:forenamePosition" type="hidden" datatype="xsd:int" value="1" />
 
     <label>ist Rufname?</label>
-    <input name="cpm:isFirstName" type="boolean" datatype="xsd:boolean" value="1" checked />
+    <input name="cpm:isFirstName" type="literal" boolean datatype="xsd:boolean" value="1" checked />
   </div> 
 
   <legend>Geburt</legend>
-  <div typeof="cpm:Birth" resource="cpl:Birth/{../puri}">
+  <div typeof="cpm:Birth" resource="cpl:Birth/{puri}">
     <label>Ort:</label>
     <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" autocomplete />
 
@@ -50,7 +58,7 @@
   </div>  
 
   <legend>Studium</legend>
-  <div typeof="cpm:Study" resource="cpl:Study/{../puri}/{rdfs:label}">
+  <div typeof="cpm:Study" resource="cpl:Study/{puri}/{rdfs:label}">
     <label>Studium</label>
     <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
 
@@ -62,7 +70,7 @@
   </div>
 
   <legend>Karriere</legend>
-  <div typeof="cpm:Career" resource="cpl:Career/{../puri}/{rdfs:label}">
+  <div typeof="cpm:Career" resource="cpl:Career/{puri}/{rdfs:label}">
     <label>Akademische Karriere</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
@@ -74,7 +82,7 @@
   </div>
 
   <legend>Amt</legend>
-  <div typeof="cpm:Office" resource="cpl:Office/{../puri}/{rdfs:label}" multiple>
+  <div typeof="cpm:Office" resource="cpl:Office/{puri}/{rdfs:label}" multiple>
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
