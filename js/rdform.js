@@ -741,7 +741,7 @@
 		});
 
 		rdform.on("focus", "div.rdform-edit-class-resource input", function() {
-			$(this).val( getWebsafeString( $(this).val() ) );
+			//$(this).val( getWebsafeString( $(this).val() ) );
 		});
 
 		rdform.on("change blur", "div.rdform-edit-class-resource input", function() {
@@ -750,13 +750,14 @@
 			$(this).trigger( "keyup" );
 			$(this).hide();
 		});
-
+		
 		rdform.on("keyup", "div.rdform-edit-class-resource input", function() {
 			var val = $(this).val();
 
 			if ( val != "" ) {
-				$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
-				$(this).prev().prev("small").text( getWebsafeString( val ) );
+				//$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
+				//$(this).prev().prev("small").text( getWebsafeString( val ) );
+				$(this).prev().prev("small").text( val );
 			}
 		});
 
