@@ -198,7 +198,8 @@
 						curProperty['typeof'] = curClass['typeof'];
 						curProperty['title'] = l( $(this).attr("title") );
 						curProperty['additional'] = $(this).attr("additional");
-						curProperty['argument'] = $(this).attr("argument");						
+						curProperty['argument'] = $(this).attr("argument");
+						curProperty['arguments'] = $(this).attr("arguments");
 						curProperty['external'] = $(this).attr("external");
 
 						// test if resource class exists if its not an external resource
@@ -207,6 +208,14 @@
 								alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
 								success = false;
 							}
+						}
+						if ( curProperty['multiple'] !== undefined ) {
+							var arguments = new Object();
+							if ( curProperty['arguments'] !== undefined ) {
+								arguments = $.parseJSON( curProperty['arguments'] );
+							} 
+							arguments['i'] = 1;
+							curProperty['arguments'] = JSON.stringify( arguments );
 						}
 						break;										
 
@@ -488,6 +497,7 @@
 			'additional': resource['additional'],
 			'multiple': resource['multiple'],
 			'argument': resource['argument'],
+			'arguments': resource['arguments'],
 		});
 
 		//if ( resource['resource'] ) {
@@ -557,6 +567,12 @@
 			//classContainer.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
 
 			// rewrite index, radio input names index and references in wildcards
+			var arguments = $.parseJSON( $(thisClass).attr('arguments') );
+			//arguments['i'] = '"' + ( ++arguments['i'] ) + '"';
+			//arguments['i'] = "2";
+			++arguments['i'];
+			$(thisClass).attr("arguments", JSON.stringify( arguments ) );
+
 			var index = $(thisClass).attr("index");
 			++index;
 			$(thisClass).attr("index", index);
@@ -608,6 +624,7 @@
 			classModel['multiple'] = $(this).attr("multiple");
 			classModel['additional'] = $(this).attr("additional");
 			classModel['argument'] = $(this).attr("argument");
+			classModel['arguments'] = $(this).attr("arguments");
 			classModel['name'] = $(this).attr("name"); 
 
 			var thisClass = createHTMLClass( classModel );
@@ -646,8 +663,7 @@
 
 					wildcards[wcd] = getWildcardTarget( wcd, envClass );	
 
-					// TODO: maybe its not a wildcard but a string
-
+					// TODO: if wildcard not found no keyup event exists!
 					$(wildcards[wcd]).keyup(function() {
 						writeWildcardValue( thisInput, wildcards );
 					});
@@ -677,20 +693,19 @@
 
 			var wcdTarget = envClass.find('input[name="'+wcd+'"]');
 
-			if ( wcdTarget.length == 0 && envClass.attr( "argument" ) ) {
-				var args = envClass.attr( "argument" ).split(" ");
+			if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) {
+				var args = $.parseJSON( envClass.attr( "arguments" ) );				
 				for ( var ai in args ) {
-					var thisArg = args[ai].split(":");
-					if ( wcd == thisArg[0] ) {
-						thisArg[1] = thisArg[1].replace(/[{}]/g, '');
-
-						// TODO BUG: maybe ist not a wildcard but a string value like:
-						// argument="val:{val} string:'My string...'"
-
-						wcdTarget = getWildcardTarget( thisArg[1], envClass.parentsUntil("div[typeof]").parent() );
+					args[ai] = args[ai].toString();
+					if ( wcd == ai ) {
+						if ( args[ai].search(/\{.*\}/) != -1 ) {
+							wcdTarget = getWildcardTarget( args[ai].replace(/[{}]/g, ''), envClass.parentsUntil("div[typeof]").parent() );
+						} else {
+							wcdTarget = $( '<input type="hidden" name="' + ai + '" value="' + args[ai] + '" />' );
+						}
 						break;
 					}
-				}
+				}				
 			}
 
 			// test if property exists
@@ -1089,17 +1104,19 @@
 
 				var wcdVal = env.find('input[name="'+wcd+'"]');
 
-				if ( wcdVal.length == 0 && env.attr( "argument" ) ) {
-					var args = env.attr( "argument" ).split(" ");
+				if ( wcdVal.length == 0 && env.attr( "arguments" ) ) {
+					var args = $.parseJSON( env.attr( "arguments" ) );
 					for ( var ai in args ) {
-						var thisArg = args[ai].split(":");
-						if ( wcd == thisArg[0] ) {
-							wcdVal = $( '<input type="hidden" name="' + thisArg[0] + '" value="' + thisArg[1] + '" />' );
-							env = envClass.parentsUntil("div[typeof]").parent();
+						args[ai] = args[ai].toString();
+						if ( wcd == ai ) {
+							if ( args[ai].search(/\{.*\}/) != -1 ) {
+								env = envClass.parentsUntil("div[typeof]").parent();
+							} 
+							wcdVal = $( '<input type="hidden" name="' + ai + '" value="' + args[ai] + '" />' );
 							break;
 						}
 					}
-				}
+				}				
 
 				// test if property exists
 				if ( wcdVal.length == 0 ) {
@@ -1108,22 +1125,15 @@
 				}
 
 				switch ( wcdVal.attr("type") ) {
-					case 'hidden' :
-						wcdVal = replaceWildcards( wcdVal.val(), env )['str'];
-						break;
 
 					case 'checkbox' :
 						wcdVal = ( wcdVal.val() != "" ) ? wcdVal.val() : wcdVal.prop("checked").toString();
 						break;
 
 					default :
-						wcdVal = wcdVal.val();
+						//wcdVal = wcdVal.val();
+						wcdVal = replaceWildcards( wcdVal.val(), env )['str'];
 				}
-
-				// passing wildcard value to the function
-				/*if ( strFct !== undefined ) {
-					wcdVal = strFct(wcdVal);
-				}*/
 
 				// regex: replace the {wildard pointer} with the value
 				var regex = new RegExp("\{" + wcd + "\}", "g");

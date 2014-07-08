@@ -90,12 +90,12 @@
         -->              
 
         <input type="resource" name="hp:attendedSchool" value="EventAusbildung" title="Schule" 
-            argument="pid:{pid}" multiple additional
+            arguments='{"pid":"{pid}" }' multiple additional            
         />
         <!--arguments='[{"pid":"{pid}"}]'-->
 
         <input type="resource" name="hp:hasPosition" value="EventPfarrstelle" title="Pfarrstelle"
-            argument="pid:{pid}" multiple additional
+            arguments='{"pid":"{pid}" }' multiple additional
         />
         <!--
         <fieldset type="resource" name="hp:hasPosition" value="EventPfarrstelle" multiple>
@@ -123,7 +123,7 @@
     <!-- tmp klasse mittels hook vor result ausgabe entfernen -->
 
     <legend>Schule</legend>
-    <div typeof="hp:Event" resource="hp:attendingSchool-{pid}" return-resource="{rdf:object}" id="EventAusbildung">
+    <div typeof="hp:Event" resource="hp:attendingSchool-{i}-{pid}-{rdf:object}" return-resource="{rdf:object}" id="EventAusbildung">
 
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
@@ -136,6 +136,9 @@
 
         <label>Schule:</label>
         <input type="resource" external name="rdf:object" /> 
+
+        <label>Indes:</label>
+        <input type="literal" name="hp:index" value="{i}" />
 
         <label>Begin:</label>
         <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
