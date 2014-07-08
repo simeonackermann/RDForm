@@ -1,19 +1,19 @@
 <form base="http://pfarrerbuch.de/" prefix="bio http://vocab.org/bio/0.1/ hp: http://purl.org/vok/hp/ foaf ... hp ... rdfs ... rdf ...">
-    <legend>l(Parson)</legend>
+    <legend>l(Pfarrer)</legend>
     <div typeof="foaf:Person" resource="{pid}">
         <!-- hidden person name -->
         <input name="pid" type="hidden" value="{foaf:name}" />
 
-        <label>Ist Geistlicher</label>
+        <label>ist Geistlicher</label>
         <input type="literal" boolean name="hp:isPastor" datatype="xsd:boolean" />
 
         <label>Label:</label>
         <input type="literal" name="rdfs:label" value="{foaf:name} (*{hp:birthDate} †{hp:dateOfDeath})" datatype="xsd:string" readonly required />
 
-        <label>Name:</label>
+        <label>l(Nachname:)</label>
         <input type="literal" name="foaf:name" value="{foaf:firstName} {foaf:lastName}" datatype="xsd:string" required />
 
-        <label>Vorname:</label>
+        <label>l(Vorname:)</label>
         <input type="literal" name="foaf:firstName" datatype="xsd:string" required />
 
         <label>Alternativer Vorname:</label>
