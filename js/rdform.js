@@ -544,8 +544,8 @@
 			});
 		});​
 		*/	
-
-		__initFormHandlers();		
+		if ( typeof __initFormHandlers !== "undefined" )
+			__initFormHandlers();		
 
 		// validate input values on change
 		rdform.on("change", "input", function() {
@@ -582,7 +582,8 @@
 			$(classContainer).show("slow");
 			$(this).remove(); // remove duplicate btn
 
-			__afterDuplicateClass( thisClass );
+			if ( typeof __afterDuplicateClass !== "undefined" )
+				__afterDuplicateClass( thisClass );
 
 			findWildcardInputs( classContainer );
 
@@ -609,9 +610,6 @@
 			$(this).parentsUntil("div.rdform-literal-group").parent().after( literalContainer );
 			$(literalContainer).show("slow");
 			$(this).remove(); // remove duplicate btn
-
-			if ( typeof __afterDuplicateLiteral !== "undefined" )
-				__afterDuplicateLiteral( thisLiteral );
 
 			findWildcardInputs( literalContainer );
 
@@ -740,9 +738,9 @@
 
 		});
 
-		rdform.on("focus", "div.rdform-edit-class-resource input", function() {
-			//$(this).val( getWebsafeString( $(this).val() ) );
-		});
+		/*rdform.on("focus", "div.rdform-edit-class-resource input", function() {
+			$(this).val( getWebsafeString( $(this).val() ) ); // this is ugly, because it deletes the wildcarcd-brakes...
+		});*/
 
 		rdform.on("change blur", "div.rdform-edit-class-resource input", function() {
 			$(this).prev().prev("small").show();
@@ -757,6 +755,7 @@
 			if ( val != "" ) {
 				//$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
 				//$(this).prev().prev("small").text( getWebsafeString( val ) );
+				// TODO: maybe websafe string but with {wildcard}
 				$(this).prev().prev("small").text( val );
 			}
 		});
@@ -865,7 +864,7 @@
 
 		});
 
-		if ( typeof __filterRESULT !== undefined )
+		if ( typeof __filterRESULT !== "undefined" )
 			RESULT = __filterRESULT( RESULT );
 
 		console.log( "Result = ", RESULT );
@@ -881,7 +880,8 @@
 
 			var property = new Object();
 
-			__createResultClassProperty( $(this) ); // TODO: give input or resource class
+			if ( typeof __createResultClassProperty !== "undefined" )
+				__createResultClassProperty( $(this) ); // TODO: give input or resource class
 
 			if ( $(this).hasClass(_ID_ + "-hidden-group") ) {
 
@@ -902,9 +902,6 @@
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
 
-			if ( typeof __filterResultPropertyAfterCreating !== undefined )
-				property = __filterResultPropertyAfterCreating( property );
-
 			if ( ! $.isEmptyObject( property ) ) {
 					properties.push( property );
 			}
@@ -918,7 +915,8 @@
 
 		thisClass['properties'] = properties;
 
-		__createClass( $(cls) );
+		if ( typeof __createClass !== "undefined" )
+			__createClass( $(cls) );
 
 		var classResource = $(cls).attr("resource");
 		var wildcardsFct = replaceWildcards( classResource, $(cls), getWebsafeString );
@@ -1035,8 +1033,6 @@
 	outputResult = function() {
 		var resultStr = "";
 
-		//__beforeOutputResult();	
-
 		if ( BASEPREFIX != "" ) {
 			resultStr += "@base <" + BASEPREFIX + "> .\n";
 		}
@@ -1136,6 +1132,11 @@
 						wcdVal = replaceWildcards( wcdVal.val(), env )['str'];
 				}
 
+				// passing wildcard value to the function
+				/*if ( strFct !== undefined ) {
+					wcdVal = strFct(wcdVal);			
+				}*/
+
 				// regex: replace the {wildard pointer} with the value
 				var regex = new RegExp("\{" + wcd + "\}", "g");
 				if ( wcdVal != "" ) {
@@ -1149,7 +1150,7 @@
 
 		// passing wildcard value to the function
 		if ( strFct !== undefined ) {
-			str = strFct(str);
+			str = strFct(str);			
 		}
 		return new Object( { 'str' : str, 'count' : counted } );
 	}
@@ -1210,7 +1211,7 @@
 		str = str.replace(/[^\w ]/gi, function(char) {
 			return dict[char] || char;
 		});
-		return str.replace(/[^a-z0-9-:_]/gi,'');
+		return str.replace(/[^a-z0-9-:\/_]/gi,'');
 	}
 
 	/*
