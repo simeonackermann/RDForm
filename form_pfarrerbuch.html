@@ -123,7 +123,7 @@
     <!-- tmp klasse mittels hook vor result ausgabe entfernen -->
 
     <legend>Schule</legend>
-    <div typeof="hp:Event" resource="hp:attendingSchool-{i}-{pid}-{rdf:object}" return-resource="{rdf:object}" id="EventAusbildung">
+    <div typeof="hp:Event" resource="hp:attendingSchool-{i}-{pid}" return-resource="{rdf:object}" id="EventAusbildung">
 
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
@@ -137,9 +137,6 @@
         <label>Schule:</label>
         <input type="resource" external name="rdf:object" /> 
 
-        <label>Indes:</label>
-        <input type="literal" name="hp:index" value="{i}" />
-
         <label>Begin:</label>
         <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
@@ -148,7 +145,7 @@
     </div>    
 
     <legend>Stelle</legend>
-    <div typeof="hp:Event" resource="hp:hasPosition-{pid}" return-resource="{rdf:object}" id="EventPfarrstelle">
+    <div typeof="hp:Event" resource="hp:hasPosition-{i}-{pid}" return-resource="{rdf:object}" id="EventPfarrstelle">
         <label>Label:</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
 
