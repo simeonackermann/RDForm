@@ -24,7 +24,7 @@
 	/**
 	  * plugin base constructor
 	  *
-	  * @param[] options
+	  * @param[] options, override default settings
 	  * @return void
 	  */
 	$.fn.RDForm = function( options ) {		
@@ -45,6 +45,7 @@
         })
 		*/
 
+		// load settgins file
 		if ( settings.lang != "" ) {
 			var langFile = "lang/" + settings.lang + ".js";
 			$.getScript( langFile )
@@ -676,17 +677,6 @@
 		findWildcardInputs( rdform );
 		
 
-		// TODO: dynamically change class resource
-		rdform.find('div[typeof][resource*="{"]').each(function() {			
-
-			//console.log( "div-class with wildcard", $(this) );
-
-			//console.log( $(this).children("legend").find("input").val() );			
-
-
-		});
-
-
 		function getWildcardTarget( wcd, envClass ) {
 
 			var wcdTarget = envClass.find('input[name="'+wcd+'"]');
@@ -1133,9 +1123,9 @@
 				}
 
 				// passing wildcard value to the function
-				/*if ( strFct !== undefined ) {
+				if ( strFct !== undefined ) {
 					wcdVal = strFct(wcdVal);			
-				}*/
+				}
 
 				// regex: replace the {wildard pointer} with the value
 				var regex = new RegExp("\{" + wcd + "\}", "g");
@@ -1149,9 +1139,9 @@
 		}
 
 		// passing wildcard value to the function
-		if ( strFct !== undefined ) {
+		/*if ( strFct !== undefined ) {
 			str = strFct(str);			
-		}
+		}*/
 		return new Object( { 'str' : str, 'count' : counted } );
 	}
 
@@ -1211,7 +1201,7 @@
 		str = str.replace(/[^\w ]/gi, function(char) {
 			return dict[char] || char;
 		});
-		return str.replace(/[^a-z0-9-:\/_]/gi,'');
+		return str.replace(/[^a-z0-9-_]/gi,'');
 	}
 
 	/*
@@ -1283,7 +1273,5 @@
 		
 		return str;
 	}
-
-	
 
 }( jQuery ));
