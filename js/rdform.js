@@ -4,6 +4,7 @@
 	  */
 	var settings = {
 		model: "form.html",
+		data: "",
 		hooks: "js/hooks.js",
 		lang: "",
 		ontologie: "",
@@ -723,7 +724,7 @@
 		// find the target input of a wildcard wcd in the class envClass
 		function getWildcardTarget( wcd, envClass ) {
 
-			var wcdTarget = envClass.find('input[name="'+wcd+'"]');
+			var wcdTarget = envClass.find('input[name="'+wcd+'"],textarea[name="'+wcd+'"]');
 
 			if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) {
 				var args = $.parseJSON( envClass.attr( "arguments" ) );				
@@ -1159,7 +1160,7 @@
 				var wcd = strWcds[i].substring( 1 );
 				var env = envClass;
 
-				var wcdVal = env.find('input[name="'+wcd+'"]');
+				var wcdVal = env.find('input[name="'+wcd+'"],textarea[name="'+wcd+'"]');
 
 				// search the wilcard in the arguments attribute of resource classes
 				if ( wcdVal.length == 0 && env.attr( "arguments" ) ) {
@@ -1334,19 +1335,18 @@
 	  */
 	l = function( str, param ) {
 
+		console.log( str );
+
 		if ( typeof str === "string" && str != "" ) {
 
 			str = str.replace(/l\((.*)\)/, '$1');
 
-			if ( typeof TRANSLATIONS === "object" ) {
+			if ( typeof TRANSLATIONS === "object" && TRANSLATIONS[str] ) {
+				str = TRANSLATIONS[str];
+			}
 
-				if ( TRANSLATIONS[str] ) {
-					str = TRANSLATIONS[str];
-				}
-				if ( typeof param !== undefined ) {
-					str = str.replace( /%s/g, param );
-				}
-
+			if ( typeof param !== undefined ) {
+				str = str.replace( /%s/g, param );
 			}
 		}
 		return str;
