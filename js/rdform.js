@@ -503,7 +503,7 @@
 	}
 
 	/**
-	  * Create a group for a resource
+	  * Create a group for a new resource. It can be a new subclass, an add button for an new subclass or a single input field for an external resource
 	  *
 	  * @resource Object of the current resource from MODEL
 	  * @return HTML DOM object of the resource group
@@ -517,16 +517,19 @@
 			resourceClass = $("<input />");						
 		}
 		else {
+			var classModel = $.extend( true, {}, getClassModel(resource['value']) );
 			// add button for additional or same resources (like person know person)
-			if ( resource['typeof'] == resource['value'] || typeof(resource['additional']) !== "undefined" ) {					
-				var btnText = resource['title'] ? resource['title'] : "add " + resource['name'] + " - " + resource['value'];			
+			if ( resource['typeof'] == resource['value'] || typeof(resource['additional']) !== "undefined" ) {				
+				if ( classModel['legend'] )
+					var btnText = classModel['legend'];
+				else
+					var btnText = resource['title'] ? resource['title'] : resource['name'] + " - " + resource['value'];
 				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
 			} 
 			// get class-model for the resource
 			else {
-				var classModel = $.extend( true, {}, getClassModel(resource['value']) );
 				classModel['name'] = resource['name'];
 				classModel['multiple'] = resource['multiple'];
 				resourceClass = createHTMLClass( classModel );
