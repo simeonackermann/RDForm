@@ -1,4 +1,3 @@
-
 var rdform;
 function setRDForm( rdform ) {
 	this.rdform = rdform;		

@@ -1,5 +1,4 @@
 var rdform;
-
 function setRDForm( rdform ) {
 	this.rdform = rdform;		
 }
@@ -21,18 +20,11 @@ __initFormHandlers = function () {
 // after pressing the duplicate button
 __afterDuplicateClass = function ( thisClass ) {
 
-	if ( $(thisClass).attr("typeof").search(/cpm:Forename/) != -1 ) {
-			var index = $(thisClass).attr("index");
-			$(thisClass).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
-			$(thisClass).find('input[name="cpm:forenamePosition"]').val( index );
-	}
 	
 }
 
 // before creating the class properties from input values
 __createResultClassProperty = function( propertyContainer ) {
-
-	//console.log( propertyContainer );
 
 	if ( $(propertyContainer).children("input").attr("name") == "pid" ) {
 		$(propertyContainer).children("input").val( Math.floor( Math.random() * 10 ) );
@@ -44,11 +36,4 @@ __createResultClassProperty = function( propertyContainer ) {
 // before generating the class object from input values and properties
 __createClass = function ( thisClass ) {
 		
-}
-
-
-__filterResultPropertyAfterCreating = function( property ) {
-
-	return property;
-
 }
