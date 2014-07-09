@@ -46,10 +46,18 @@
 
     <script type="text/javascript">
 
-	$(document).ready(function(){
-		$(".rdform").RDForm({
+    /*
 			model: "form_pfarrerbuch.html",
 			lang: "pfarrerbuch_hu"
+
+			model: "form_cpl.html",
+			hooks: "js/hooks_cpl.js"
+    */
+	$(document).ready(function(){
+		$(".rdform").RDForm({
+			model: "form_cpl.html",
+			hooks: "js/hooks_cpl.js",
+			lang: "de"
 		});
 	});
 
