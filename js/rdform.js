@@ -376,7 +376,7 @@
 
 		// add button for multiple classes
 		if ( classModel['multiple'] ) {
-			thisClass.attr('index', 1);
+			//thisClass.attr('index', 1);
 			thisClass.append('<button type="button" class="btn btn-default btn-xs duplicate-class" title="'+ l("Duplicate class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-plus"></span> '+ l("add") +'</button>');
 		}
 
@@ -618,15 +618,42 @@
 		// BUTTON: remove a class resource
 		rdform.on("click", "button.remove-class", function() {
 			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent();
+			
 			var thisClass = classContainer.children("div[typeof]");			
-			//console.log( thisClass );
-			//
+			var thisClassTypeof = thisClass.attr('typeof');
+			/*var arguments = $.parseJSON( thisClass.attr('arguments') );
+			var thisClassIndex = arguments['i'];
+			var prevClassIndex = 0;
+			var nextClassIndex = 0;*/
+			
+			var nextClass = $();
+			var prevClass = $();
+			prevClass = classContainer.prev("div.rdform-resource-group").children('div[typeof="'+thisClassTypeof+'"]');
+			nextClass = classContainer.next("div.rdform-resource-group").children('div[typeof="'+thisClassTypeof+'"]');
 
-			if ( thisClass.attr('multiple') ) {
-				// TODO ...
+
+			if ( thisClass.attr('multiple') 
+				&& ( nextClass.length != 0 || prevClass.length != 0 )
+				) {
+				//var arguments = $.parseJSON( thisClass.attr('arguments') );
+				//var index = arguments['i'];
+					
+				if ( nextClass.length != 0 ) {
+					var thisLegend = thisClass.children("legend");
+					nextClass.prepend( thisLegend );
+				} else {
+					var thisAddBtn = thisClass.children("button.duplicate-class");
+					prevClass.append( thisAddBtn );
+				}
+				classContainer.hide( "slow", function() {
+					classContainer.remove();
+				});
+
 			} else {
+
 				var classModel = $.extend( true, {}, getClassModel( thisClass.attr('typeof') ) );
-				classModel['additional'] = thisClass.attr('additional');
+				classModel['additional'] = true;
+				classModel['multiple'] = thisClass.attr('multiple');
 				classModel['name'] = thisClass.attr('name');
 				classModel['value'] = thisClass.attr('typeof');
 				classModel['arguments'] = thisClass.attr('arguments');
