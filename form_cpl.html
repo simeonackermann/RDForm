@@ -12,7 +12,7 @@
     <input name="rdfs:label" type="literal" datatype="xsd:string" value="{cpm:fullAcademicalTitle} {forenames} {cpm:surname}" required readonly />
 
     <label>öffentlich</label>
-    <input type="literal" boolean name="hp:public" datatype="xsd:boolean" checked />
+    <input type="literal" boolean name="hp:isPublic" datatype="xsd:boolean" checked />
 
     <label>Akademischer Titel:</label>
     <input name="cpm:fullAcademicalTitle" type="literal" datatype="xsd:string" placeholder="Bsp: Prof. Dr." />
@@ -29,10 +29,10 @@
       arguments='{"puri":"{puri}"}'
     />
 
-    <input name="cpm:has-period" type="resource" value="cpm:Death" title="Tod" 
+    <input name="cpm:has-period" type="resource" value="cpm:Death"
       arguments='{"puri":"{puri}"}' additional
     />
-    
+
     <label>Religion</label>
     <input name="cpm:religion" type="literal" datatype="xsd:string" placeholder="Religion" />
 
@@ -42,22 +42,22 @@
     <label>Mutter:</label>
     <input name="cpm:mother" type="literal" datatype="xsd:string" />
     
-    <input name="cpm:has-period" type="resource" value="cpm:Study" title="Studium / Schule"
+    <input name="cpm:has-period" type="resource" value="cpm:Study"
       arguments='{"puri":"{puri}"}' multiple additional 
     />    
-    <input name="cpm:has-period" type="resource" value="cpm:Career" title="Karriere" 
+    <input name="cpm:has-period" type="resource" value="cpm:Career"
       arguments='{"puri":"{puri}"}' multiple additional 
     />
 
-    <input name="cpm:has-period" type="resource" value="cpm:Qualification" title="Qualifikation" 
+    <input name="cpm:has-period" type="resource" value="cpm:Qualification"
       arguments='{"puri":"{puri}"}' multiple additional 
     />
 
-    <input name="cpm:has-period" type="resource" value="cpm:Office" title="Universitätsämter" 
+    <input name="cpm:has-period" type="resource" value="cpm:Office"
       arguments='{"puri":"{puri}"}' multiple additional 
     />
 
-    <input name="cpm:has-period" type="resource" value="cpm:membership" title="sonstige Funktionen Mitgliedschaften" 
+    <input name="cpm:has-period" type="resource" value="cpm:membership" 
       arguments='{"puri":"{puri}"}' multiple additional 
     />
 
@@ -109,7 +109,7 @@
     <input name="cpm:forename" type="literal" datatype="xsd:string" placeholder="1. Vorname" required />
 
     <input name="rdfs:label" type="hidden" value="{cpm:forename}" />
-    <input name="cpm:forenamePosition" type="hidden" datatype="xsd:int" value="1" />
+    <input name="cpm:forenamePosition" type="hidden" datatype="xsd:int" value="{i}" />
 
     <label>ist Rufname?</label>
     <input name="cpm:isFirstName" type="literal" boolean datatype="xsd:boolean" value="1" checked />
@@ -128,7 +128,7 @@
     <label>Administrative Einheit:</label>
     <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string"  />
 
-    <label>Land:</label>
+    <label>Land</label>
     <input name="cpm:country" type="literal" datatype="xsd:string"  />    
   </div>  
 
