@@ -1333,17 +1333,28 @@
 	  *
 	  * @return String. The translated string
 	  */
-	l = function( str, param ) {
-
-		console.log( str );
+	l = function( str, param ) {		
 
 		if ( typeof str === "string" && str != "" ) {
 
-			str = str.replace(/l\((.*)\)/, '$1');
+			//str = str.replace(/l\((.*)\)/, '$1');
+			var translate = str.replace(/.*l\((.*?)\).*/, '$1');
+			var translated = translate;
 
-			if ( typeof TRANSLATIONS === "object" && TRANSLATIONS[str] ) {
-				str = TRANSLATIONS[str];
+			if ( typeof TRANSLATIONS === "object" && TRANSLATIONS[translate] ) {
+				translated = TRANSLATIONS[translate];
+			} 
+
+			//str = str.replace(/l*\(*.*?\)*/, translated);
+			//var regex = new RegExp("\{" + wcd + "\}", "g");
+			if ( str.search( /l\(/ ) != -1 ) {
+				str = str.replace(/l\(.*?\)/, translated);
+			} else {
+				str = str.replace(translate, translated);
 			}
+			//var regex = new RegExp( /l\(/ + translate + /\)/ );
+			//str = str.replace( regex, translated);
+			//str = str.replace(/(.*)l\((.*?)\)(.*)/, '$1' + translated + '$3');
 
 			if ( typeof param !== undefined ) {
 				str = str.replace( /%s/g, param );
