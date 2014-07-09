@@ -213,7 +213,7 @@
 						curProperty['typeof'] = curClass['typeof'];
 						curProperty['title'] = l( $(this).attr("title") );
 						curProperty['additional'] = $(this).attr("additional");
-						curProperty['argument'] = $(this).attr("argument");
+						//curProperty['argument'] = $(this).attr("argument");
 						curProperty['arguments'] = $(this).attr("arguments");
 						curProperty['external'] = $(this).attr("external");
 
@@ -363,21 +363,18 @@
 							'</div>' );	
 
 		thisLegend.append( '<small>a '+ classModel['typeof'] +'</small>' );	
-
 		thisClass.append( thisLegend );
 
 		for ( var pi in classModel['properties'] ) {
 			var property =  classModel['properties'][pi];
 			thisClass.append( createHTMLProperty( property ) );				
 		}
-
-		/*
+		
 		if ( classModel['additional'] !== undefined ) {
 			thisClass.append('<button type="button" class="btn btn-link btn-xs remove-class" title="'+ l("Remove class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-remove"></span> '+ l("remove") +'</button>');
-		}
-		*/
+		}		
 
-		// add button for mutliple classes
+		// add button for multiple classes
 		if ( classModel['multiple'] ) {
 			thisClass.attr('index', 1);
 			thisClass.append('<button type="button" class="btn btn-default btn-xs duplicate-class" title="'+ l("Duplicate class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-plus"></span> '+ l("add") +'</button>');
@@ -405,11 +402,6 @@
 			case "literal":
 				thisProperty = createHTMLiteral( property );
 				break;
-			/*
-			case "boolean":
-				thisProperty = createHTMLiteral( property );
-				break;
-			*/
 			case "resource":
 				thisProperty = createHTMLResource( property );
 				break;			
@@ -428,7 +420,7 @@
 	  * @literal Object of the current literal propertie
 	  * @return  HTML DOM object of the literal group
 	  */
-	createHTMLiteral = function( literal ) {
+	createHTMLiteral = function( literal )  {
 
 		var thisFormGroup = $('<div class="form-group '+_ID_+'-literal-group"></div>');
 		var thisInputContainer = $('<div class="col-xs-9"></div>');		
@@ -532,6 +524,7 @@
 			else {
 				classModel['name'] = resource['name'];
 				classModel['multiple'] = resource['multiple'];
+				classModel['arguments'] = resource['arguments'];
 				resourceClass = createHTMLClass( classModel );
 			}
 		}
@@ -543,7 +536,7 @@
 			'name': resource['name'],
 			'additional': resource['additional'],
 			'multiple': resource['multiple'],
-			'argument': resource['argument'],
+			//'argument': resource['argument'],
 			'arguments': resource['arguments'],
 		});
 
@@ -605,7 +598,7 @@
 			var classModel = $.extend( true, {}, getClassModel( $(this).val() ) );
 			classModel['multiple'] = $(this).attr("multiple");
 			classModel['additional'] = $(this).attr("additional");
-			classModel['argument'] = $(this).attr("argument");
+			//classModel['argument'] = $(this).attr("argument");
 			classModel['arguments'] = $(this).attr("arguments");
 			classModel['name'] = $(this).attr("name"); 
 
@@ -625,7 +618,26 @@
 		// BUTTON: remove a class resource
 		rdform.on("click", "button.remove-class", function() {
 			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent();
-			classContainer.remove();
+			var thisClass = classContainer.children("div[typeof]");			
+			//console.log( thisClass );
+			//
+
+			if ( thisClass.attr('multiple') ) {
+				// TODO ...
+			} else {
+				var classModel = $.extend( true, {}, getClassModel( thisClass.attr('typeof') ) );
+				classModel['additional'] = thisClass.attr('additional');
+				classModel['name'] = thisClass.attr('name');
+				classModel['value'] = thisClass.attr('typeof');
+				classModel['arguments'] = thisClass.attr('arguments');
+				var newClassContainer = createHTMLResource( classModel );
+
+				classContainer.hide( "slow", function() {
+					$(classContainer).before( newClassContainer );
+					classContainer.remove();
+				});	
+			}
+
 			return false;
 		});
 
@@ -649,9 +661,11 @@
 			$(thisClass).attr("arguments", JSON.stringify( arguments ) );
 
 			// TODO dont need this anymore, instead obsolete cpl HOOK
+			/*
 			var index = $(thisClass).attr("index");
 			++index;
 			$(thisClass).attr("index", index);
+			*/
 
 			$(classContainer).hide();	
 			$(this).parentsUntil("div.rdform-resource-group").parent().after( classContainer );
