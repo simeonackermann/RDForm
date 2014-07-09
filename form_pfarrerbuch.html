@@ -4,22 +4,22 @@
         <!-- hidden person name -->
         <input name="pid" type="hidden" value="{foaf:name}" />
 
-        <label>l(ist Geistlicher)</label>
+        <label>l(ist Pfarrer)</label>
         <input type="literal" boolean name="hp:isPastor" datatype="xsd:boolean" />
 
-        <label>Label:</label>
+        <label>l(Label):</label>
         <input type="literal" name="rdfs:label" value="{foaf:name} (*{hp:birthDate} †{hp:dateOfDeath})" datatype="xsd:string" readonly required />
 
-        <label>l(Nachname:)</label>
+        <label>l(Nachname):</label>
         <input type="literal" name="foaf:name" value="{foaf:firstName} {foaf:lastName}" datatype="xsd:string" required />
 
-        <label>l(Vorname:)</label>
+        <label>l(Vorname):</label>
         <input type="literal" name="foaf:firstName" datatype="xsd:string" required />
 
         <label>Alternativer Vorname:</label>
         <input type="literal" name="foaf:firstNameAlt" datatype="xsd:string" />
 
-        <label>Nachname:</label>
+        <label>l(Nachname):</label>
         <input type="literal" name="foaf:lastName" datatype="xsd:string" required />
 
         <label>Alternativer Nachname:</label>
@@ -31,52 +31,52 @@
             <option value="woman">Frau</option>            
         </select>-->
 
-        <label>Geschlecht (select):</label>
+        <label>l(Geschlecht) (select):</label>
         <input type="literal" select name="foaf:gender" datatype="xsd:string"
             select-options='["k.A.", "Frau", "Mann"]'
         />
 
-        <label>Geschlecht (autocomplete):</label>
+        <label>l(Geschlecht) (autocomplete):</label>
         <input type="literal" name="foaf:gender" datatype="xsd:string" autocomplete
             query-apitype="local"
             query-values='["k.A.", "Frau", "Mann"]'
         />        
 
-        <label>Geburtsdatum:</label>
+        <label>l(Geburtsdatum):</label>
         <input type="literal" name="hp:birthDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
-        <label>Geburtsort:</label>
+        <label>l(Geburtsort):</label>
         <input type="literal" name="hp:birthPlace" datatype="xsd:string" autocomplete
             query-apitype="sparql"
             query-endpoint="http://dbpedia.org/sparql"            
             query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
         />
 
-        <label>Taufdatum:</label>
+        <label>l(Taufdatum):</label>
         <input type="literal" name="hp:babtismDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
-        <label>Taufort:</label>
+        <label>l(Taufort):</label>
         <input type="literal" name="hp:babtismPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
 
-        <label>Ordinationsdatum:</label>
+        <label>l(Ordinationsdatum):</label>
         <input type="literal" name="hp:ordinationDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
-        <label>Ordinationsort:</label>
+        <label>l(Ordinationsort):</label>
         <input type="literal" name="hp:ordinationPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
 
-        <label>Vater:</label>
+        <label>l(Vater):</label>
         <input type="resource" name="hp:father" external />
 
-        <label>Mutter:</label>
+        <label>l(Mutter):</label>
         <input type="literal" name="hp:mother" datatype="xsd:string" /> <!-- resource type person --> <!-- auswahl xsd:date, xsd:gYear, … -->
 
-        <label>Kinder:</label>
+        <label>l(Kinder):</label>
         <input type="literal" name="hp:child" datatype="xsd:string" /> <!-- resource type person --> <!-- auswahl xsd:date, xsd:gYear, … -->
 
-        <label>Sterbedatum:</label>
+        <label>l(Sterbedatum):</label>
         <input type="literal" name="hp:dateOfDeath" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
-        <label>Sterbeort:</label>
+        <label>l(Sterbeort):</label>
         <input type="literal" name="hp:placeOfDeath" datatype="xsd:string" autocomplete
             query-endpoint="http://dbpedia.org/sparql"
             query-apitype="sparql"
@@ -89,7 +89,7 @@
         />  
         -->              
 
-        <input type="resource" name="hp:attendedSchool" value="EventAusbildung" title="Schule" 
+        <input type="resource" name="hp:attendedSchool" value="EventAusbildung" title="l(Schule)" 
             arguments='{"pid":"{pid}" }' multiple additional            
         />
         <!--arguments='[{"pid":"{pid}"}]'-->
@@ -103,7 +103,7 @@
         </fieldset>
         -->
 
-        <label>Kommentar/Freitext:</label>
+        <label>l(Bemerkung):</label>
         <input type="literal" textarea name="rdfs:comment" datatype="xsd:string" multiple />
     </div>
         
@@ -122,10 +122,10 @@
     -->
     <!-- tmp klasse mittels hook vor result ausgabe entfernen -->
 
-    <legend>Schule</legend>
+    <legend>l(Schule)</legend>
     <div typeof="hp:Event" resource="hp:attendingSchool-{i}-{pid}" return-resource="{rdf:object}" id="EventAusbildung">
 
-        <label>Label:</label>
+        <label>l(Label):</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
 
         <label>Person</label>
@@ -134,19 +134,19 @@
         <label>Beziehung</label>
         <input type="resource" external name="rdf:predicate" value="hp:attendedSchool" readonly />
 
-        <label>Schule:</label>
+        <label>l(Schule):</label>
         <input type="resource" external name="rdf:object" /> 
 
-        <label>Begin:</label>
+        <label>l(Begin):</label>
         <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
-        <label>End:</label>
+        <label>l(Ende):</label>
         <input type="literal" name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />        
     </div>    
 
-    <legend>Stelle</legend>
+    <legend>l(Pfarrstelle)</legend>
     <div typeof="hp:Event" resource="hp:hasPosition-{i}-{pid}" return-resource="{rdf:object}" id="EventPfarrstelle">
-        <label>Label:</label>
+        <label>l(Label):</label>
         <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
 
         <label>Person</label>
@@ -156,13 +156,13 @@
         <input type="resource" external name="rdf:predicate" value="hp:hasPosition" readonly />
         <!-- evtl mittels stylesheet ausblenden -->
 
-        <label>Pfarrstelle:</label>
+        <label>l(Pfarrstelle):</label>
         <input type="resource" name="rdf:object" external />
 
-        <label>Begin:</label>
+        <label>l(Begin):</label>
         <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
-        <label>End:</label>
+        <label>l(Ende):</label>
         <input type="literal" name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />        
     </div>
 
