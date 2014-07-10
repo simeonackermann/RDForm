@@ -631,17 +631,18 @@
 			prevClass = classContainer.prev("div.rdform-resource-group").children('div[typeof="'+thisClassTypeof+'"]');
 			nextClass = classContainer.next("div.rdform-resource-group").children('div[typeof="'+thisClassTypeof+'"]');
 
-
+			// remove a multiple class when it was not duplicated yet
 			if ( thisClass.attr('multiple') 
 				&& ( nextClass.length != 0 || prevClass.length != 0 )
 				) {
 				//var arguments = $.parseJSON( thisClass.attr('arguments') );
 				//var index = arguments['i'];
 					
-				if ( nextClass.length != 0 ) {
+				if ( nextClass.length != 0 ) { // remove any multiple class
+					// TODO decrease all next indexes -1
 					var thisLegend = thisClass.children("legend");
 					nextClass.prepend( thisLegend );
-				} else {
+				} else { // remove the last multiple class
 					var thisAddBtn = thisClass.children("button.duplicate-class");
 					prevClass.append( thisAddBtn );
 				}
@@ -650,6 +651,7 @@
 				});
 
 			} else {
+				// remove a class
 
 				var classModel = $.extend( true, {}, getClassModel( thisClass.attr('typeof') ) );
 				classModel['additional'] = true;
