@@ -13,6 +13,7 @@ body {
 
 .rdform-result {
 	display: none;
+	margin-bottom: 10px;
 }
 
 .rdform .duplicate-dataset {
