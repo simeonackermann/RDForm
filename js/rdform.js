@@ -1366,7 +1366,7 @@
 				value = value.replace(/[^\d]/g, '');
 			}
 		}
-		$(property).val( value );
+		$(property).attr.('value', value );
 	}
 
 	/**
