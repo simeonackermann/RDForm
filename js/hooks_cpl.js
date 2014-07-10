@@ -16,6 +16,10 @@ __initFormHandlers = function () {
 	})
 	*/
 
+	rdform.on( 'keyup', 'input', function(){
+		$(this).attr('value',$(this).val());
+	});
+
 	// change isForename checkbox value to 1/0
 	rdform.on("change", 'input:checkbox', function() {
 		$(this).val( $(this).prop("checked") ? "1" : "0" );
@@ -72,6 +76,27 @@ __createResultClassProperty = function( propertyContainer ) {
 __createClass = function ( thisClass ) {
 
 
+}
+
+__filterRESULT = function ( RESULT ) {
+
+	for ( var ci in RESULT ) {
+
+		if ( RESULT[ci]['typeof'] ==  'cpm:Professor' ) {
+
+			var resource = RESULT[ci]['resource']; 
+			resource = resource.replace(/[^a-z0-9-_]/gi,'_');
+
+			$("#rdform-prof-uri").val( resource );
+
+			break;
+
+		}
+
+	}
+
+
+	return RESULT;
 }
 
 /* own functions */

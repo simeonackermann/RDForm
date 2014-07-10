@@ -25,9 +25,12 @@
 <div class="container">
     <h1>Professorenkatalog Formular</h1>
 
-    <div id="rdform-formstore">
-    	
-    </div>
+    <input type="hidden" id="rdform-prof-uri" />
+    <div class="panel panel-default">
+		<div class="panel-heading"><h3 class="panel-title">Bereits erstellte Professoren</h3></div>
+		<div class="panel-body" id="rdform-filestore" style="max-height: 150px; overflow-y:scroll; ">
+		</div>
+	</div>
 
     <!-- the form container -->
 	<form action="#" class="form-horizontal rdform" role="form"></form>	
@@ -47,6 +50,8 @@
     <script src="js/jquery-ui.custom.min.js"></script>
     <!-- own stuff -->
     <script src="js/rdform.js"></script>
+
+    <script src="js/store.js"></script>
 
     <script type="text/javascript">
 
