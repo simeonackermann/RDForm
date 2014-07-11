@@ -7,17 +7,14 @@ function setRDForm( rdform ) {
 // after model is parsed - init form handlers
 __initFormHandlers = function () {
 
-	// example: check mail for @
-	/*
-	rdform.find('input[name="foaf:mbox"]').change(function() {
-		if ( $(this).val().search(/\@/) == -1 ) {
-			alert("wondering - no '@' in your mail...?!");
-		}
-	})
-	*/
+	// really write checked-attrs for checkboxes
+	rdform.on( 'click', 'input[type=checkbox]', function(){
+		$(this).attr("checked", $(this).prop("checked"));
 
-	rdform.on( 'keyup', 'input', function(){
-		$(this).attr('value',$(this).val());
+	});
+
+	$("button[type=reset]").click(function() {
+		location.reload();
 	});
 
 	// change isForename checkbox value to 1/0
@@ -30,11 +27,6 @@ __initFormHandlers = function () {
 		var forenames = "";
 		
 		rdform.find('div[typeof="cpm:Forename"]').each(function() {
-			/*
-			if ( $(this).find('input[name="cpm:isFirstName"]:checked').val() == "1" ) {
-				forenames += $(this).find('input[name="cpm:forename"]').val() + " ";
-			}
-			*/
 			if ( $(this).find('input[name="cpm:isFirstName"]').prop("checked") ) {
 				forenames += $(this).find('input[name="cpm:forename"]').val() + " ";
 			}
