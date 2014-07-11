@@ -7,7 +7,7 @@ function setRDForm( rdform ) {
 // after model is parsed - init form handlers
 __initFormHandlers = function () {
 
-	// really write checked-attrs for checkboxes
+	// really write checked-attrs for checkboxes -> MASTER-BRANCH CANDIDATE
 	rdform.on( 'click', 'input[type=checkbox]', function(){
 		$(this).attr("checked", $(this).prop("checked"));
 
