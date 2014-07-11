@@ -643,9 +643,6 @@
 						--arguments['i'];
 						$(curNextClass).attr("arguments", JSON.stringify( arguments ) );
 
-						curNextClass.find('input[modvalue]').each(function() { // set wildcard inputs to default
-							$(this).val( $(this).attr('modvalue') );
-						});
 						findWildcardInputs( curNextClass );
 					});
 				} else { // remove the last multiple class
@@ -682,9 +679,6 @@
 			var thisClass = classContainer.children("div[typeof]");			
 
 			thisClass.find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
-			thisClass.find('input[modvalue]').each(function() { // set wildcard inputs to default
-				$(this).val( $(this).attr('modvalue') );
-			});
 
 			thisClass.children("legend").remove(); // remove class legend
 			thisClass.find("div").removeClass("error");
@@ -720,7 +714,7 @@
 			if ( thisLiteral.val().search("{") == -1 ) {
 				thisLiteral.val("");
 			}
-			// TODO remove duplicated literals
+			// TODO add remove duplicated literals btn
 
 			// rewrite index, radio input names index and references in wildcards
 			var index = $(thisLiteral).attr("index");
@@ -739,6 +733,13 @@
 
 		// find inputs with wildcard
 		function findWildcardInputs( env ) {
+
+			// reset inputs values with existing modvalue
+			$(env).find('input[modvalue]').each(function() {
+				if ( $(this).attr("modvalue") ) {
+					$(this).attr( "value", $(this).attr("modvalue" ) );
+				}
+			});
 
 			// text inputs with wildcard values -> bind handlers to dynamically change the value
 			$(env).find('input[value*="{"]').each(function() {
