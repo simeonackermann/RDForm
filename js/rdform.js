@@ -680,7 +680,10 @@
 
 			thisClass.children("legend").remove(); // remove class legend
 			thisClass.find("div").removeClass("error");
-			//classContainer.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
+
+			if ( $(thisClass).find('button.remove-class').length == 0 ) {
+				$('button.duplicate-class', thisClass).before('<button type="button" class="btn btn-link btn-xs remove-class" title="'+ l("Remove class %s", $(thisClass).attr('typeof') ) +'"><span class="glyphicon glyphicon-remove"></span> '+ l("remove") +'</button>');
+			}
 
 			// rewrite index, radio input names index and references in wildcards
 			var arguments = $.parseJSON( $(thisClass).attr('arguments') );
