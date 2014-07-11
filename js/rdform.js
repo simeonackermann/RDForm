@@ -618,40 +618,46 @@
 		// BUTTON: remove a class resource
 		rdform.on("click", "button.remove-class", function() {
 			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent();
-			
-			var thisClass = classContainer.children("div[typeof]");			
+			var thisClass = classContainer.children("div[typeof]");
 			var thisClassTypeof = thisClass.attr('typeof');
-			/*var arguments = $.parseJSON( thisClass.attr('arguments') );
-			var thisClassIndex = arguments['i'];
-			var prevClassIndex = 0;
-			var nextClassIndex = 0;*/
-			
-			var nextClass = $();
-			var prevClass = $();
-			prevClass = classContainer.prev("div.rdform-resource-group").children('div[typeof="'+thisClassTypeof+'"]');
-			nextClass = classContainer.next("div.rdform-resource-group").children('div[typeof="'+thisClassTypeof+'"]');
+			var prevClass = classContainer.prev("div.rdform-resource-group").children('div[typeof="'+thisClassTypeof+'"]');
+			var nextClass = classContainer.next("div.rdform-resource-group").children('div[typeof="'+thisClassTypeof+'"]');
 
-			// remove a multiple class when it was not duplicated yet
+			// remove a multiple class when it was allready duplicated (has next or prev)
 			if ( thisClass.attr('multiple') 
 				&& ( nextClass.length != 0 || prevClass.length != 0 )
 				) {
-				//var arguments = $.parseJSON( thisClass.attr('arguments') );
-				//var index = arguments['i'];
-					
+
 				if ( nextClass.length != 0 ) { // remove any multiple class
-					// TODO decrease all next indexes -1
-					var thisLegend = thisClass.children("legend");
+					//maybe add legend to the next class
+					var thisLegend = thisClass.children("legend"); 
 					nextClass.prepend( thisLegend );
+
+					// decrease all next indexes in arguments and reload wildcard-inputs
+					classContainer.nextAll("div.rdform-resource-group").each(function() {
+						var curNextClass = $(this).children('div[typeof="'+thisClassTypeof+'"]');
+						if ( curNextClass.length == 0 ) {
+							return false;						
+						}
+						var arguments = $.parseJSON( $(curNextClass).attr('arguments') );
+						--arguments['i'];
+						$(curNextClass).attr("arguments", JSON.stringify( arguments ) );
+
+						curNextClass.find('input[modvalue]').each(function() { // set wildcard inputs to default
+							$(this).val( $(this).attr('modvalue') );
+						});
+						findWildcardInputs( curNextClass );
+					});
 				} else { // remove the last multiple class
 					var thisAddBtn = thisClass.children("button.duplicate-class");
 					prevClass.append( thisAddBtn );
 				}
+
 				classContainer.hide( "slow", function() {
 					classContainer.remove();
 				});
 
-			} else {
-				// remove a class
+			} else { // remove a single additional or multiple-additional class -> add the add-resource button
 
 				var classModel = $.extend( true, {}, getClassModel( thisClass.attr('typeof') ) );
 				classModel['additional'] = true;
@@ -682,19 +688,16 @@
 
 			thisClass.children("legend").remove(); // remove class legend
 			thisClass.find("div").removeClass("error");
-			//classContainer.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
+
+			// add remove btn if not already there
+			if ( $(thisClass).find('button.remove-class').length == 0 ) {
+				$('button.duplicate-class', thisClass).before('<button type="button" class="btn btn-link btn-xs remove-class" title="'+ l("Remove class %s", $(thisClass).attr('typeof') ) +'"><span class="glyphicon glyphicon-remove"></span> '+ l("remove") +'</button>');
+			}
 
 			// rewrite index, radio input names index and references in wildcards
 			var arguments = $.parseJSON( $(thisClass).attr('arguments') );
 			++arguments['i'];
 			$(thisClass).attr("arguments", JSON.stringify( arguments ) );
-
-			// TODO dont need this anymore, instead obsolete cpl HOOK
-			/*
-			var index = $(thisClass).attr("index");
-			++index;
-			$(thisClass).attr("index", index);
-			*/
 
 			$(classContainer).hide();	
 			$(this).parentsUntil("div.rdform-resource-group").parent().after( classContainer );
@@ -717,8 +720,7 @@
 			if ( thisLiteral.val().search("{") == -1 ) {
 				thisLiteral.val("");
 			}
-			//literalContainer.removeClass("error");
-			//literalContainer.append('<a class="btn btn-link" href="#"><i class="icon-remove"></i> entfernen</a>');
+			// TODO remove duplicated literals
 
 			// rewrite index, radio input names index and references in wildcards
 			var index = $(thisLiteral).attr("index");
@@ -739,9 +741,7 @@
 		function findWildcardInputs( env ) {
 
 			// text inputs with wildcard values -> bind handlers to dynamically change the value
-			// TODO: doesnt work for dynamically added fields
-			$(env).find('input[value*="{"]').each(function() {			
-			//rdform.on("change", 'input[value*="{"]', function() {
+			$(env).find('input[value*="{"]').each(function() {
 				var wildcards = new Object();
 				var thisInput = $(this);
 				var envClass = $(this).parentsUntil("div[typeof]").parent();
