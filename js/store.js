@@ -1,4 +1,8 @@
-$(document).ready(function(){	
+$(document).ready(function(){
+
+	$(".feedback button").click(function() {
+		window.location.href='mailto:s.ackermann@mail.de?subject=RDForm Professorenkatalog';
+	});
 
 	var firstSubmit = true;
 	$("form.rdform").submit(function() {

@@ -25,6 +25,20 @@
 <div class="container">
     <h1>Professorenkatalog Formular</h1>
 
+    <p class="feedback">
+    	<button type="button" class="btn btn-default btn-lg" title="Für Fragen und Fehlermeldungen zum Formular hier klicken">
+			<span class="glyphicon glyphicon-envelope"></span> 
+		</button>
+
+    </p>
+    <style type="text/css">
+    .feedback {
+    	position: fixed;
+    	top: 100px; right: -5px;
+
+    }
+    </style>
+
     <input type="hidden" id="rdform-prof-uri" />
     <div class="panel panel-default">
 		<div class="panel-heading">		
@@ -33,8 +47,8 @@
 			</h3>			
 		</div>
 		<div class="panel-body" id="rdform-filestore" style="max-height: 150px; overflow-y:scroll; ">
-		</div>
-	</div>
+		</div>		
+	</div>	
 
     <!-- the form container -->
 	<form action="#" class="form-horizontal rdform" role="form"></form>	
