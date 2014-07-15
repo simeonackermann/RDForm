@@ -1,8 +1,3 @@
-var rdform;
-function setRDForm( rdform ) {
-	this.rdform = rdform;		
-}
-
 // after model is parsed - init form handlers
 __initFormHandlers = function () {
 
