@@ -1,3 +1,18 @@
+/**
+  * init default variables
+  */
+var _ID_ = "rdform";
+var rdform; // rdform DOM object
+var MODEL = new Array();
+var RESULT = new Array();
+var PREFIXES = new Object();	// RDF prefixes		
+var BASEPREFIX;
+
+// TODO: put PREFIXES and BASEPREFIX into MODEL as Objects
+
+/**
+  * RDForm Plugin base constructor
+  */
 (function ( $ ) {
 	/**
 	  * default plugin settings
@@ -8,19 +23,7 @@
 		hooks: "js/hooks.js",
 		lang: "",
 		ontologie: "",
-	}
-
-	/**
-	  * init default variables
-	  */
-	var _ID_ = "rdform"; // TODO: add id to html form
-	var rdform; // rdform DOM object
-	var MODEL = new Array();
-	var RESULT = new Array();
-	var PREFIXES = new Object();	// RDF prefixes		
-	var BASEPREFIX;
-
-	// TODO: put PREFIXES and BASEPREFIX into MODEL as Objects
+	}	
 	
 	/**
 	  * plugin base constructor
@@ -30,8 +33,8 @@
 	  */
 	$.fn.RDForm = function( options ) {		
 
-		// overide defaults
-        var opts = $.extend(settings, options);
+		// overide defaults settings
+        $.extend(settings, options);
 		
 		rdform = $(this);
 		rdform.append( '<div class="row"><p id="error-msg" class="alert alert-error hide"></p></div>' );				
@@ -76,7 +79,7 @@
     			alert('Error on loading JavaScript hooks file "'+settings.hooks+'". Is the filename right?');
 			})
 			.done(function() {			
-				setRDForm( rdform ); // set rdform var in hooks file
+				//setRDForm( rdform ); // set rdform var in hooks file
 
 				// load nd parse model file
 				$.ajax({ 
@@ -84,15 +87,15 @@
 					type: "GET",
 					dataType: "text",
 					success: function( model ) {
-						parseFormModel( 'rdform', model )
+						RDForm.parseFormModel( 'rdform', model )
 						
-						rdform.append( createHTMLForm() );
+						rdform.append( RDForm.createHTMLForm() );
 
 						rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
-											'<button type="reset" class="btn btn-default">'+ l("reset") +'</button> ' + 
-											'<button type="submit" class="btn btn-lg btn-primary">'+ l("create") +'</button>' + 
+											'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
+											'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
 										'</div></div>' );
-						initFormHandler();
+						RDForm.initFormHandler();
 					},
 					error: function() {
 						alert('Error when calling data model file "'+settings.model+'". Is the filename right?');
@@ -101,10 +104,18 @@
 		});
 
 		// add result div
-		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
+		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
 
     	return this;
-	};
+	};	
+
+}( jQuery ));
+
+/**
+  * RDForm main object
+  *
+  */
+RDForm = {
 
 	/**
 	  * Parse form model, get the type via param
@@ -112,16 +123,16 @@
 	  * @param type The type of the model. Currently only rdform available
 	  * @return void
 	  */
-	parseFormModel = function( type, model ) {
+	parseFormModel: function( type, model ) {
 		switch (type) {
 			case 'rdform':
-				parseRDFormModel( model );
+				RDForm.parseRDFormModel( model );
 				break;
 			default:
 				alert( "Unknown model type \"" + type  + "\"" );
 				break;
 		}
-	}
+	},
 
 
 	/**
@@ -130,7 +141,7 @@
 	  * @data Model as a string from config file
 	  * @return void
 	  */
-	parseRDFormModel = function( data ) {
+	parseRDFormModel: function( data ) {
 		var dom_model = $.parseHTML( data );
 
 		// get base
@@ -156,13 +167,13 @@
 
 			curClass['typeof'] = $(this).attr("typeof"); // TODO: test if all importants attrs exists !!!			
 			curClass['resource'] = $(this).attr("resource"); 
-			curClass['legend'] = l( $(this).prev("legend").text() );
+			curClass['legend'] = RDForm.l( $(this).prev("legend").text() );
 			if ( $(this).attr("id") )
 				curClass['id'] = $(this).attr("id");
 			if ( $(this).attr("return-resource") )
 				curClass['return-resource'] = $(this).attr("return-resource");
 
-			validatePrefix( curClass['typeof'] );
+			RDForm.validatePrefix( curClass['typeof'] );
 
 			// walk the input-properties
 			$(this).children('input').each(function() {
@@ -176,11 +187,11 @@
 				curProperty['type'] = $(this).attr("type");
 				curProperty['name'] = $(this).attr("name");
 				curProperty['value'] = $(this).val();
-				curProperty['label'] = l( $(this).prev("label").text() );
+				curProperty['label'] = RDForm.l( $(this).prev("label").text() );
 				curProperty['multiple'] = $(this).attr("multiple"); 
 				curProperty['readonly'] = $(this).attr("readonly");
 
-				validatePrefix( curProperty['name'] );
+				RDForm.validatePrefix( curProperty['name'] );
 
 				var success = true;
 				switch ( curProperty['type'] ) {
@@ -188,7 +199,7 @@
 						// TODO use a function to get all optiional/required attributes
 						// -> http://stackoverflow.com/questions/14645806/get-all-attributes-of-an-element-using-jquery
 						curProperty['datatype'] = $(this).attr("datatype");
-						curProperty['placeholder'] = l( $(this).attr("placeholder") );
+						curProperty['placeholder'] = RDForm.l( $(this).attr("placeholder") );
 						curProperty['required'] = $(this).attr("required");						
 						curProperty['autocomplete'] = $(this).attr("autocomplete");
 						curProperty['textarea'] = $(this).attr("textarea");
@@ -211,7 +222,7 @@
 					
 					case "resource":
 						curProperty['typeof'] = curClass['typeof'];
-						curProperty['title'] = l( $(this).attr("title") );
+						curProperty['title'] = RDForm.l( $(this).attr("title") );
 						curProperty['additional'] = $(this).attr("additional");
 						//curProperty['argument'] = $(this).attr("argument");
 						curProperty['arguments'] = $(this).attr("arguments");
@@ -277,7 +288,7 @@
 			}			
 		}
 		console.log( "Model = ", MODEL );				
-	} // end of parseFormModel
+	}, // end of parseFormModel	
 
 	/**
 	  * Get the model of a class by the class name (typeof) or id
@@ -285,7 +296,7 @@
 	  * @classTypeof String of the needed class model
 	  * @return The model of the class
 	  */
-	getClassModel = function( classTypeof ) {
+	getClassModel: function( classTypeof ) {
 		var classModel = false;
 		for ( mi in MODEL ) {
 			if ( MODEL[mi]['typeof'] == classTypeof || MODEL[mi]['id'] == classTypeof ) {
@@ -297,33 +308,33 @@
 			alert( "Class \"" + classTypeof + "\" doesnt exists but refered..." );
 		}
 		return classModel;
-	}
+	},
 
 	/**
 	  * Create the HTML form and append all root classes in MODEL
 	  *
 	  * @return HTML DOM of the form
 	  */
-	createHTMLForm = function() {
+	createHTMLForm: function() {
 
 		var elem = $('<form></form>');
 		
 		for ( var mi in MODEL ) {
 			if ( MODEL[mi]['isRootClass'] ) {				
-				elem.append( createHTMLClass( MODEL[mi] ) );
+				elem.append( RDForm.createHTMLClass( MODEL[mi] ) );
 			}
 		}
 
 		return elem.html();
-	}
+	},
 
 	/**
-	  * Create a HTML class
+	  * Create a class for the HTML form
 	  *
 	  * @classModel Model-Object of the current class
 	  * @return HTML DOM object of the class
 	  */
-	createHTMLClass = function( classModel ) {		
+	createHTMLClass: function( classModel ) {		
 		/* TODO: max depth
 		if( typeof(depth) === 'undefined' ) var depth = 0;
 		depth += 1;
@@ -365,23 +376,24 @@
 		thisLegend.append( '<small>a '+ classModel['typeof'] +'</small>' );	
 		thisClass.append( thisLegend );
 
+		// add the properties
 		for ( var pi in classModel['properties'] ) {
 			var property =  classModel['properties'][pi];
-			thisClass.append( createHTMLProperty( property ) );				
+			thisClass.append( RDForm.createHTMLProperty( property ) );				
 		}
 		
 		if ( classModel['additional'] !== undefined ) {
-			thisClass.append('<button type="button" class="btn btn-link btn-xs remove-class" title="'+ l("Remove class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-remove"></span> '+ l("remove") +'</button>');
+			thisClass.append('<button type="button" class="btn btn-link btn-xs remove-class" title="'+ RDForm.l("Remove class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
 		}		
 
 		// add button for multiple classes
 		if ( classModel['multiple'] ) {
 			//thisClass.attr('index', 1);
-			thisClass.append('<button type="button" class="btn btn-default btn-xs duplicate-class" title="'+ l("Duplicate class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-plus"></span> '+ l("add") +'</button>');
+			thisClass.append('<button type="button" class="btn btn-default btn-xs duplicate-class" title="'+ RDForm.l("Duplicate class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
 		}
 
 		return thisClass;
-	}
+	},
 	
 	/**
 	  * Create HTML propertie, decides if its a hidden, literal, resource, ...
@@ -389,7 +401,7 @@
 	  * @property The object of the current proprtie
 	  * @return HTML DOM object of the propertie
 	  */
-	createHTMLProperty = function( property ) {
+	createHTMLProperty: function( property ) {
 
 		var thisProperty;
 
@@ -400,10 +412,10 @@
 				break;
 
 			case "literal":
-				thisProperty = createHTMLiteral( property );
+				thisProperty = RDForm.createHTMLiteral( property );
 				break;
 			case "resource":
-				thisProperty = createHTMLResource( property );
+				thisProperty = RDForm.createHTMLResource( property );
 				break;			
 
 			default:
@@ -412,7 +424,7 @@
 
 		}
 		return thisProperty;
-	}
+	},
 
 	/**
 	  * Create literal propertie group  
@@ -420,7 +432,7 @@
 	  * @literal Object of the current literal propertie
 	  * @return  HTML DOM object of the literal group
 	  */
-	createHTMLiteral = function( literal )  {
+	createHTMLiteral: function( literal )  {
 
 		var thisFormGroup = $('<div class="form-group '+_ID_+'-literal-group"></div>');
 		var thisInputContainer = $('<div class="col-xs-9"></div>');		
@@ -486,13 +498,13 @@
 
 		if ( literal['multiple'] ) {
 			thisInput.attr('index', 1);
-			thisInputContainer.append('<button type="button" class="btn btn-default btn-xs duplicate-literal" title="'+ l("Duplicate literal %s", literal['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ l("add") +'</button>');
+			thisInputContainer.append('<button type="button" class="btn btn-default btn-xs duplicate-literal" title="'+ RDForm.l("Duplicate literal %s", literal['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
 		}
 
 		thisFormGroup.append( thisInputContainer );		
 
 		return thisFormGroup;
-	}
+	},
 
 	/**
 	  * Create a group for a new resource. It can be a new subclass, an add button for an new subclass or a single input field for an external resource
@@ -500,7 +512,7 @@
 	  * @resource Object of the current resource from MODEL
 	  * @return HTML DOM object of the resource group
 	  */
-	createHTMLResource = function( resource ) {		
+	createHTMLResource: function( resource ) {		
 
 		var curFormGroup = $('<div class="form-group '+_ID_+'-resource-group"></div>');
 		var resourceClass;
@@ -509,7 +521,7 @@
 			resourceClass = $("<input />");						
 		}
 		else {
-			var classModel = $.extend( true, {}, getClassModel(resource['value']) );
+			var classModel = $.extend( true, {}, RDForm.getClassModel(resource['value']) );
 			// add button for additional or same resources (like person know person)
 			if ( resource['typeof'] == resource['value'] || typeof(resource['additional']) !== "undefined" ) {				
 				if ( classModel['legend'] )
@@ -525,7 +537,7 @@
 				classModel['name'] = resource['name'];
 				classModel['multiple'] = resource['multiple'];
 				classModel['arguments'] = resource['arguments'];
-				resourceClass = createHTMLClass( classModel );
+				resourceClass = RDForm.createHTMLClass( classModel );
 			}
 		}
 		/*
@@ -568,13 +580,13 @@
 		}
 
 		return curFormGroup;
-	}
+	},
 
 	/*******************************************************
 	 *	Init form button handlers after building the form
 	 * 
 	 *******************************************************/
-	initFormHandler = function() {
+	initFormHandler: function() {
 		/*
 		$('body').on('focus',".date", function(){
 			//$(".datepicker").datepicker('hide'); // if enabled resets the format
@@ -589,20 +601,20 @@
 
 		// validate input values on change
 		rdform.on("change", "input", function() {
-			userInputValidation( $(this) );
+			RDForm.userInputValidation( $(this) );
 		});
 
 		// BUTTON: add a class-resource
 		rdform.on("click", "button.add-class-resource", function() {
 			//var classModel = getClassModel( $(this).val() );
-			var classModel = $.extend( true, {}, getClassModel( $(this).val() ) );
+			var classModel = $.extend( true, {}, RDForm.getClassModel( $(this).val() ) );
 			classModel['multiple'] = $(this).attr("multiple");
 			classModel['additional'] = $(this).attr("additional");
 			//classModel['argument'] = $(this).attr("argument");
 			classModel['arguments'] = $(this).attr("arguments");
 			classModel['name'] = $(this).attr("name"); 
 
-			var thisClass = createHTMLClass( classModel );
+			var thisClass = RDForm.createHTMLClass( classModel );
 
 			$(thisClass).hide();	
 			$(this).before( thisClass );
@@ -643,7 +655,7 @@
 						--arguments['i'];
 						$(curNextClass).attr("arguments", JSON.stringify( arguments ) );
 
-						findWildcardInputs( curNextClass );
+						RDForm.findWildcardInputs( curNextClass );
 					});
 				} else { // remove the last multiple class
 					var thisAddBtn = thisClass.children("button.duplicate-class");
@@ -656,13 +668,13 @@
 
 			} else { // remove a single additional or multiple-additional class -> add the add-resource button
 
-				var classModel = $.extend( true, {}, getClassModel( thisClass.attr('typeof') ) );
+				var classModel = $.extend( true, {}, RDForm.getClassModel( thisClass.attr('typeof') ) );
 				classModel['additional'] = true;
 				classModel['multiple'] = thisClass.attr('multiple');
 				classModel['name'] = thisClass.attr('name');
 				classModel['value'] = thisClass.attr('typeof');
 				classModel['arguments'] = thisClass.attr('arguments');
-				var newClassContainer = createHTMLResource( classModel );
+				var newClassContainer = RDForm.createHTMLResource( classModel );
 
 				classContainer.hide( "slow", function() {
 					$(classContainer).before( newClassContainer );
@@ -685,7 +697,7 @@
 
 			// add remove btn if not already there
 			if ( $(thisClass).find('button.remove-class').length == 0 ) {
-				$('button.duplicate-class', thisClass).before('<button type="button" class="btn btn-link btn-xs remove-class" title="'+ l("Remove class %s", $(thisClass).attr('typeof') ) +'"><span class="glyphicon glyphicon-remove"></span> '+ l("remove") +'</button>');
+				$('button.duplicate-class', thisClass).before('<button type="button" class="btn btn-link btn-xs remove-class" title="'+ RDForm.l("Remove class %s", $(thisClass).attr('typeof') ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
 			}
 
 			// rewrite index, radio input names index and references in wildcards
@@ -927,34 +939,34 @@
 			if ( proceed ) {
 				$("button[type=submit]").html("Datensatz aktualisieren");
 				//createClasses();
-				createResult();
+				RDForm.createResult();
 
-				outputResult();
+				RDForm.outputResult();
 			}
 
 			return false;
 		});
 
-	} // end of initFormHandler	
+	}, // end of initFormHandler	
 
 	/**
 	  * Walk every class (div[typeof]) in the HTML form to create the RESULT
 	  *
 	  * @return void
 	  */
-	createResult = function() {
+	createResult: function() {
 
 		RESULT = new Array();
 
 		rdform.children("div[typeof]").each(function( ci ) {
-			createResultClass( $(this) );
+			RDForm.createResultClass( $(this) );
 		});
 
 		if ( typeof __filterRESULT !== "undefined" )
 			RESULT = __filterRESULT( RESULT );
 
 		console.log( "Result = ", RESULT );
-	}
+	},
 
 	/**
 	  * Add a class and its properties in the RESULT array
@@ -962,7 +974,7 @@
 	  * @cls HTML DOM object of the current class
 	  * @return the ID for this class or the return ID
 	  */
-	createResultClass = function( cls )  {
+	createResultClass: function( cls )  {
 
 		var thisClass = new Object();
 		var properties = new Array();
@@ -977,13 +989,13 @@
 
 			// decide if its a hidden,literal or resource property
 			if ( $(this).hasClass(_ID_ + "-hidden-group") ) {
-				property = createResultHidden( $(this).find('input') );
+				property = RDForm.createResultHidden( $(this).find('input') );
 			}
 			else if ( $(this).hasClass(_ID_ + "-literal-group") ) {
-				property = createResultLiteral( $(this).find('input,textarea,select') );
+				property = RDForm.createResultLiteral( $(this).find('input,textarea,select') );
 			}
 			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
-				property = createResultResource( $(this) );
+				property = RDForm.createResultResource( $(this) );
 			}
 			else {
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
@@ -1006,7 +1018,7 @@
 			__createClass( $(cls) );
 
 		var classResource = $(cls).attr("resource");
-		var wildcardsFct = replaceWildcards( classResource, $(cls), getWebsafeString );
+		var wildcardsFct = RDForm.replaceWildcards( classResource, $(cls), RDForm.getWebsafeString );
 
 		// dont save classes with wildcard pointers when every value is empty
 		if ( classResource.search(/\{.*\}/) != -1 && wildcardsFct['count'] == 0 ) {
@@ -1025,10 +1037,10 @@
 
 		// if it has a return-resource take this for the return
 		if ( $(cls).attr("return-resource") ) {
-			classResource = replaceWildcards( $(cls).attr("return-resource"), $(cls), getWebsafeString )['str'];
+			classResource = RDForm.replaceWildcards( $(cls).attr("return-resource"), $(cls), RDForm.getWebsafeString )['str'];
 		}
 		return classResource;
-	}
+	},
 
 	/**
 	  * Create a hidden property for the RESULT
@@ -1036,20 +1048,20 @@
 	  * @hidden HTML DOM Object of the current hidden input
 	  * @return Object of this hidden property
 	  */
-	createResultHidden = function( hidden ) {
+	createResultHidden: function( hidden ) {
 		var thisHidden = new Object();		
 
 		thisHidden['type'] = 'hidden';
 
 		var val = $(hidden).val();
-		val = replaceWildcards( val, $(hidden).parentsUntil("div[typeof]").parent() )['str'];
+		val = RDForm.replaceWildcards( val, $(hidden).parentsUntil("div[typeof]").parent() )['str'];
 		thisHidden['value'] = '"' + val + '"';
 		
 		var name = $(hidden).attr("name");
 		thisHidden['name'] = name;
 
 		return thisHidden;
-	}
+	},
 
 	/**
 	  * Create a literal property (text,boolean,textarea) for the RESULT
@@ -1057,7 +1069,7 @@
 	  * @literal HTML DOM Object of the current hidden input
 	  * @return Object of this property
 	  */
-	createResultLiteral = function( literal ) {
+	createResultLiteral: function( literal ) {
 		var thisLiteral = new Object();		
 
 		var val = $(literal).val();
@@ -1093,12 +1105,12 @@
 				thisLiteral['datatype'] = $(literal).attr("datatype");
 			}
 			
-			val = replaceWildcards( val, $(literal).parentsUntil("div[typeof]").parent() )['str'];
+			val = RDForm.replaceWildcards( val, $(literal).parentsUntil("div[typeof]").parent() )['str'];
 			thisLiteral['value'] = '"' + val + '"';
 		}		
 
 		return thisLiteral;
-	}
+	},
 
 	/**
 	  * Create a resource-class property for the RESULT
@@ -1106,7 +1118,7 @@
 	  * @env HTML DOM Object of the current resource group
 	  * @return Object of this resource property
 	  */
-	createResultResource = function( env ) {
+	createResultResource: function( env ) {
 
 		var resource = new Object();
 		var resourceID = false;
@@ -1116,12 +1128,12 @@
 		resourceGroup = $(env).children('div[typeof]');
 		if ( resourceGroup.length > 0 ) { 
 			// create a new class for this resource and take its return ID
-			resourceID = createResultClass( resourceGroup );
+			resourceID = RDForm.createResultClass( resourceGroup );
 		}
 		// search for a external resource input
 		else if ( $(env).find('input[external]').length > 0 ) {
 			resourceGroup = $(env).find('input[external]');			
-			resourceID = replaceWildcards( $(resourceGroup).val(), $(env).parent("div[typeof]"), getWebsafeString )['str'];
+			resourceID = RDForm.replaceWildcards( $(resourceGroup).val(), $(env).parent("div[typeof]"), RDForm.getWebsafeString )['str'];
 		}
 
 		if ( resourceID ) {
@@ -1131,14 +1143,14 @@
 		}
 
 		return resource;
-	}
+	},
 
 	/**
 	  *	Create result string from baseprefix, prefixes and RESULT array and output it in the result textarea
 	  *
 	  * @return void
 	  */
-	outputResult = function() {
+	outputResult: function() {
 		var resultStr = "";
 
 		if ( BASEPREFIX != "" ) {
@@ -1183,7 +1195,7 @@
 		$("."+_ID_+"-result textarea").attr( "rows" , ( lines.length ) );
 		$('html, body').animate({ scrollTop: $("."+_ID_+"-result").offset().top }, 200);		
 
-	} // end of creating result
+	}, // end of creating result
 
 
 	/************************** HELPER FUNCTIONS ******************************/
@@ -1197,7 +1209,7 @@
 	 * 
 	 * @return Object. Keys: 'str', 'count'
 	 */
-	replaceWildcards = function( str, envClass, strFct ) {
+	replaceWildcards: function( str, envClass, strFct ) {
 		var counted = 0;
  
 		if ( str.search(/\{.*\}/) != -1 ) { // look if it has wilcards {...}
@@ -1237,8 +1249,7 @@
 						break;
 
 					default :
-						//wcdVal = wcdVal.val();
-						wcdVal = replaceWildcards( wcdVal.val(), env )['str'];
+						wcdVal = RDForm.replaceWildcards( wcdVal.val(), env )['str'];
 				}
 
 				// passing wildcard value to the function
@@ -1257,7 +1268,7 @@
 			}
 		}
 		return new Object( { 'str' : str, 'count' : counted } );
-	}
+	},
 
 	/**
 	  * Validate if a string as a prefix which is defined in the form
@@ -1265,7 +1276,7 @@
 	  * @str String to check
 	  * @return Boolean if its valid or null if the string does not has any prefix
 	  */
-	validatePrefix = function( str ) {
+	validatePrefix: function( str ) {
 
 		if ( str.search(":") != -1 ) {
 			str = str.split(":")[0];
@@ -1281,11 +1292,11 @@
 		}
 		console.log( "Prefix \"" + str + "\" not defined in the form model (see attribute 'prefix')" );
 		return false;
-	}
+	},
 
 	/*
 	TODO: maybe write this helper function:
-	getParentClass = function( env ) {
+	getParentClass: function( env ) {
 		var thisClass = env.parentsUntil("div[typeof]").parent().clone();
 		thisClass.find( "div[typeof]" ).remove();
 		return thisClass;
@@ -1299,7 +1310,7 @@
 	  * @str String
 	  * return String with only a-z0-9-_
 	  */
-	getWebsafeString = function ( str ) {
+	getWebsafeString: function ( str ) {
 		// str= str.replace(/[ÀÁÂÃÄÅ]/g,"A");
 		// replace dictionary
 		var dict = {
@@ -1321,7 +1332,7 @@
 			return dict[char] || char;
 		});
 		return str.replace(/[^a-z0-9-_]/gi,'');
-	}
+	},
 
 	/*
 	 * Validate and correct input values depending on the datatype after user changed the value
@@ -1329,7 +1340,7 @@
 	 * @property DOM object with input element
 	 * @return void
 	 */
-	userInputValidation = function ( property ) {	
+	userInputValidation: function ( property ) {	
 		
 		var value = $(property).val();
 		value = value.trim();
@@ -1370,7 +1381,7 @@
 			}
 		}
 		$(property).attr('value', value );
-	}
+	},
 
 	/**
 	  * Translate a string
@@ -1380,7 +1391,7 @@
 	  *
 	  * @return String. The translated string
 	  */
-	l = function( str, param ) {		
+	l: function( str, param ) {		
 
 		if ( typeof str === "string" && str != "" ) {
 
@@ -1408,6 +1419,6 @@
 			}
 		}
 		return str;
-	}
+	},
 
-}( jQuery ));
+}
