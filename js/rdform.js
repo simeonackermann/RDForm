@@ -101,7 +101,7 @@
 		});
 
 		// add result div
-		rdform.after( '<div class="row rdform-result"><legend>'+ l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
+		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
 
     	return this;
 	};
@@ -1177,11 +1177,11 @@
 			}
 		}
 		
-		$(".rdform-result").show();
-		$(".rdform-result textarea").val( resultStr );		
+		$("."+_ID_+"-result").show();
+		$("."+_ID_+"-result textarea").val( resultStr );		
 		var lines = resultStr.split("\n");
-		$(".rdform-result textarea").attr( "rows" , ( lines.length ) );
-		$('html, body').animate({ scrollTop: $(".rdform-result").offset().top }, 200);		
+		$("."+_ID_+"-result textarea").attr( "rows" , ( lines.length ) );
+		$('html, body').animate({ scrollTop: $("."+_ID_+"-result").offset().top }, 200);		
 
 	} // end of creating result
 
