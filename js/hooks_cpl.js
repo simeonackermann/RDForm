@@ -61,6 +61,13 @@ __createResultClassProperty = function( propertyContainer ) {
 // before generating the class object from input values and properties
 __createClass = function ( thisClass ) {
 
+	
+
+	if ( $(thisClass).attr("typeof") == "cpm:Professor" ) {
+		//console.log( 'Prof' );
+		var label = $(thisClass).find('input[name="rdfs:label"]').first().val();
+		//console.log( 'label=' + label );
+	}
 
 }
 
@@ -70,12 +77,21 @@ __filterRESULT = function ( RESULT ) {
 
 		if ( RESULT[ci]['typeof'] ==  'cpm:Professor' ) {
 
-			var resource = RESULT[ci]['resource']; 
-			resource = resource.replace(/[^a-z0-9-_]/gi,'_');
+			for ( var pi in RESULT[ci]['properties'] ) {
+				if ( RESULT[ci]['properties'][pi]['name'] == 'rdfs:label' ) {
 
-			$("#rdform-prof-uri").val( resource );
+					var resource = RESULT[ci]['properties'][pi]['value'];
+					resource = $.trim( resource.replace(/"/gi,'') );
 
-			break;
+					//var resource = RESULT[ci]['resource']; 
+					resource = resource.replace(/[^a-z0-9-_]/gi,'_');
+
+					$("#rdform-prof-uri").val( resource );
+
+					break;
+
+				}
+			}			
 
 		}
 

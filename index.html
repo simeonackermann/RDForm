@@ -32,23 +32,42 @@
 
     </p>
     <style type="text/css">
+
+	.rdform {
+		display: none;
+	}
+
+	#rdform-filestore {
+		/*max-height: 150px; overflow-y:scroll;*/
+	}
+
     .feedback {
     	position: fixed;
     	top: 100px; right: -5px;
 
     }
+    .show-list {
+    	//display: none;
+    }
+    .rdform-edit-class-resource  {
+    	display: none;
+    }
+    .rdform-class-group legend small {
+    	display: none;	
+    }
     </style>
 
     <input type="hidden" id="rdform-prof-uri" />
-    <div class="panel panel-default">
+    <div class="panel panel-default rdform-filestore-wrapper">
 		<div class="panel-heading">		
-			<h3 class="panel-title">Bereits erstellte Professoren
-				<button type="reset" class="btn btn-default btn-xs pull-right ">Professor hinzufügen</button>
+			<h3 class="panel-title">Bereits erstellte Professoren				
 			</h3>			
 		</div>
-		<div class="panel-body" id="rdform-filestore" style="max-height: 150px; overflow-y:scroll; ">
-		</div>		
+		<div class="panel-body" id="rdform-filestore"></div>		
+		<div class="panel-footer"><button type="submit" class="btn btn-default btn-xs show-form">neuen Professor erstellen</button></div>				
 	</div>	
+
+	<p><button type="button" class="btn btn-link btn-xs show-list" style="display:none">zurück zur Liste</button></p>
 
     <!-- the form container -->
 	<form action="#" class="form-horizontal rdform" role="form"></form>	

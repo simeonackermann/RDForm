@@ -1,5 +1,45 @@
 $(document).ready(function(){
 
+	var showForm = false;
+	$(document).on("click", ".show-list", function() {		
+		showForm = false;
+		/*
+		$(".show-list").hide();
+		$(".rdform-filestore-wrapper").show("slow");
+		rdform.hide("fast");
+		$(".rdform-result").hide("fast");
+		*/
+		window.location.reload();
+	});
+
+	window.onbeforeunload = function (e) {
+
+		if ( $(rdform).css("display") == "block" && showForm ) {
+
+			e = e || window.event;
+
+		    // For IE and Firefox prior to version 4
+		    if (e) {
+		        e.returnValue = 'Sure?';
+		    }
+
+		    // For Safari
+		    return 'Sure?';
+
+		}
+	};
+
+	function myShowForm() {
+		showForm = true;
+		$(".show-list").show();
+		rdform.show("fast");
+		$(".rdform-filestore-wrapper").hide("slow");	
+	}
+
+	$(".show-form").click(function() {
+		myShowForm();
+	});	
+
 	$(".feedback button").click(function() {
 		window.location.href='mailto:s.ackermann@mail.de?subject=RDForm Professorenkatalog';
 	});
@@ -7,12 +47,15 @@ $(document).ready(function(){
 	var firstSubmit = true;
 	$("form.rdform").submit(function() {
 		if ( firstSubmit )
-			$(".rdform-result").after( '<p><button type="button" class="btn btn-info rdform-write-file">In Datei schreiben</button></p><p id="rdform-store-msg"></p>' );
+			$(".rdform-result").after(  '<p><button type="button" class="btn btn-info rdform-write-file">In Datei schreiben</button></p>' +
+										'<p><button type="button" class="btn btn-link btn-xs show-list">zurück zur Liste</button></p>' +
+										'<p id="rdform-store-msg"></p>'
+				);
 
 		firstSubmit = false;		
 	});
 
-	$(document).on("click", "#rdform-filestore a", function() {
+	$(document).on("click", "#rdform-filestore a", function() {		
 
 		$.post( "store/getFile.php", { name: $(this).text() })
 			.done(function( jsondata ) {
@@ -21,7 +64,11 @@ $(document).ready(function(){
 
 					findWildcardInputs( $("form.rdform") );
 				}
+
 		});
+
+		myShowForm();
+
 		return false;
 	});	
 
