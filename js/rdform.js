@@ -189,6 +189,7 @@ RDForm = {
 				curProperty['value'] = $(this).val();
 				curProperty['label'] = RDForm.l( $(this).prev("label").text() );
 				curProperty['multiple'] = $(this).attr("multiple"); 
+				curProperty['additional'] = $(this).attr("additional");
 				curProperty['readonly'] = $(this).attr("readonly");
 
 				RDForm.validatePrefix( curProperty['name'] );
@@ -223,7 +224,7 @@ RDForm = {
 					case "resource":
 						curProperty['typeof'] = curClass['typeof'];
 						curProperty['title'] = RDForm.l( $(this).attr("title") );
-						curProperty['additional'] = $(this).attr("additional");
+						
 						//curProperty['argument'] = $(this).attr("argument");
 						curProperty['arguments'] = $(this).attr("arguments");
 						curProperty['external'] = $(this).attr("external");
@@ -442,6 +443,14 @@ RDForm = {
 
 		// TODO: cleanup the following spaghettic code....!
 
+		if ( literal['additional'] !==  undefined ) {			
+			thisInputContainer.append ('<button type="button" class="btn btn-default btn-sm add-class-literal" name="'+ literal['name'] +'" title="Add literal '+literal['name']+'">' + 
+											'<span class="glyphicon glyphicon-plus"></span> '+ literal['label'] +
+										'</button>' );
+			thisFormGroup.append( thisInputContainer );
+			return thisFormGroup;
+		}
+
 		var thisLabel = $("<label></label>");
 		thisLabel.attr({
 			//'for': curPropertyID,
@@ -528,7 +537,8 @@ RDForm = {
 					var btnText = classModel['legend'];
 				else
 					var btnText = resource['title'] ? resource['title'] : resource['name'] + " - " + resource['value'];
-				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'">' + 
+
+				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="Add resource-class '+resource['value']+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
 			} 
@@ -604,6 +614,31 @@ RDForm = {
 			RDForm.userInputValidation( $(this) );
 		});
 
+		// BUTTON: add a class-literal
+		rdform.on("click", "button.add-class-literal", function() {
+			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent();
+			var thisClass = $(this).parentsUntil("div[typeof]").parent();
+			var classModel = RDForm.getClassModel( $(thisClass).attr('typeof') );
+			for ( var pi in classModel.properties ) {
+				if ( classModel.properties[pi].name == $(this).attr("name") ) {
+					var thisLiteral = $.extend( true, {}, classModel.properties[pi] );					
+					break;
+				}
+			}
+			thisLiteral.additional = undefined;
+			
+			var thisLiteralHTML = RDForm.createHTMLiteral( thisLiteral );
+
+			$(thisLiteralHTML).hide();
+			$(literalContainer).before( thisLiteralHTML );
+			$(thisLiteralHTML).show("slow");
+			$(literalContainer).remove();
+			
+			findWildcardInputs( thisLiteralHTML );
+
+			return false;
+		});
+
 		// BUTTON: add a class-resource
 		rdform.on("click", "button.add-class-resource", function() {
 			//var classModel = getClassModel( $(this).val() );
@@ -616,10 +651,9 @@ RDForm = {
 
 			var thisClass = RDForm.createHTMLClass( classModel );
 
-			$(thisClass).hide();	
+			$(thisClass).hide();
 			$(this).before( thisClass );
 			$(thisClass).show("slow");
-
 			$(this).remove();
 
 			findWildcardInputs( thisClass );
