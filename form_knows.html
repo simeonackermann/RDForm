@@ -19,7 +19,9 @@
     />
     
     <input type="resource" name="bio:has-forename" value="ClassForename" multiple />
-    <input type="resource" name="foaf:knows" value="foaf:Person" title="knows Person" />   
+    <input type="resource" name="foaf:knows" value="foaf:Person" title="knows Person"
+      arguments='{"pid":"{pid}" }'
+    />   
 
   </div> 
 
@@ -32,7 +34,7 @@
     <input name="cpm:forenamePosition" type="hidden" datatype="xsd:int" value="1" />
 
     <label>ist Rufname?</label>
-    <input name="cpm:isFirstName" type="boolean" datatype="xsd:boolean" checked />
+    <input type="literal" boolean name="cpm:isFirstName" datatype="xsd:boolean" checked />
   </div>
 
   <legend>Geburt</legend>
