@@ -1104,28 +1104,20 @@ RDForm = {
 	  * @return Object of this property
 	  */
 	createResultLiteral: function( literal ) {
-		var thisLiteral = new Object();		
+		var thisLiteral = new Object();	
 
-		var val = $(literal).val();
+		if ( $(literal).length == 0 ) {
+			return thisLiteral; // return empty object fur null litreal e.g. add btn
+		}
+
+		var val = $(literal).val();		
 
 		if ( $(literal).attr("type") == "checkbox" ) {
 			val = $(literal).prop("checked").toString();
 		}
-		//&& ( ( $(this).attr("type") == "radio" && $(this).prop("checked") || $(this).attr("type") != "radio" ) )
-
-		switch ( $(literal).get(0).tagName ) {
-			/*
-			case 'INPUT' :
-				break;
-
-			case 'TEXTAREA' :
-				break;
-			*/
-
-			case 'SELECT' :
-				val = $( ":selected", $(literal) ).val();
-				break;
-
+		
+		if ( $(literal).prop("tagName") == "SELECT" ) {
+			val = $( ":selected", $(literal) ).val();
 		}
 
 		if ( val != "" ) {
@@ -1138,7 +1130,7 @@ RDForm = {
 			if ( $(literal).attr("datatype") ) {
 				thisLiteral['datatype'] = $(literal).attr("datatype");
 			}
-			
+
 			val = RDForm.replaceWildcards( val, $(literal).parentsUntil("div[typeof]").parent() )['str'];
 			thisLiteral['value'] = '"' + val + '"';
 		}		
@@ -1245,7 +1237,7 @@ RDForm = {
 	 */
 	replaceWildcards: function( str, envClass, strFct ) {
 		var counted = 0;
- 
+
 		if ( str.search(/\{.*\}/) != -1 ) { // look if it has wilcards {...}
 
 			var strWcds = str.match(/\{[^\}]*/gi);
