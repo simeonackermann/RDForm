@@ -765,7 +765,11 @@ RDForm = {
 			if ( thisLiteral.val().search("{") == -1 ) {
 				thisLiteral.val("");
 			}
-			// TODO add remove duplicated literals btn
+
+			//add remove button
+			if ( $(literalContainer).find('button.remove-literal').length == 0 ) {
+				$('button.duplicate-literal', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(this).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
+			}
 
 			// rewrite index, radio input names index and references in wildcards
 			var index = $(thisLiteral).attr("index");
