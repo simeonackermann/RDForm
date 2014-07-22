@@ -371,7 +371,7 @@ RDForm = {
 		thisLegend.append(	'<div class="rdform-edit-class-resource">' +
 								'<small>'+ classModel['resource'] +'</small>' +
 								'<span class="glyphicon glyphicon-pencil"></span>' +
-								'<input type="text" value="'+ classModel['resource'] +'" class="form-control" />' +
+								'<input type="text" value="'+ classModel['resource'] +'" class="form-control input-sm" />' +
 							'</div>' );	
 
 		thisLegend.append( '<small>a '+ classModel['typeof'] +'</small>' );	
@@ -529,10 +529,12 @@ RDForm = {
 		if ( resource['external'] !== undefined ) {	// add simple input for external resources
 			resourceClass = $("<input />");						
 		}
-		else {
+		else { // add regular resource
 			var classModel = $.extend( true, {}, RDForm.getClassModel(resource['value']) );
-			// add button for additional or same resources (like person know person)
+			
+			// add button for additional or same resources (like person knows person)
 			if ( resource['typeof'] == resource['value'] || typeof(resource['additional']) !== "undefined" ) {				
+				//curFormGroup.addClass("add-resoource-button-group");
 				if ( classModel['legend'] )
 					var btnText = classModel['legend'];
 				else
@@ -541,9 +543,8 @@ RDForm = {
 				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="Add resource-class '+resource['value']+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
-			} 
-			// get class-model for the resource
-			else {
+			} 			
+			else { // create class-model for the resource
 				classModel['name'] = resource['name'];
 				classModel['multiple'] = resource['multiple'];
 				classModel['arguments'] = resource['arguments'];
@@ -619,15 +620,19 @@ RDForm = {
 			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent();
 			var thisClass = $(this).parentsUntil("div[typeof]").parent();
 			var classModel = RDForm.getClassModel( $(thisClass).attr('typeof') );
+			// find literal in class-model
 			for ( var pi in classModel.properties ) {
 				if ( classModel.properties[pi].name == $(this).attr("name") ) {
 					var thisLiteral = $.extend( true, {}, classModel.properties[pi] );					
 					break;
 				}
 			}
-			thisLiteral.additional = undefined;
+			thisLiteral.additional = undefined; // set additional to undefined so createHTMLiteral will really create the literal
 			
 			var thisLiteralHTML = RDForm.createHTMLiteral( thisLiteral );
+
+			//add remove button
+			$(thisLiteralHTML).find("input,textarea").after('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(this).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
 
 			$(thisLiteralHTML).hide();
 			$(literalContainer).before( thisLiteralHTML );
@@ -674,10 +679,10 @@ RDForm = {
 				&& ( nextClass.length != 0 || prevClass.length != 0 )
 				) {
 
-				if ( nextClass.length != 0 ) { // remove any multiple class
-					//maybe add legend to the next class
-					var thisLegend = thisClass.children("legend"); 
-					nextClass.prepend( thisLegend );
+				if ( nextClass.length != 0 ) { // remove any middle multiple class
+					//show legend if the first class was deleted
+					if ( prevClass.length == 0 )
+						nextClass.children("legend").show();
 
 					// decrease all next indexes in arguments and reload wildcard-inputs
 					classContainer.nextAll("div.rdform-resource-group").each(function() {
@@ -689,7 +694,7 @@ RDForm = {
 						--arguments['i'];
 						$(curNextClass).attr("arguments", JSON.stringify( arguments ) );
 
-						RDForm.findWildcardInputs( curNextClass );
+						findWildcardInputs( curNextClass );
 					});
 				} else { // remove the last multiple class
 					var thisAddBtn = thisClass.children("button.duplicate-class");
@@ -710,8 +715,8 @@ RDForm = {
 				classModel['arguments'] = thisClass.attr('arguments');
 				var newClassContainer = RDForm.createHTMLResource( classModel );
 
-				classContainer.hide( "slow", function() {
-					$(classContainer).before( newClassContainer );
+				$(classContainer).before( newClassContainer );
+				classContainer.hide( "slow", function() {					
 					classContainer.remove();
 				});	
 			}
@@ -726,7 +731,7 @@ RDForm = {
 
 			thisClass.find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
 
-			thisClass.children("legend").remove(); // remove class legend
+			thisClass.children("legend").hide(); // hide legend
 			thisClass.find("div").removeClass("error");
 
 			// add remove btn if not already there
@@ -777,14 +782,45 @@ RDForm = {
 			return false;
 		});		
 
+		// BUTTON: remove literal
+		rdform.on("click", "button.remove-literal", function() {
+			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent();
+			var literalName = $(this).prev().attr("name");
+			var prevLiteral = literalContainer.prev("div.rdform-literal-group").find('*[name="'+literalName+'"]');
+			var nextLiteral = literalContainer.next("div.rdform-literal-group").find('*[name="'+literalName+'"]');
+			
+			// if its the only duplicated literal - add button from model
+			if ( prevLiteral.length == 0 && nextLiteral.length == 0 ) {
+
+				var thisClass = $(this).parentsUntil("div[typeof]").parent();
+				var classModel = RDForm.getClassModel( $(thisClass).attr('typeof') );
+				// find literal in class-model
+				for ( var pi in classModel.properties ) {
+					if ( classModel.properties[pi].name == literalName ) {
+						var thisLiteral = $.extend( true, {}, classModel.properties[pi] );					
+						break;
+					}
+				}				
+				var thisLiteralHTML = RDForm.createHTMLiteral( thisLiteral );
+				literalContainer.before( thisLiteralHTML );
+
+			} 
+			else { // middle or last literal, maybe copy duplicate-btn
+				var addBtn = literalContainer.find("button.duplicate-literal");
+				prevLiteral.parent().append( addBtn );
+			}
+
+			literalContainer.hide( "slow", function() {					
+				literalContainer.remove();
+			});
+		});
+
 		// find inputs with wildcard
 		function findWildcardInputs( env ) {
 
 			// reset inputs values with existing modvalue
 			$(env).find('input[modvalue]').each(function() {
-				if ( $(this).attr("modvalue") ) {
-					$(this).attr( "value", $(this).attr("modvalue" ) );
-				}
+				$(this).val( $(this).attr("modvalue" ) );
 			});
 
 			// text inputs with wildcard values -> bind handlers to dynamically change the value
