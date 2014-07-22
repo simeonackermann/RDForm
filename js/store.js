@@ -3,12 +3,6 @@ $(document).ready(function(){
 	var showForm = false;
 	$(document).on("click", ".show-list", function() {		
 		showForm = false;
-		/*
-		$(".show-list").hide();
-		$(".rdform-filestore-wrapper").show("slow");
-		rdform.hide("fast");
-		$(".rdform-result").hide("fast");
-		*/
 		window.location.reload();
 	});
 
@@ -41,7 +35,13 @@ $(document).ready(function(){
 	});	
 
 	$(".feedback button").click(function() {
-		window.location.href='mailto:s.ackermann@mail.de?subject=RDForm Professorenkatalog';
+		$(this).hide();
+		$(".feedback p").show();
+		//window.location.href='mailto:s.ackermann@mail.de?subject=RDForm Professorenkatalog';
+	});
+	$(".feedback").focusout(function() {
+		$(".feedback button").show();
+		$(".feedback p").hide();
 	});
 
 	var firstSubmit = true;

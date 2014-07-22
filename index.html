@@ -25,12 +25,17 @@
 <div class="container">
     <h1>Professorenkatalog Formular</h1>
 
-    <p class="feedback">
+    <div class="feedback">
     	<button type="button" class="btn btn-default btn-lg" title="Für Fragen und Fehlermeldungen zum Formular hier klicken">
 			<span class="glyphicon glyphicon-envelope"></span> 
 		</button>
-
-    </p>
+		<p>
+		<strong>Kontakt: </strong><br /><br />
+		Simeon Ackermann<br />
+		Telefon: 0177 5150466<br />
+		E-Mail: <a href="mailto:s.ackermann@mail.de">s.ackermann@mail.de</a><br />
+		</p>
+    </div>
     <style type="text/css">
 
 	.rdform {
@@ -44,7 +49,13 @@
     .feedback {
     	position: fixed;
     	top: 100px; right: -5px;
-
+    }
+    .feedback p {
+    	display: none;
+    	border: 1px solid lightGray;
+    	padding: 5px;
+    	border-radius: 5px;
+    	background: white;
     }
     .show-list {
     	//display: none;
