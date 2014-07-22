@@ -620,15 +620,19 @@ RDForm = {
 			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent();
 			var thisClass = $(this).parentsUntil("div[typeof]").parent();
 			var classModel = RDForm.getClassModel( $(thisClass).attr('typeof') );
+			// find literal in class-model
 			for ( var pi in classModel.properties ) {
 				if ( classModel.properties[pi].name == $(this).attr("name") ) {
 					var thisLiteral = $.extend( true, {}, classModel.properties[pi] );					
 					break;
 				}
 			}
-			thisLiteral.additional = undefined;
+			thisLiteral.additional = undefined; // set additional to undefined so createHTMLiteral will really create the literal
 			
 			var thisLiteralHTML = RDForm.createHTMLiteral( thisLiteral );
+
+			//add remove button
+			$(thisLiteralHTML).find("input,textarea").after('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(this).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
 
 			$(thisLiteralHTML).hide();
 			$(literalContainer).before( thisLiteralHTML );
@@ -777,6 +781,39 @@ RDForm = {
 
 			return false;
 		});		
+
+		// BUTTON: remove literal
+		rdform.on("click", "button.remove-literal", function() {
+			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent();
+			var literalName = $(this).prev().attr("name");
+			var prevLiteral = literalContainer.prev("div.rdform-literal-group").find('*[name="'+literalName+'"]');
+			var nextLiteral = literalContainer.next("div.rdform-literal-group").find('*[name="'+literalName+'"]');
+			
+			// if its the only duplicated literal - add button from model
+			if ( prevLiteral.length == 0 && nextLiteral.length == 0 ) {
+
+				var thisClass = $(this).parentsUntil("div[typeof]").parent();
+				var classModel = RDForm.getClassModel( $(thisClass).attr('typeof') );
+				// find literal in class-model
+				for ( var pi in classModel.properties ) {
+					if ( classModel.properties[pi].name == literalName ) {
+						var thisLiteral = $.extend( true, {}, classModel.properties[pi] );					
+						break;
+					}
+				}				
+				var thisLiteralHTML = RDForm.createHTMLiteral( thisLiteral );
+				literalContainer.before( thisLiteralHTML );
+
+			} 
+			else { // middle or last literal, maybe copy duplicate-btn
+				var addBtn = literalContainer.find("button.duplicate-literal");
+				prevLiteral.parent().append( addBtn );
+			}
+
+			literalContainer.hide( "slow", function() {					
+				literalContainer.remove();
+			});
+		});
 
 		// find inputs with wildcard
 		function findWildcardInputs( env ) {
