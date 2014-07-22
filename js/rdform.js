@@ -371,7 +371,7 @@ RDForm = {
 		thisLegend.append(	'<div class="rdform-edit-class-resource">' +
 								'<small>'+ classModel['resource'] +'</small>' +
 								'<span class="glyphicon glyphicon-pencil"></span>' +
-								'<input type="text" value="'+ classModel['resource'] +'" class="form-control" />' +
+								'<input type="text" value="'+ classModel['resource'] +'" class="form-control input-sm" />' +
 							'</div>' );	
 
 		thisLegend.append( '<small>a '+ classModel['typeof'] +'</small>' );	
@@ -529,10 +529,12 @@ RDForm = {
 		if ( resource['external'] !== undefined ) {	// add simple input for external resources
 			resourceClass = $("<input />");						
 		}
-		else {
+		else { // add regular resource
 			var classModel = $.extend( true, {}, RDForm.getClassModel(resource['value']) );
-			// add button for additional or same resources (like person know person)
+			
+			// add button for additional or same resources (like person knows person)
 			if ( resource['typeof'] == resource['value'] || typeof(resource['additional']) !== "undefined" ) {				
+				//curFormGroup.addClass("add-resoource-button-group");
 				if ( classModel['legend'] )
 					var btnText = classModel['legend'];
 				else
@@ -541,9 +543,8 @@ RDForm = {
 				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="Add resource-class '+resource['value']+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
-			} 
-			// get class-model for the resource
-			else {
+			} 			
+			else { // create class-model for the resource
 				classModel['name'] = resource['name'];
 				classModel['multiple'] = resource['multiple'];
 				classModel['arguments'] = resource['arguments'];
@@ -674,10 +675,10 @@ RDForm = {
 				&& ( nextClass.length != 0 || prevClass.length != 0 )
 				) {
 
-				if ( nextClass.length != 0 ) { // remove any multiple class
-					//maybe add legend to the next class
-					var thisLegend = thisClass.children("legend"); 
-					nextClass.prepend( thisLegend );
+				if ( nextClass.length != 0 ) { // remove any middle multiple class
+					//show legend if the first class was deleted
+					if ( prevClass.length == 0 )
+						nextClass.children("legend").show();
 
 					// decrease all next indexes in arguments and reload wildcard-inputs
 					classContainer.nextAll("div.rdform-resource-group").each(function() {
@@ -689,7 +690,7 @@ RDForm = {
 						--arguments['i'];
 						$(curNextClass).attr("arguments", JSON.stringify( arguments ) );
 
-						RDForm.findWildcardInputs( curNextClass );
+						findWildcardInputs( curNextClass );
 					});
 				} else { // remove the last multiple class
 					var thisAddBtn = thisClass.children("button.duplicate-class");
@@ -710,8 +711,8 @@ RDForm = {
 				classModel['arguments'] = thisClass.attr('arguments');
 				var newClassContainer = RDForm.createHTMLResource( classModel );
 
-				classContainer.hide( "slow", function() {
-					$(classContainer).before( newClassContainer );
+				$(classContainer).before( newClassContainer );
+				classContainer.hide( "slow", function() {					
 					classContainer.remove();
 				});	
 			}
@@ -726,7 +727,7 @@ RDForm = {
 
 			thisClass.find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
 
-			thisClass.children("legend").remove(); // remove class legend
+			thisClass.children("legend").hide(); // hide legend
 			thisClass.find("div").removeClass("error");
 
 			// add remove btn if not already there
@@ -782,9 +783,7 @@ RDForm = {
 
 			// reset inputs values with existing modvalue
 			$(env).find('input[modvalue]').each(function() {
-				if ( $(this).attr("modvalue") ) {
-					$(this).attr( "value", $(this).attr("modvalue" ) );
-				}
+				$(this).val( $(this).attr("modvalue" ) );
 			});
 
 			// text inputs with wildcard values -> bind handlers to dynamically change the value
