@@ -191,13 +191,10 @@
   <legend>Qualifikation</legend>
   <div typeof="cpm:Qualification" resource="cpl:Qualification/{puri}/{rdfs:label}" multiple>
     <label>Bezeichnung</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Qualifikationsbeschreibung" />
 
-    <label>von:</label>
-    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-
-    <label>bis:</label>
-    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <label>Jahr:</label>
+    <input type="literal" name="cpm:date" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
     <label>Anmerkung</label>
     <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
