@@ -22,28 +22,20 @@
 </head>
 <body>
 
-<div class="container">
-    <h1>Professorenkatalog Formular</h1>
-
-    <div class="feedback">
-    	<button type="button" class="btn btn-default btn-lg" title="Für Fragen und Fehlermeldungen zum Formular hier klicken">
-			<span class="glyphicon glyphicon-envelope"></span> 
-		</button>
-		<p>
-		<strong>Kontakt: </strong><br /><br />
-		Simeon Ackermann<br />
-		Telefon: 0177 5150466<br />
-		E-Mail: <a href="mailto:s.ackermann@mail.de">s.ackermann@mail.de</a><br />
-		</p>
-    </div>
-    <style type="text/css">
+	<style type="text/css">
 
 	.rdform {
 		display: none;
 	}
 
-	#rdform-filestore {
-		/*max-height: 150px; overflow-y:scroll;*/
+	#rdform-filestore li:hover {
+		background-color: #F5F5F5;
+	}
+	#rdform-filestore .delete-prof {
+		display: none;
+	}
+	#rdform-filestore li:hover .delete-prof {
+		display: inline;
 	}
 
     .feedback {
@@ -58,7 +50,7 @@
     	background: white;
     }
     .show-list {
-    	//display: none;
+    	display: none;
     }
     .rdform-edit-class-resource  {
     	display: none;
@@ -68,13 +60,28 @@
     }
     </style>
 
+<div class="container">
+    <h1>Professorenkatalog Formular</h1>
+
+    <div class="feedback">
+    	<button type="button" class="btn btn-default btn-lg" title="Für Fragen und Fehlermeldungen zum Formular hier klicken">
+			<span class="glyphicon glyphicon-envelope"></span> 
+		</button>
+		<p>
+		<strong>Kontakt: </strong><br /><br />
+		Simeon Ackermann<br />
+		Telefon: 0177 5150466<br />
+		E-Mail: <a href="mailto:s.ackermann@mail.de">s.ackermann@mail.de</a><br />
+		</p>
+    </div>    
+
     <input type="hidden" id="rdform-prof-uri" />
     <div class="panel panel-default rdform-filestore-wrapper">
 		<div class="panel-heading">		
 			<h3 class="panel-title">Bereits erstellte Professoren				
 			</h3>			
 		</div>
-		<div class="panel-body" id="rdform-filestore"></div>		
+		<ul id="rdform-filestore" class="list-group"></ul>
 		<div class="panel-footer"><button type="submit" class="btn btn-default btn-xs show-form">neuen Professor erstellen</button></div>				
 	</div>	
 

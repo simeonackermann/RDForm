@@ -55,7 +55,7 @@ $(document).ready(function(){
 		firstSubmit = false;		
 	});
 
-	$(document).on("click", "#rdform-filestore a", function() {		
+	$(document).on("click", "#rdform-filestore a.prof-label", function() {		
 
 		$.post( "store/getFile.php", { name: $(this).text() })
 			.done(function( jsondata ) {
@@ -63,6 +63,7 @@ $(document).ready(function(){
 					$("form.rdform").html( jsondata.content );
 
 					findWildcardInputs( $("form.rdform") );
+					//RDForm.initFormHandler();
 				}
 
 		});
@@ -71,6 +72,21 @@ $(document).ready(function(){
 
 		return false;
 	});	
+
+	$(document).on( "click", "#rdform-filestore button.delete-prof", function() {
+
+		var deleteCheck = confirm("Wollen Sie diesen Professor wirklich löschen?");
+		if (deleteCheck == true) {
+
+			$.post( "store/deleteFile.php", { name: $(this).prev("a").text() })				
+				.done(function( jsondata ) {
+					getFiles();
+				
+			});
+
+		}
+	
+	});
 
 	$(document).on( "click", "button.rdform-write-file", function() {
 
@@ -87,6 +103,8 @@ $(document).ready(function(){
 		});
 	});
 
+	
+
 	getFiles = function() {
 		$.ajax("store/getFiles.php")
 			.done(function( jsondata ) {		    
@@ -100,24 +118,25 @@ $(document).ready(function(){
 			$("#rdform-filestore").html( "<i>Keine Dateien gefunden</i>" );
 			return;
 		}
-		var ul = $("<ul></ul>");
+		var ul = $('<ul></ul>');
 		for ( i in files ) {
-			ul.append( "<li><a href='#'>"+files[i]+"</a></li>" );
+			ul.append( 	"<li class='list-group-item'>" +
+							"<a href='#' title='Professor bearbeiten' class='prof-label'>"+files[i]+"</a>" +
+							'<button type="button" class="btn btn-link btn-xs pull-right delete-prof" title="Diesen Professor löschen""><span class="glyphicon glyphicon-remove"></span> löschen</button>' +
+						"</li>" );
 		}
-		$("#rdform-filestore").html( ul );
+		$("#rdform-filestore").html( ul.html() );
 	}
 
 	/*
-	THIS IS ONLY A BUGFIX - remove it later hen i can call the initFormHandler in rdform.js here!
+	THIS IS ONLY A BUGFIX - remove it later then i can call the initFormHandler in rdform.js here!
 	*/
 	// find inputs with wildcard
 	findWildcardInputs = function ( env ) {
 
 		// reset inputs values with existing modvalue
 		$(env).find('input[modvalue]').each(function() {
-			if ( $(this).attr("modvalue") ) {
-				$(this).attr( "value", $(this).attr("modvalue" ) );
-			}
+			$(this).val( $(this).attr("modvalue" ) );
 		});
 
 		// text inputs with wildcard values -> bind handlers to dynamically change the value
