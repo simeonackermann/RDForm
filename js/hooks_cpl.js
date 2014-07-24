@@ -88,10 +88,14 @@ __filterRESULT = function ( RESULT ) {
 				if ( RESULT[ci]['properties'][pi]['name'] == 'rdfs:label' ) {
 
 					var resource = RESULT[ci]['properties'][pi]['value'];
+
 					resource = $.trim( resource.replace(/"/gi,'') );
+					resource = resource.replace(/.*\./gi,'').trim();
+					resource = resource.replace(/ /gi,'_');
+					resource = RDForm.getWebsafeString(resource);
 
 					//var resource = RESULT[ci]['resource']; 
-					resource = resource.replace(/[^a-z0-9-_]/gi,'_');
+					//resource = resource.replace(/[^a-z0-9-_]/gi,'_');
 
 					$("#rdform-prof-uri").val( resource );
 
