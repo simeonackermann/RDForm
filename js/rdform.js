@@ -23,6 +23,7 @@ var BASEPREFIX;
 		hooks: "js/hooks.js",
 		lang: "",
 		ontologie: "",
+		cache: false,
 	}	
 	
 	/**
@@ -79,11 +80,11 @@ var BASEPREFIX;
     			alert('Error on loading JavaScript hooks file "'+settings.hooks+'". Is the filename right?');
 			})
 			.done(function() {			
-				//setRDForm( rdform ); // set rdform var in hooks file
+				var modelFile = settings.cache ? settings.model : settings.model + "?" + (new Date()).getTime();
 
-				// load nd parse model file
+				// load and parse model file
 				$.ajax({ 
-					url: settings.model,
+					url: modelFile,
 					type: "GET",
 					dataType: "text",
 					success: function( model ) {
