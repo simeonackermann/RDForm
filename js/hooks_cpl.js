@@ -7,6 +7,11 @@ __initFormHandlers = function () {
 
 	});
 
+	// really write textarea value to html
+	rdform.on( 'change', 'textarea', function(){
+		$(this).text( $(this).val() );
+	});
+
 	$("button[type=reset]").click(function() {
 		location.reload();
 	});
@@ -15,6 +20,8 @@ __initFormHandlers = function () {
 	rdform.on("change", 'input:checkbox', function() {
 		$(this).val( $(this).prop("checked") ? "1" : "0" );
 	});
+
+
 
 	// on change forename insert all forenames (rufname) into global input
 	rdform.on("keyup change", 'div[typeof="cpm:Forename"]', function() {
