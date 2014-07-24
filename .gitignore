@@ -1,4 +1,5 @@
 #files in filestore
 store/files
+store/archive
 
 Zugang\ htpasswd
