@@ -1,14 +1,13 @@
 /**
   * init default variables
   */
-var _ID_ = "rdform";
-var rdform; // rdform DOM object
-var MODEL = new Array();
-var RESULT = new Array();
-var PREFIXES = new Object();	// RDF prefixes		
-var BASEPREFIX;
-
-// TODO: put PREFIXES and BASEPREFIX into MODEL as Objects
+var _ID_ = "rdform",
+	rdform, // rdform DOM object
+	MODEL = new Array(),
+	RESULT = new Array(),
+	PREFIXES = new Object(),	// RDF prefixes		
+	BASEPREFIX;
+	// TODO: put PREFIXES and BASEPREFIX into MODEL as Objects
 
 /**
   * RDForm Plugin base constructor
@@ -22,7 +21,6 @@ var BASEPREFIX;
 		data: "",
 		hooks: "js/hooks.js",
 		lang: "",
-		ontologie: "",
 		cache: false,
 	}	
 	
@@ -30,7 +28,7 @@ var BASEPREFIX;
 	  * plugin base constructor
 	  *
 	  * @param[] options, override default settings
-	  * @return void
+	  * @return this
 	  */
 	$.fn.RDForm = function( options ) {		
 
@@ -40,69 +38,62 @@ var BASEPREFIX;
 		rdform = $(this);
 		rdform.append( '<div class="row"><p id="error-msg" class="alert alert-error hide"></p></div>' );				
 
-		// loading bootstrap
-		/*
-		$.ajax({
-            url:"css/bootstrap.min.css",
-            success:function(data){
-                 $("<style></style>").appendTo("head").html(data);
-            }
-        })
-		*/
-
-		// load setting file
+		// loading language file
 		if ( settings.lang != "" ) {
 			var langFile = "lang/" + settings.lang + ".js";
-			$.getScript( langFile )
-				.fail(function( jqxhr, type, exception ) {
-	    			alert('Error on loading language file "'+ langFile +'"...');
-				})
-				.done(function() {				
+			$.ajax({
+				url: langFile,
+				dataType: "script",
+				async: false,
+				error: function( jqxhr, type, exception ) {
+					alert('Error "'+exception+'" on loading language file "'+ langFile +'"');
+				}
 			});
 		}
 
-		// load external ontologie
-		if ( settings.ontologie != "" ) {
-			var ontFile = settings.ontologie;
-			$.getScript( ontFile )
-				.fail(function( jqxhr, type, exception ) {
-	    			alert('Error on loading ontologie file "'+ ontFile +'"...');
-				})
-				.done(function() {	
-			});
-		}
+		//loading hooks file
+		$.ajax({
+		 	url: settings.hooks,
+		 	dataType: "script",
+		 	async: false,
+		 	error: function( jqxhr, type, exception ) {
+		 		alert('Error "'+exception+'" on loading hooks file "'+ settings.hooks +'"');
+		 	}
+		 });
 
-		// loading hooks js file
-		$.getScript( settings.hooks )
-			.fail(function( jqxhr, type, exception ) {
-    			//$( "div.log" ).text( "Triggered ajaxError handler." );
-    			// TODO: better error reporting, instead alerts...
-    			alert('Error on loading JavaScript hooks file "'+settings.hooks+'". Is the filename right?');
-			})
-			.done(function() {			
-				var modelFile = settings.cache ? settings.model : settings.model + "?" + (new Date()).getTime();
-
-				// load and parse model file
-				$.ajax({ 
-					url: modelFile,
-					type: "GET",
-					dataType: "text",
-					success: function( model ) {
-						RDForm.parseFormModel( 'rdform', model )
-						
-						rdform.append( RDForm.createHTMLForm() );
-
-						rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
-											'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
-											'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
-										'</div></div>' );
-						RDForm.initFormHandler();
-					},
-					error: function() {
-						alert('Error when calling data model file "'+settings.model+'". Is the filename right?');
-					}
-				});
+		// loading model file
+		var modelFile = settings.cache ? settings.model : settings.model + "?" + (new Date()).getTime();
+		var model = "";
+		$.ajax({
+			url: modelFile,
+			type: "GET",
+			dataType: "text",
+			async: false,
+			success: function( m ) {
+				model = m;
+			},
+			error: function( jqxhr, type, exception ) {
+				// TODO: better error reporting, instead alerts...
+				//$( "div.log" ).text( "Triggered ajaxError handler." );    			
+				alert('Error "'+exception+'" on loading data model file "'+ settings.model +'"');
+			}
 		});
+		if ( "" == model ) return this;
+
+		// parsing model
+		RDForm.parseFormModel( 'rdform', model )
+						
+		//add model-form to my form
+		rdform.append( RDForm.createHTMLForm() );
+
+		// append submit button
+		rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
+							'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
+							'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
+						'</div></div>' );
+
+		// init form action handler
+		RDForm.initFormHandler();
 
 		// add result div
 		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
@@ -178,74 +169,52 @@ RDForm = {
 
 			// walk the input-properties
 			$(this).children('input').each(function() {
+				var success = true;
 				var curProperty = new Object();
 
-				if ( ! $(this).attr("type") ) {
+				if ( $(this).attr("type") === undefined ) { // check if type exists, set literal as default
 					$(this).attr("type", "literal");
 					console.log( "Model parsing exception: type attribute in property \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\" is not set. I manually added it as literal..." );
-				}				
+				}
+				if ( $(this).attr("name") === undefined ) { // check if name exists
+					alert( "Attention: Unnamed Property-" + $(this).attr("type") + " in \"" + curClass['typeof'] + "\". Please add any name." );
+					success = false;
+				}
 
-				curProperty['type'] = $(this).attr("type");
-				curProperty['name'] = $(this).attr("name");
-				curProperty['value'] = $(this).val();
-				curProperty['label'] = RDForm.l( $(this).prev("label").text() );
-				curProperty['multiple'] = $(this).attr("multiple"); 
-				curProperty['additional'] = $(this).attr("additional");
-				curProperty['readonly'] = $(this).attr("readonly");
+				// add all attributes: type, name, value, multiple, additional, readonly, placeholder, datatype, requiere, autocomplete, textare, boolean, checked, select, ...				
+				$.each ( $(this)[0].attributes, function( ai, attr) {
+					curProperty[ attr.name ] = attr.value;
 
+					// maybe translate same attributes
+					if ( attr.name == "placeholder" || attr.name == "title" || attr.name == "label" ) {
+						curProperty[ attr.name ] = RDForm.l( attr.value );
+					}					
+				});
 				RDForm.validatePrefix( curProperty['name'] );
-
-				var success = true;
+				curProperty['label'] = RDForm.l( $(this).prev("label").text() );				
+				
+				// do some property-type specific things
 				switch ( curProperty['type'] ) {
-					case "literal":
-						// TODO use a function to get all optiional/required attributes
-						// -> http://stackoverflow.com/questions/14645806/get-all-attributes-of-an-element-using-jquery
-						curProperty['datatype'] = $(this).attr("datatype");
-						curProperty['placeholder'] = RDForm.l( $(this).attr("placeholder") );
-						curProperty['required'] = $(this).attr("required");						
-						curProperty['autocomplete'] = $(this).attr("autocomplete");
-						curProperty['textarea'] = $(this).attr("textarea");
-						curProperty['boolean'] = $(this).attr("boolean");
-						curProperty['checked'] = $(this).attr("checked");
-
-						if ( $(this).attr("autocomplete") !== undefined )  {
-							curProperty['query-endpoint'] = $(this).attr("query-endpoint");
-							curProperty['query-apitype'] = $(this).attr("query-apitype");
-							curProperty['query-values'] = $(this).attr("query-values");
-							curProperty['query'] = $(this).attr("query");							
-						}
-
-						if ( $(this).attr("select") !== undefined ) {
-							curProperty["select"] = $(this).attr("select");
-							curProperty["select-options"] = $(this).attr("select-options");
-						}
-
-						break;			
-					
 					case "resource":
 						curProperty['typeof'] = curClass['typeof'];
-						curProperty['title'] = RDForm.l( $(this).attr("title") );
 						
-						//curProperty['argument'] = $(this).attr("argument");
-						curProperty['arguments'] = $(this).attr("arguments");
-						curProperty['external'] = $(this).attr("external");
-
-						// test if resource class exists if its not an external resource
+						// test if the resource class exists (if not external)
 						if ( curProperty['external'] === undefined ) {
 							if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
 								alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
 								success = false;
 							}
 						}
+						// add arguments-index for multiple resources
 						if ( curProperty['multiple'] !== undefined ) {
-							var arguments = new Object();
-							if ( curProperty['arguments'] !== undefined ) {
-								arguments = $.parseJSON( curProperty['arguments'] );
-							} 
+							var arguments = ( curProperty['arguments'] === undefined ) ? new Object() : $.parseJSON( curProperty['arguments'] );
 							arguments['i'] = 1;
 							curProperty['arguments'] = JSON.stringify( arguments );
 						}
-						break;										
+						break;		
+
+					case "literal":
+						break;									
 
 					case "hidden":						
 						break;
@@ -268,15 +237,19 @@ RDForm = {
 			MODEL.push( curClass );
 		})
 		
-		// define if a class is a root class (and not a resource class of another class)		
+		// define if a class as a root class (and not a resource class of another class)		
 		// TODO BUG: on relation: person -> has -> cat, cat -> lives with -> person NO ROOT CLASS exists
 		for ( var mi in MODEL ) {
 			var isRootClass = true;
 			for ( var mi2 in MODEL ) {
+				// dont need to test the same class
+				if ( MODEL[mi]['typeof'] == MODEL[mi2]['typeof'] ) continue;
+
+				// test if any resource property in model2 points to current class
 				for ( var mi2pi in MODEL[mi2]['properties'] ) {
 					var thisProperty = MODEL[mi2]['properties'][mi2pi];
-					if (   MODEL[mi]['typeof'] != MODEL[mi2]['typeof']
-						&& thisProperty['type'] == 'resource' 
+					if ( thisProperty['type'] == 'resource' 
+						&& thisProperty['value'] !== undefined
 						&& (   thisProperty['value'] == MODEL[mi]['typeof'] 
 							|| thisProperty['value'] == MODEL[mi]['id'] 
 							)
@@ -353,7 +326,7 @@ RDForm = {
 		
 		var attrs = $.extend( true, {}, classModel );
 		delete attrs['properties']; 
-		thisClass.attr( attrs ); // add all attributes insead the array properties
+		thisClass.attr( attrs ); // add all attributes except the array properties
 		
 		var thisLegend = $( "<legend>"+ classModel['legend'] +"</legend>" );
 		/*
@@ -389,7 +362,7 @@ RDForm = {
 		}		
 
 		// add button for multiple classes
-		if ( classModel['multiple'] ) {
+		if ( classModel['multiple'] !== undefined ) {
 			//thisClass.attr('index', 1);
 			thisClass.append('<button type="button" class="btn btn-default btn-xs duplicate-class" title="'+ RDForm.l("Duplicate class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
 		}
@@ -475,7 +448,7 @@ RDForm = {
 		});		
 		thisInput.attr( literal );
 
-		if ( literal['datatype'] ) {
+		if ( literal['datatype'] !== undefined ) {
 			if (  literal['datatype'].search(/.*date/) != -1 || literal['name'].search(/.*date/) != -1 ) {
 				thisInputContainer.removeClass( "col-xs-9" );
 				thisInputContainer.addClass( "col-xs-3" );
@@ -506,7 +479,7 @@ RDForm = {
 
 		thisInputContainer.append( thisInput );
 
-		if ( literal['multiple'] ) {
+		if ( literal['multiple'] != undefined ) {
 			thisInput.attr('index', 1);
 			thisInputContainer.append('<button type="button" class="btn btn-default btn-xs duplicate-literal" title="'+ RDForm.l("Duplicate literal %s", literal['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
 		}
@@ -560,7 +533,6 @@ RDForm = {
 			'name': resource['name'],
 			'additional': resource['additional'],
 			'multiple': resource['multiple'],
-			//'argument': resource['argument'],
 			'arguments': resource['arguments'],
 		});
 
@@ -577,6 +549,7 @@ RDForm = {
 				'class': 'form-control input-sm',
 				'value': resource['value'],
 				'readonly': resource['readonly'],
+				'placeholder': resource['placeholder'],
 			});
 
 			var thisLabel = $("<label>...</label>");
@@ -1344,6 +1317,7 @@ RDForm = {
 	  * @return Boolean if its valid or null if the string does not has any prefix
 	  */
 	validatePrefix: function( str ) {
+		if ( str === undefined ) return null
 
 		if ( str.search(":") != -1 ) {
 			str = str.split(":")[0];
