@@ -514,7 +514,7 @@ RDForm = {
 				else
 					var btnText = resource['title'] ? resource['title'] : resource['name'] + " - " + resource['value'];
 
-				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="Add resource-class '+resource['value']+'">' + 
+				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="' + RDForm.l("Add class %s", resource['value'])+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
 			} 			
@@ -742,7 +742,7 @@ RDForm = {
 
 			//add remove button
 			if ( $(literalContainer).find('button.remove-literal').length == 0 ) {
-				$('button.duplicate-literal', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(this).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
+				$('button.duplicate-literal', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(thisLiteral).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
 			}
 
 			// rewrite index, radio input names index and references in wildcards
