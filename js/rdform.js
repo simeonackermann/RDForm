@@ -383,7 +383,8 @@ RDForm = {
 		switch ( property['type'] ) {
 
 			case "hidden":
-				thisProperty = $( '<div class="'+_ID_+'-hidden-group"><input type="hidden" name="'+ property['name'] +'" id="" value="'+ property['value'] +'" /></div>' );
+				var val = ( property['value'] !== undefined ) ? property['value'] : "";
+				thisProperty = $( '<div class="'+_ID_+'-hidden-group"><input type="hidden" name="'+ property['name'] +'" id="" value="'+ val +'" /></div>' );
 				break;
 
 			case "literal":
@@ -1106,7 +1107,7 @@ RDForm = {
 		thisHidden['value'] = '"' + val + '"';
 		
 		var name = $(hidden).attr("name");
-		thisHidden['name'] = name;
+		thisHidden['name'] = name;		
 
 		return thisHidden;
 	},
