@@ -33,33 +33,18 @@ var _ID_ = "rdform",
 	$.fn.RDForm = function( options ) {		
 
 		// overide defaults settings
-        $.extend(settings, options);
-		
+        $.extend(settings, options);		
 		rdform = $(this);
-		rdform.append( '<div class="row"><p id="error-msg" class="alert alert-error hide"></p></div>' );				
+		rdform.append( '<div class="row"><p class="alert alert-error rdform-error hide"></p></div>' );		
 
 		// loading language file
 		if ( settings.lang != "" ) {
 			var langFile = "lang/" + settings.lang + ".js";
-			$.ajax({
-				url: langFile,
-				dataType: "script",
-				async: false,
-				error: function( jqxhr, type, exception ) {
-					alert('Error "'+exception+'" on loading language file "'+ langFile +'"');
-				}
-			});
+			ajaxAsyncScript( langFile );
 		}
 
 		//loading hooks file
-		$.ajax({
-		 	url: settings.hooks,
-		 	dataType: "script",
-		 	async: false,
-		 	error: function( jqxhr, type, exception ) {
-		 		alert('Error "'+exception+'" on loading hooks file "'+ settings.hooks +'"');
-		 	}
-		 });
+		ajaxAsyncScript( settings.hooks );
 
 		// loading model file
 		var modelFile = settings.cache ? settings.model : settings.model + "?" + (new Date()).getTime();
@@ -84,7 +69,7 @@ var _ID_ = "rdform",
 		RDForm.parseFormModel( 'rdform', model )
 						
 		//add model-form to my form
-		rdform.append( RDForm.createHTMLForm() );
+		rdform.append( RDForm.createHTMLForm() );		
 
 		// append submit button
 		rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
@@ -95,11 +80,28 @@ var _ID_ = "rdform",
 		// init form action handler
 		RDForm.initFormHandler();
 
+		// maybe add existing data
+		if ( settings.data != "" ) {
+			//ajaxAsyncScript( "js/jsonld.js" );
+			RDForm.addExistingData( undefined, settings.data );
+		}
+
 		// add result div
 		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
 
     	return this;
-	};	
+	};
+
+	ajaxAsyncScript = function( script ) {
+		$.ajax({
+			url: script,
+			dataType: "script",
+			async: false,
+			error: function( jqxhr, type, exception ) {
+				alert('Error on loading script "'+ script +'": '+exception);
+			}
+		});
+	};
 
 }( jQuery ));
 
@@ -568,6 +570,79 @@ RDForm = {
 		return curFormGroup;
 	},
 
+	/**
+	 * Add existing JSON-LD data to form
+	 *
+	 * @param string|undefined name Name of the current field (for multiple literal)
+	 * @param array|object data Values to insert
+	 * @param object env DOM modell of current environment class
+	 */
+	addExistingData : function( name, data, env ) {
+		if ( typeof env === 'undefined' ) {
+			// TODO: what to do if @type doesnt exists?
+			env = rdform.find( 'div[typeof="'+data["@type"]+'"]' );
+		}
+		console.log(data);
+		var prevKey = "";
+
+		for ( var i in data ) {
+			var curName = ( name === undefined ) ? i : name;	
+
+			if ( i[0] != "@" ) { // we dont want @id, @type, ...
+
+				if ( typeof data[i] === "string" ) { // its a literal					
+
+					var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+
+					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
+						$(env).children("div.rdform-literal-group").find( 'button.add-class-literal[name="'+curName+'"]' ).trigger("click");
+						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+					}
+
+					if ( prevKey == curName ) { // same key -> try to duplicate
+						$(literal).next().trigger("click");
+						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+					}
+
+					$(literal).val( data[i] );	
+					$(literal).trigger("keyup");
+
+					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
+						if ( data[i] == "0" || data[i] == "false" ) {
+							$(literal).removeAttr("checked");							
+						} else {
+							$(literal).trigger("click");
+						}
+					}				
+
+				} else { // its an array: literals or resource
+
+					if ( data[i][0]["@type"] ) { // its a resource
+
+						var subEnv = $(env).find( 'div[typeof="'+data[i][0]["@type"]+'"]' ).last();
+
+						if ( $(subEnv).length == 0 ) { // resourc not found -> try to find additional button
+							$(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+data[i][0]["@type"]+'"]' ).trigger("click");
+							subEnv = $(env).find( 'div[typeof="'+data[i][0]["@type"]+'"]' ).last();
+						}
+
+						for ( var j in data[i] ) { 
+							if ( j > 0 ) { // multiple resource -> trigger duplication
+								$(subEnv).find( 'button.duplicate-class' ).trigger("click");
+								subEnv = $(env).find( 'div[typeof="'+data[i][j]["@type"]+'"]' )[j];
+							}
+							RDForm.addExistingData( undefined, data[i][j], subEnv );
+						}
+					}	
+					else { // its multiple literals
+						RDForm.addExistingData( i, data[i], env );
+					}				
+				}
+			}
+			prevKey = curName;
+		}
+	},
+
 	/*******************************************************
 	 *	Init form button handlers after building the form
 	 * 
@@ -959,7 +1034,7 @@ RDForm = {
 
 		// reset button, reset form and values
 		rdform.find("button[type=reset]").click(function() {		
-			$("#error-msg").hide();
+			$(".rdform-error").hide();
 			rdform[0].reset();
 			// TODO: remove duplicates, selects ...
 			$(".rdform-result").hide();
@@ -969,15 +1044,15 @@ RDForm = {
 
 		// submit formular
 		rdform.submit(function() {			
-			$("#error-msg").hide();
+			$(".rdform-error").hide();
 			var proceed = true;
 
 			// validate required inputs
 			$("input[required]").each(function() {
 				if ( $(this).val() == "" ) {
 					$(this).parents(".form-group").addClass("error");
-					$("#error-msg").text("Bitte alle rot hinterlegten Felder ausfüllen!");
-					$("#error-msg").show();
+					$(".rdform-error").text("Bitte alle rot hinterlegten Felder ausfüllen!");
+					$(".rdform-error").show();
 					proceed = false;
 				} else {
 					$(this).parents(".form-group").removeClass("error");
