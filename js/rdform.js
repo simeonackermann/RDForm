@@ -5,9 +5,8 @@ var _ID_ = "rdform",
 	rdform, // rdform DOM object
 	MODEL = new Array(),
 	RESULT = new Array(),
-	PREFIXES = new Object(),	// RDF prefixes		
-	BASEPREFIX;
-	// TODO: put PREFIXES and BASEPREFIX into MODEL as Objects
+	JSON_RESULT = new Object(),
+	CONTEXT = new Object();
 
 /**
   * RDForm Plugin base constructor
@@ -140,7 +139,7 @@ RDForm = {
 
 		// get base
 		if ( $(dom_model).attr("base") ) {
-			BASEPREFIX = $(dom_model).attr("base");
+			CONTEXT["@base"] = $(dom_model).attr("base");
 		}		
 
 		// get prefixes
@@ -150,7 +149,7 @@ RDForm = {
 				alert( "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
 			}
 			for (var i = 0; i < prefixesArr.length - 1; i += 2) {
-				PREFIXES[ prefixesArr[i] ] = prefixesArr[i+1];
+				CONTEXT[ prefixesArr[i] ] = prefixesArr[i+1];
 			}
 		}	
 
@@ -337,7 +336,7 @@ RDForm = {
 			thisLegend.prepend( "<small>"+ classModel['name'] +"</small> " );
 		
 		if ( classModel['isRootClass'] ) {
-			thisLegend.prepend( "<small class='rdform-class-baseprefix'>"+ BASEPREFIX +"</small> " );
+			thisLegend.prepend( "<small class='rdform-class-baseprefix'>"+ CONTEXT[@base] +"</small> " );
 		}
 
 		if ( classModel['return-resource'] ) {
@@ -582,7 +581,6 @@ RDForm = {
 			// TODO: what to do if @type doesnt exists?
 			env = rdform.find( 'div[typeof="'+data["@type"]+'"]' );
 		}
-		console.log(data);
 		var prevKey = "";
 
 		for ( var i in data ) {
@@ -615,7 +613,7 @@ RDForm = {
 						}
 					}				
 
-				} else { // its an array: literals or resource
+				} else { // its an array: literals or resource ( $.isArray(data[i]) )
 
 					if ( data[i][0]["@type"] ) { // its a resource
 
@@ -1080,16 +1078,49 @@ RDForm = {
 	  */
 	createResult: function() {
 
-		RESULT = new Array();
+		RESULT = new Array();		
 
+		RDForm.createJSONResult();
+		/*
 		rdform.children("div[typeof]").each(function( ci ) {
 			RDForm.createResultClass( $(this) );
 		});
+		*/
 
-		if ( typeof __filterRESULT !== "undefined" )
-			RESULT = __filterRESULT( RESULT );
+		//console.log( "Result = ", RESULT );
+		console.log( "Result = ", JSON_RESULT );		
+	},
 
-		console.log( "Result = ", RESULT );
+	createJSONResult: function() {
+
+		JSON_RESULT = new Object();			
+
+		rdform.children("div[typeof]").each(function( ci ) {			
+			var curClass = RDForm.getResultClass( $(this) );
+			if ( ! $.isEmptyObject( curClass ) ) { // dont add empty classes
+				if (! JSON_RESULT.hasOwnProperty( curClass["@resource"] ) ) {
+					JSON_RESULT[ curClass["@resource"] ] = new Array();
+				}
+				JSON_RESULT[ curClass["@resource"] ].push( curClass["@value"] );
+			}
+		});
+
+		// make one length array classes to normal classes
+		for ( var ci in JSON_RESULT ) {
+			if ( JSON_RESULT[ci].length == 1 ) {
+				JSON_RESULT[ci] = JSON_RESULT[ci][0];
+			}
+		}
+
+		// if just one rootClass set as only class
+		if ( Object.keys(JSON_RESULT).length == 1 ) {
+			for ( var ci in JSON_RESULT ) {
+				JSON_RESULT = JSON_RESULT[ci];
+			}
+		}
+
+		// add context
+		JSON_RESULT['@context'] = CONTEXT;
 	},
 
 	/**
@@ -1098,6 +1129,79 @@ RDForm = {
 	  * @cls HTML DOM object of the current class
 	  * @return the ID for this class or the return ID
 	  */
+	getResultClass: function( cls ) {
+
+		var thisClass = new Object(),
+			properties = new Object();
+
+		// walk each property (div-group literal,resource,hidden)
+		cls.children("div").each(function() {
+
+			var property = new Object();
+			//var curPropName = "";
+
+			if ( typeof __createResultClassProperty !== "undefined" )
+				__createResultClassProperty( $(this) ); // TODO: give input or resource class
+
+			// decide if its a hidden,literal or resource property
+			if ( $(this).hasClass(_ID_ + "-hidden-group") ) {
+				//property = RDForm.createResultHidden( $(this).find('input') );
+			}
+			else if ( $(this).hasClass(_ID_ + "-literal-group") ) {
+				property = RDForm.getResultLiteral( $(this).find('input,textarea,select') );
+			}
+			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
+				property = RDForm.getResultResource( $(this) );
+			}
+			else {
+				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
+			}
+
+			if ( ! $.isEmptyObject( property ) ) { // dont add empty properties
+				if (! properties.hasOwnProperty( property["@resource"] ) ) {
+					properties[ property["@resource"] ] = new Array();
+				}
+				properties[ property["@resource"] ].push( property["@value"] );
+			}
+		});
+
+		if ( $.isEmptyObject( properties ) ) { // dont create empty classes
+			console.log( 'Skip class "' + $(cls).attr("typeof") + '" because it has no properties' );
+			return new Object();
+		}
+
+		// make one length array properties to normal properties
+		for ( pi in properties ) {
+			if ( properties[pi].length == 1 ) {
+				properties[pi] = properties[pi][0];
+			}
+		}
+
+		if ( typeof __createClass !== "undefined" )
+			__createClass( $(cls) );		
+
+		var classResource = $(cls).attr("resource");
+		var wildcardsFct = RDForm.replaceWildcards( classResource, $(cls), RDForm.getWebsafeString );
+
+		// dont save classes with wildcard pointers when every value is empty
+		if ( classResource.search(/\{.*\}/) != -1 && wildcardsFct['count'] == 0 ) {
+			console.log( 'Skip class "' + $(cls).attr("typeof") + '" because it has wildcards, but every pointer property is empty.' );
+			return new Object();
+		}
+
+		thisClass["@resource"] = $(cls).attr("typeof");
+
+		// if it has a return-resource take this for the return
+		if ( $(cls).attr("return-resource") ) {
+			thisClass["@return-resource"] = RDForm.replaceWildcards( $(cls).attr("return-resource"), $(cls), RDForm.getWebsafeString )['str'];
+		}
+
+		thisClass["@value"] = { "@id" : wildcardsFct['str'], "@type" : $(cls).attr("typeof") };
+		$.extend(true, thisClass["@value"], properties );
+
+		return thisClass;
+	},
+	// deprecated
 	createResultClass: function( cls )  {
 
 		var thisClass = new Object();
@@ -1172,6 +1276,7 @@ RDForm = {
 	  * @hidden HTML DOM Object of the current hidden input
 	  * @return Object of this hidden property
 	  */
+	  // deprecated
 	createResultHidden: function( hidden ) {
 		var thisHidden = new Object();		
 
@@ -1193,6 +1298,36 @@ RDForm = {
 	  * @literal HTML DOM Object of the current hidden input
 	  * @return Object of this property
 	  */
+	getResultLiteral: function( literal ) {
+		var thisLiteral = new Object();	
+
+		if ( $(literal).length == 0 ) {
+			return thisLiteral; // return empty object fur null litreal e.g. add btn
+		}
+
+		var val = $(literal).val();		
+
+		if ( $(literal).attr("type") == "checkbox" ) {
+			val = $(literal).prop("checked").toString();
+		}
+		
+		if ( $(literal).prop("tagName") == "SELECT" ) {
+			val = $( ":selected", $(literal) ).val();
+		}
+
+		if ( val != "" ) {
+
+			thisLiteral["@value"] = RDForm.replaceWildcards( val, $(literal).parentsUntil("div[typeof]").parent() )['str'];			
+			thisLiteral['@resource'] = $(literal).attr("name");
+
+			if ( $(literal).attr("datatype") !== undefined ) {
+				CONTEXT[ thisLiteral['@resource'] ] = { "@type" : $(literal).attr("datatype") };
+			}
+		}		
+
+		return thisLiteral;
+	},
+	// deprecated
 	createResultLiteral: function( literal ) {
 		var thisLiteral = new Object();	
 
@@ -1234,6 +1369,30 @@ RDForm = {
 	  * @env HTML DOM Object of the current resource group
 	  * @return Object of this resource property
 	  */
+	getResultResource: function( env ) {
+		var resource = new Object(),
+			resourceGroup;
+
+		// search for a normal resource class children
+		resourceGroup = $(env).children('div[typeof]');
+		if ( resourceGroup.length > 0 ) { 
+			// create a new class for this resource and take its return ID
+			resource = RDForm.getResultClass( resourceGroup );
+		}
+		// search for a external resource input
+		else if ( $(env).find('input[external]').length > 0 ) {
+			resourceGroup = $(env).find('input[external]');			
+			resource['@resource'] = $(resourceGroup).attr("name");
+			resource["@value"] = RDForm.replaceWildcards( $(resourceGroup).val(), $(env).parent("div[typeof]"), RDForm.getWebsafeString )['str'];
+		}
+
+		/*if ( ! $.isEmptyObject( resource ) ) {
+
+		}*/
+
+		return resource;
+	},
+	// deprecated
 	createResultResource: function( env ) {
 
 		var resource = new Object();
@@ -1259,7 +1418,7 @@ RDForm = {
 		}
 
 		return resource;
-	},
+	},	
 
 	/**
 	  *	Create result string from baseprefix, prefixes and RESULT array and output it in the result textarea
@@ -1267,16 +1426,29 @@ RDForm = {
 	  * @return void
 	  */
 	outputResult: function() {
+		
+		var resultStr = JSON.stringify(JSON_RESULT, null, 2);
+				
+		$("."+_ID_+"-result").show();	
+		$("."+_ID_+"-result textarea").val( resultStr );
+		var lines = resultStr.split("\n");
+		$("."+_ID_+"-result textarea").attr( "rows" , ( lines.length ) );
+		$('html, body').animate({ scrollTop: $("."+_ID_+"-result").offset().top }, 200);		
+
+	}, // end of creating result
+	// deprecated
+	outputTurtle: function() {
+
 		var resultStr = "";
 
-		if ( BASEPREFIX != "" ) {
+		/*if ( BASEPREFIX != "" ) {
 			resultStr += "@base <" + BASEPREFIX + "> .\n";
 		}
 
 		//create prefixes
 		for ( var prefix in PREFIXES ) {
 			resultStr += "@prefix " + prefix + ": <" + PREFIXES[prefix] + "> .\n";
-		}
+		}*/
 
 		// output classes
 		for ( var ci in RESULT ) {
@@ -1304,14 +1476,8 @@ RDForm = {
 				resultStr += ( ( 1 + parseInt(pi) ) == RESULT[ci]['properties'].length ) ? " .\n" : " ;\n";
 			}
 		}
-		
-		$("."+_ID_+"-result").show();
-		$("."+_ID_+"-result textarea").val( resultStr );		
-		var lines = resultStr.split("\n");
-		$("."+_ID_+"-result textarea").attr( "rows" , ( lines.length ) );
-		$('html, body').animate({ scrollTop: $("."+_ID_+"-result").offset().top }, 200);		
-
-	}, // end of creating result
+		return resultStr;
+	},
 
 
 	/************************** HELPER FUNCTIONS ******************************/
@@ -1401,8 +1567,7 @@ RDForm = {
 			return null;
 		}
 
-		for ( var prefix in PREFIXES ) {
-			//resultStr += "@prefix " + prefix + " <" + PREFIXES[prefix] + "> .\n";
+		for ( var prefix in CONTEXT ) {
 			if ( str == prefix ) {
 				return true;
 			}
