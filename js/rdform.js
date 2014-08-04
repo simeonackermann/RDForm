@@ -34,7 +34,7 @@ var _ID_ = "rdform",
 		// overide defaults settings
         $.extend(settings, options);		
 		rdform = $(this);
-		rdform.append( '<div class="row"><p class="alert alert-error rdform-error hide"></p></div>' );		
+		rdform.append( '<div class="row rdform-alert"></p></div>' );
 
 		// loading language file
 		if ( settings.lang != "" ) {
@@ -57,9 +57,7 @@ var _ID_ = "rdform",
 				model = m;
 			},
 			error: function( jqxhr, type, exception ) {
-				// TODO: better error reporting, instead alerts...
-				//$( "div.log" ).text( "Triggered ajaxError handler." );    			
-				alert('Error "'+exception+'" on loading data model file "'+ settings.model +'"');
+				RDForm.showAlert( "error", 'Error "'+exception+'" on loading data model file "'+ settings.model +'"');
 			}
 		});
 		if ( "" == model ) return this;
@@ -97,7 +95,7 @@ var _ID_ = "rdform",
 			dataType: "script",
 			async: false,
 			error: function( jqxhr, type, exception ) {
-				alert('Error on loading script "'+ script +'": '+exception);
+				RDForm.showAlert( "error", 'Error on loading script "'+ script +'": '+exception );
 			}
 		});
 	};
@@ -122,7 +120,7 @@ RDForm = {
 				RDForm.parseRDFormModel( model );
 				break;
 			default:
-				alert( "Unknown model type \"" + type  + "\"" );
+				RDForm.showAlert( "error", "Unknown model type \"" + type  + "\"" );
 				break;
 		}
 	},
@@ -146,7 +144,7 @@ RDForm = {
 		if ( $(dom_model).attr("prefix") ) {
 			var prefixesArr = $(dom_model).attr("prefix").split(" ");
 			if ( prefixesArr.length % 2 != 0 ) {
-				alert( "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
+				RDForm.showAlert( "warning", "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
 			}
 			for (var i = 0; i < prefixesArr.length - 1; i += 2) {
 				CONTEXT[ prefixesArr[i] ] = prefixesArr[i+1];
@@ -178,7 +176,7 @@ RDForm = {
 					console.log( "Model parsing exception: type attribute in property \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\" is not set. I manually added it as literal..." );
 				}
 				if ( $(this).attr("name") === undefined ) { // check if name exists
-					alert( "Attention: Unnamed Property-" + $(this).attr("type") + " in \"" + curClass['typeof'] + "\". Please add any name." );
+					RDForm.showAlert( "warning", "Attention: Unnamed Property-" + $(this).attr("type") + " in \"" + curClass['typeof'] + "\". Please add any name." );
 					success = false;
 				}
 
@@ -202,7 +200,7 @@ RDForm = {
 						// test if the resource class exists (if not external)
 						if ( curProperty['external'] === undefined ) {
 							if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
-								alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
+								RDForm.showAlert( "warning", "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
 								success = false;
 							}
 						}
@@ -221,7 +219,7 @@ RDForm = {
 						break;
 
 					default:
-						alert("Unknown type \"" + $(this).attr("type") + "\" at property \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\" on parsing model found. I will ignore this property..." );
+						RDForm.showAlert( "warning", "Unknown type \"" + $(this).attr("type") + "\" at property \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\" on parsing model found. I will ignore this property..." );
 						success = false;
 						break;
 				}
@@ -232,7 +230,7 @@ RDForm = {
 			curClass['properties'] = properties;
 
 			if ( properties.length == 0 ) {
-				alert( "No properties stored in class \"" + curClass['typeof'] + "\" on parsing model found..." );
+				RDForm.showAlert( "warning", "No properties stored in class \"" + curClass['typeof'] + "\" on parsing model found..." );
 			}
 
 			MODEL.push( curClass );
@@ -281,7 +279,7 @@ RDForm = {
 			}
 		}
 		if ( ! classModel ) {
-			alert( "Class \"" + classTypeof + "\" doesnt exists but refered..." );
+			RDForm.showAlert( "warning", "Class \"" + classTypeof + "\" doesnt exists but refered..." );
 		}
 		return classModel;
 	},
@@ -396,7 +394,7 @@ RDForm = {
 				break;			
 
 			default:
-				alert("Unknown property type \""+property['type']+"\" detected on creating HTML property.");
+				RDForm.showAlert( "warning", "Unknown property type \""+property['type']+"\" detected on creating HTML property.");
 				break;
 
 		}
@@ -924,7 +922,7 @@ RDForm = {
 
 			// test if property exists
 			if ( wcdTarget.length == 0 ) {
-				alert( 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
+				RDForm.showAlert("error", 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
 			}
 
 			return wcdTarget;
@@ -1032,7 +1030,7 @@ RDForm = {
 
 		// reset button, reset form and values
 		rdform.find("button[type=reset]").click(function() {		
-			$(".rdform-error").hide();
+			$(".rdform-alert").hide();
 			rdform[0].reset();
 			// TODO: remove duplicates, selects ...
 			$(".rdform-result").hide();
@@ -1042,15 +1040,14 @@ RDForm = {
 
 		// submit formular
 		rdform.submit(function() {			
-			$(".rdform-error").hide();
+			$(".rdform-alert").hide();
 			var proceed = true;
 
 			// validate required inputs
 			$("input[required]").each(function() {
 				if ( $(this).val() == "" ) {
 					$(this).parents(".form-group").addClass("error");
-					$(".rdform-error").text("Bitte alle rot hinterlegten Felder ausfüllen!");
-					$(".rdform-error").show();
+					RDForm.showAlert( "warning", "Bitte alle rot hinterlegten Felder ausfüllen!");
 					proceed = false;
 				} else {
 					$(this).parents(".form-group").removeClass("error");
@@ -1193,7 +1190,7 @@ RDForm = {
 
 		// if it has a return-resource take this for the return
 		if ( $(cls).attr("return-resource") ) {
-			thisClass["@return-resource"] = RDForm.replaceWildcards( $(cls).attr("return-resource"), $(cls), RDForm.getWebsafeString )['str'];
+			thisClass["@resource"] = RDForm.replaceWildcards( $(cls).attr("return-resource"), $(cls), RDForm.getWebsafeString )['str'];
 		}
 
 		thisClass["@value"] = { "@id" : wildcardsFct['str'], "@type" : $(cls).attr("typeof") };
@@ -1520,7 +1517,7 @@ RDForm = {
 
 				// test if property exists
 				if ( wcdVal.length == 0 ) {
-					alert( 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
+					RDForm.showAlert( "error", 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
 					continue;
 				}
 
@@ -1701,6 +1698,33 @@ RDForm = {
 			}
 		}
 		return str;
+	},
+
+	showAlert : function( type, msg ) {
+
+		var cls = "";
+
+		switch ( type ) {
+
+			case "success" :
+				cls = "alert-success";				
+				break;
+
+			case "error" :
+				cls = "alert-danger";				
+				break;
+
+			case "warning" :
+				cls = "alert-warning";
+				break;
+
+			default :
+				cls = "alert-info";
+
+		}
+
+		$(".rdform-alert").append('<p class="alert '+cls+'" role="alert">' + msg + '</p>');
+
 	},
 
 }
