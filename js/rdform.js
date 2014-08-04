@@ -79,7 +79,6 @@ var _ID_ = "rdform",
 
 		// maybe add existing data
 		if ( settings.data != "" ) {
-			//ajaxAsyncScript( "js/jsonld.js" );
 			RDForm.addExistingData( undefined, settings.data );
 		}
 
@@ -568,7 +567,7 @@ RDForm = {
 	},
 
 	/**
-	 * Add existing JSON-LD data to form
+	 * Add existing data from a JSON-LD object to the form
 	 *
 	 * @param string|undefined name Name of the current field (for multiple literal)
 	 * @param array|object data Values to insert
@@ -591,7 +590,12 @@ RDForm = {
 					var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
 
 					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
-						$(env).children("div.rdform-literal-group").find( 'button.add-class-literal[name="'+curName+'"]' ).trigger("click");
+						var addBtn = $(env).children("div.rdform-literal-group").find( 'button.add-class-literal[name="'+curName+'"]' );
+						if ( $(addBtn).length == 0 ) {
+							RDForm.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }' );
+							continue;
+						}
+						$(addBtn).trigger("click");
 						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
 					}
 
@@ -618,8 +622,17 @@ RDForm = {
 						var subEnv = $(env).find( 'div[typeof="'+data[i][0]["@type"]+'"]' ).last();
 
 						if ( $(subEnv).length == 0 ) { // resourc not found -> try to find additional button
-							$(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+data[i][0]["@type"]+'"]' ).trigger("click");
+							var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+data[i][0]["@type"]+'"]' );
+							if ( $(addBtn).length == 0 ) {
+								RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+data[i][0]["@type"]+'": "' + JSON.stringify(data[i]) + '" }' );
+								continue;
+							}
+							$(addBtn).trigger("click");
 							subEnv = $(env).find( 'div[typeof="'+data[i][0]["@type"]+'"]' ).last();
+						}
+
+						if ( i != $(subEnv).attr("name")  ) {
+							RDForm.showAlert( "info", 'Der Datensatz enthält die Propertie "'+i+'", die im Modell zu "'+$(subEnv).attr("name")+'" verändert ist.' );
 						}
 
 						for ( var j in data[i] ) { 
@@ -1075,20 +1088,12 @@ RDForm = {
 	  */
 	createResult: function() {
 
-		RESULT = new Array();		
-
-		RDForm.createJSONResult();
+		//RESULT = new Array();		
 		/*
 		rdform.children("div[typeof]").each(function( ci ) {
 			RDForm.createResultClass( $(this) );
 		});
 		*/
-
-		//console.log( "Result = ", RESULT );
-		console.log( "Result = ", JSON_RESULT );		
-	},
-
-	createJSONResult: function() {
 
 		JSON_RESULT = new Object();			
 
@@ -1118,6 +1123,8 @@ RDForm = {
 
 		// add context
 		JSON_RESULT['@context'] = CONTEXT;
+
+		console.log( "Result = ", JSON_RESULT );		
 	},
 
 	/**
@@ -1418,6 +1425,13 @@ RDForm = {
 	},	
 
 	/**
+	  * TODO: JSON-LD to turtle
+	  */
+	createTurtleResult: function() {
+
+	},
+
+	/**
 	  *	Create result string from baseprefix, prefixes and RESULT array and output it in the result textarea
 	  *
 	  * @return void
@@ -1700,6 +1714,13 @@ RDForm = {
 		return str;
 	},
 
+	/**
+	  * Show a message in a colorred box above the form
+	  *
+	  * @param String type Message type (succes, error, warning)
+	  * @param String msg The message
+	  * @return viod
+	  */
 	showAlert : function( type, msg ) {
 
 		var cls = "";
@@ -1723,6 +1744,7 @@ RDForm = {
 
 		}
 
+		console.log( "RDForm Alert ("+type+"): " + msg );
 		$(".rdform-alert").append('<p class="alert '+cls+'" role="alert">' + msg + '</p>');
 
 	},
