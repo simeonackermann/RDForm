@@ -53,6 +53,19 @@ __afterDuplicateClass = function ( thisClass ) {
 	
 }
 
+__createResult = function() {
+
+	var forenames = $(rdform).find('input[name="forenames"]').val();
+	var surname = $(rdform).find('input[name="cpm:surname"]').val();
+	var resource = forenames + " " + surname;
+
+	resource = resource.replace(/ /gi,'_');
+	resource = RDForm.getWebsafeString(resource);
+
+	$("#rdform-prof-filename").val( resource );
+
+}
+
 // before creating the class properties from input values
 __createResultClassProperty = function( propertyContainer ) {
 
@@ -71,45 +84,9 @@ __createClass = function ( thisClass ) {
 	
 
 	if ( $(thisClass).attr("typeof") == "cpm:Professor" ) {
-		//console.log( 'Prof' );
 		var label = $(thisClass).find('input[name="rdfs:label"]').first().val();
-		//console.log( 'label=' + label );
 	}
 
-}
-
-__filterRESULT = function ( RESULT ) {
-
-	for ( var ci in RESULT ) {
-
-		if ( RESULT[ci]['typeof'] ==  'cpm:Professor' ) {
-
-			for ( var pi in RESULT[ci]['properties'] ) {
-				if ( RESULT[ci]['properties'][pi]['name'] == 'rdfs:label' ) {
-
-					var resource = RESULT[ci]['properties'][pi]['value'];
-
-					resource = $.trim( resource.replace(/"/gi,'') );
-					resource = resource.replace(/.*\./gi,'').trim();
-					resource = resource.replace(/ /gi,'_');
-					resource = RDForm.getWebsafeString(resource);
-
-					//var resource = RESULT[ci]['resource']; 
-					//resource = resource.replace(/[^a-z0-9-_]/gi,'_');
-
-					$("#rdform-prof-uri").val( resource );
-
-					break;
-
-				}
-			}			
-
-		}
-
-	}
-
-
-	return RESULT;
 }
 
 /* own functions */

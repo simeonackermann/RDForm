@@ -1,11 +1,14 @@
 $(document).ready(function(){
 
+	rdform = $("form.rdform");
+
 	var showForm = false;
 	$(document).on("click", ".show-list", function() {		
 		showForm = false;
 		window.location.reload();
 	});
 
+	// alert a message before closing/reload window
 	window.onbeforeunload = function (e) {
 
 		if ( $(rdform).css("display") == "block" && showForm ) {
@@ -23,27 +26,36 @@ $(document).ready(function(){
 		}
 	};
 
-	function myShowForm() {
+	function myShowForm( data ) {
 		showForm = true;
-		$(".show-list").show();
-		rdform.show("fast");
 		$(".rdform-filestore-wrapper").hide("slow");	
+		
+		$(rdform).RDForm({
+			model: "form_cpl.html",
+			data: data,
+			hooks: "js/hooks_cpl.js",
+			lang: "de"
+		});
+		rdform.show("fast");
+		$(".show-list").show();
 	}
 
 	$(".show-form").click(function() {
 		myShowForm();
 	});	
 
+	// show feeedback
 	$(".feedback button").click(function() {
 		$(this).hide();
 		$(".feedback p").show();
-		//window.location.href='mailto:s.ackermann@mail.de?subject=RDForm Professorenkatalog';
 	});
+	// hide feeedback
 	$(".feedback").focusout(function() {
 		$(".feedback button").show();
 		$(".feedback p").hide();
 	});
 
+	// add some buttons on first form submitting
 	var firstSubmit = true;
 	$("form.rdform").submit(function() {
 		if ( firstSubmit )
@@ -55,30 +67,26 @@ $(document).ready(function(){
 		firstSubmit = false;		
 	});
 
+	// choose a file from files-list
 	$(document).on("click", "#rdform-filestore a.prof-label", function() {		
-
-		$.post( "store/getFile.php", { name: $(this).text() })
+		$.post( "store/getFile.php", { name: $(this).attr("data-file") })		
 			.done(function( jsondata ) {
 				if ( jsondata.result && jsondata.content != "" ) {
-					$("form.rdform").html( jsondata.content );
-
-					findWildcardInputs( $("form.rdform") );
-					//RDForm.initFormHandler();
+					var data = $.parseJSON( jsondata.content );
+					myShowForm(data);
 				}
 
 		});
-
-		myShowForm();
-
 		return false;
 	});	
 
+	// delete a dataset
 	$(document).on( "click", "#rdform-filestore button.delete-prof", function() {
-
-		var deleteCheck = confirm("Wollen Sie diesen Professor wirklich löschen?");
+		var name = $(this).prev("a").attr("data-file");
+		var deleteCheck = confirm('Wollen Sie den Datensatz "'+name+'" wirklich löschen?');
 		if (deleteCheck == true) {
 
-			$.post( "store/deleteFile.php", { name: $(this).prev("a").text() })				
+			$.post( "store/deleteFile.php", { name: name })				
 				.done(function( jsondata ) {
 					getFiles();
 				
@@ -90,7 +98,10 @@ $(document).ready(function(){
 
 	$(document).on( "click", "button.rdform-write-file", function() {
 
-		$.post( "store/writeFile.php", { name: $("#rdform-prof-uri").val(), form: $("form.rdform").html() })
+		var name = $("#rdform-prof-filename").val();
+		var content = $(".rdform-result").find("textarea").val();
+
+		$.post( "store/writeFile.php", { name: name, content: content })
 			.done(function( jsondata ) {
 				if ( jsondata.result ) {
 					$("#rdform-store-msg").toggleClass("text-success");
@@ -115,13 +126,13 @@ $(document).ready(function(){
 
 	printoutFilelist = function( files ) {
 		if ( files.length == 0 ) {
-			$("#rdform-filestore").html( "<i>Keine Dateien gefunden</i>" );
+			$("#rdform-filestore").html( "<i>Keine Datensätze gefunden</i>" );
 			return;
 		}
 		var ul = $('<ul></ul>');
 		for ( i in files ) {
 			ul.append( 	"<li class='list-group-item'>" +
-							"<a href='#' title='Professor bearbeiten' class='prof-label'>"+files[i]+"</a>" +
+							"<a href='#' title='Professor bearbeiten' class='prof-label' data-file='"+files[i]+"'>"+files[i].replace(/_/g, " ")+"</a>" +
 							'<button type="button" class="btn btn-link btn-xs pull-right delete-prof" title="Diesen Professor löschen""><span class="glyphicon glyphicon-remove"></span> löschen</button>' +
 						"</li>" );
 		}

@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 
 
 $filename = isset( $_POST['name'] ) ? $_POST['name'] : false;
-$content = isset( $_POST['form'] ) ? $_POST['form'] : false;
+$content = isset( $_POST['content'] ) ? $_POST['content'] : false;
 
 
 if ( $filename && $content ) {
