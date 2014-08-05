@@ -79,7 +79,6 @@ var _ID_ = "rdform",
 
 		// maybe add existing data
 		if ( settings.data != "" ) {
-			console.log( settings.data );
 			RDForm.addExistingData( undefined, settings.data );
 		}
 
@@ -261,7 +260,7 @@ RDForm = {
 				MODEL[mi]['isRootClass'] = true;
 			}			
 		}
-		console.log( "Model = ", MODEL );				
+		console.log( "RDForm Model = ", MODEL );				
 	}, // end of parseFormModel	
 
 	/**
@@ -608,14 +607,14 @@ RDForm = {
 					}
 
 					$(literal).val( data[i] );	
-					$(literal).trigger("keyup");
+					//$(literal).trigger("keyup");
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
 						if ( data[i] == "0" || data[i] == "false" ) {
 							$(literal).removeAttr("checked");							
-						} else {
+						} /* else {
 							$(literal).trigger("click");
-						}
+						}*/
 					}				
 
 				} else { // its an array: multiple literals or resource ( $.isArray(data[i]) )
@@ -1118,8 +1117,6 @@ RDForm = {
 			}
 		});
 
-		console.log( JSON_RESULT );
-
 		// make one length array classes to normal classes
 		for ( var ci in JSON_RESULT ) {
 			if ( JSON_RESULT[ci].length == 1 ) {
@@ -1137,7 +1134,7 @@ RDForm = {
 		// add context
 		JSON_RESULT['@context'] = CONTEXT;
 
-		console.log( "Result = ", JSON_RESULT );		
+		console.log( "RDForm Result = ", JSON_RESULT );		
 	},
 
 	/**
