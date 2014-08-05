@@ -79,6 +79,7 @@ var _ID_ = "rdform",
 
 		// maybe add existing data
 		if ( settings.data != "" ) {
+			console.log( settings.data );
 			RDForm.addExistingData( undefined, settings.data );
 		}
 
@@ -585,7 +586,9 @@ RDForm = {
 
 			if ( i[0] != "@" ) { // we dont want @id, @type, ...
 
-				if ( typeof data[i] === "string" ) { // its a literal					
+				// TODO: external resources
+
+				if ( typeof data[i] === "string" ) { // its a literal	
 
 					var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
 
@@ -615,37 +618,44 @@ RDForm = {
 						}
 					}				
 
-				} else { // its an array: literals or resource ( $.isArray(data[i]) )
+				} else { // its an array: multiple literals or resource ( $.isArray(data[i]) )
 
-					if ( data[i][0]["@type"] ) { // its a resource
+					var thisData = new Array();
+					if ( $.isArray(data[i]) ) {
+						thisData = data[i];
+					} else {
+						thisData.push( data[i] );
+					}
 
-						var subEnv = $(env).find( 'div[typeof="'+data[i][0]["@type"]+'"]' ).last();
+					if ( typeof thisData[0] === "string" ) { // its multiple literal
+						RDForm.addExistingData( i, thisData, env );
+					}
+					else { // its one or mutliple resources
+
+						var subEnv = $(env).find( 'div[typeof="'+thisData[0]["@type"]+'"]' ).last();
 
 						if ( $(subEnv).length == 0 ) { // resourc not found -> try to find additional button
-							var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+data[i][0]["@type"]+'"]' );
+							var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+thisData[0]["@type"]+'"]' );
 							if ( $(addBtn).length == 0 ) {
-								RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+data[i][0]["@type"]+'": "' + JSON.stringify(data[i]) + '" }' );
+								RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisData[0]["@type"]+'": "' + JSON.stringify(thisData) + '" }' );
 								continue;
 							}
 							$(addBtn).trigger("click");
-							subEnv = $(env).find( 'div[typeof="'+data[i][0]["@type"]+'"]' ).last();
+							subEnv = $(env).find( 'div[typeof="'+thisData[0]["@type"]+'"]' ).last();
 						}
 
 						if ( i != $(subEnv).attr("name")  ) {
 							RDForm.showAlert( "info", 'Der Datensatz enthält die Propertie "'+i+'", die im Modell zu "'+$(subEnv).attr("name")+'" verändert ist.' );
 						}
 
-						for ( var j in data[i] ) { 
-							if ( j > 0 ) { // multiple resource -> trigger duplication
+						for ( var di in thisData ) { 
+							if ( di > 0 ) { // multiple resource -> trigger duplication
 								$(subEnv).find( 'button.duplicate-class' ).trigger("click");
-								subEnv = $(env).find( 'div[typeof="'+data[i][j]["@type"]+'"]' )[j];
+								subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' )[di];
 							}
-							RDForm.addExistingData( undefined, data[i][j], subEnv );
+							RDForm.addExistingData( undefined, thisData[di], subEnv );
 						}
-					}	
-					else { // its multiple literals
-						RDForm.addExistingData( i, data[i], env );
-					}				
+					}		
 				}
 			}
 			prevKey = curName;
@@ -1097,6 +1107,7 @@ RDForm = {
 
 		JSON_RESULT = new Object();			
 
+		// walk every root class
 		rdform.children("div[typeof]").each(function( ci ) {			
 			var curClass = RDForm.getResultClass( $(this) );
 			if ( ! $.isEmptyObject( curClass ) ) { // dont add empty classes
@@ -1106,6 +1117,8 @@ RDForm = {
 				JSON_RESULT[ curClass["@resource"] ].push( curClass["@value"] );
 			}
 		});
+
+		console.log( JSON_RESULT );
 
 		// make one length array classes to normal classes
 		for ( var ci in JSON_RESULT ) {
@@ -1193,7 +1206,7 @@ RDForm = {
 			return new Object();
 		}
 
-		thisClass["@resource"] = $(cls).attr("typeof");
+		thisClass["@resource"] = ( $(cls).attr("name") ) ? $(cls).attr("name") : $(cls).attr("typeof");
 
 		// if it has a return-resource take this for the return
 		if ( $(cls).attr("return-resource") ) {
@@ -1438,7 +1451,7 @@ RDForm = {
 	  */
 	outputResult: function() {
 		
-		var resultStr = JSON.stringify(JSON_RESULT, null, 2);
+		var resultStr = JSON.stringify(JSON_RESULT, null, '\t');
 				
 		$("."+_ID_+"-result").show();	
 		$("."+_ID_+"-result textarea").val( resultStr );
