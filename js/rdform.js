@@ -631,27 +631,35 @@ RDForm = {
 					}
 					else { // its one or mutliple resources
 
-						var subEnv = $(env).find( 'div[typeof="'+thisData[0]["@type"]+'"]' ).last();
-
-						if ( $(subEnv).length == 0 ) { // resourc not found -> try to find additional button
-							var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+thisData[0]["@type"]+'"]' );
-							if ( $(addBtn).length == 0 ) {
-								RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisData[0]["@type"]+'": "' + JSON.stringify(thisData) + '" }' );
-								continue;
-							}
-							$(addBtn).trigger("click");
-							subEnv = $(env).find( 'div[typeof="'+thisData[0]["@type"]+'"]' ).last();
-						}
-
-						if ( i != $(subEnv).attr("name")  ) {
-							RDForm.showAlert( "info", 'Der Datensatz enthält die Propertie "'+i+'", die im Modell zu "'+$(subEnv).attr("name")+'" verändert ist.' );
-						}
-
 						for ( var di in thisData ) { 
-							if ( di > 0 ) { // multiple resource -> trigger duplication
-								$(subEnv).find( 'button.duplicate-class' ).trigger("click");
-								subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' )[di];
+
+							var subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
+
+							if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
+								var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+thisData[di]["@type"]+'"]' );
+								if ( $(addBtn).length == 0 ) {
+									RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisData[di]["@type"]+'": "' + JSON.stringify(thisData) + '" }' );
+									continue;
+								}
+								$(addBtn).trigger("click");
+								subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
 							}
+
+							if ( i != $(subEnv).attr("name")  ) {
+								RDForm.showAlert( "info", 'Der Datensatz enthält die Propertie "'+i+'", die im Modell zu "'+$(subEnv).attr("name")+'" verändert ist.' );
+							}
+
+							// on multiple resource (walk thisData backwards) -> duplicate the subEnv
+							if ( di > 0 ) {
+								for (var ri = di-1; ri >= 0; ri--) {
+									if( thisData[di]["@type"] == thisData[ri]["@type"] ) {										
+										$(subEnv).find( 'button.duplicate-class' ).trigger("click");
+										subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
+										$(subEnv).attr("style", ""); // bugfix: some duplicated classes have hidden inline style
+									}
+								}
+							}
+							
 							RDForm.addExistingData( undefined, thisData[di], subEnv );
 						}
 					}		
@@ -794,13 +802,13 @@ RDForm = {
 
 		// BUTTON: duplicate a class
 		rdform.on("click", "button.duplicate-class", function() {			
-			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
-			var thisClass = classContainer.children("div[typeof]");			
+			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();			
+			var thisClass = $(classContainer).children("div[typeof]");			
 
-			thisClass.find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
+			$(thisClass).find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
 
-			thisClass.children("legend").hide(); // hide legend
-			thisClass.find("div").removeClass("error");
+			$(thisClass).children("legend").hide(); // hide legend
+			$(thisClass).find("div").removeClass("error");
 
 			// add remove btn if not already there
 			if ( $(thisClass).find('button.remove-class').length == 0 ) {
@@ -812,9 +820,9 @@ RDForm = {
 			++arguments['i'];
 			$(thisClass).attr("arguments", JSON.stringify( arguments ) );
 
-			$(classContainer).hide();	
+			$(classContainer).hide();			
 			$(this).parentsUntil("div.rdform-resource-group").parent().after( classContainer );
-			$(classContainer).show("slow");
+			$(classContainer).show("slow");						
 			$(this).remove(); // remove duplicate btn
 
 			if ( typeof __afterDuplicateClass !== "undefined" )
