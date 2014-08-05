@@ -1,14 +1,12 @@
 /**
   * init default variables
   */
-var _ID_ = "rdform";
-var rdform; // rdform DOM object
-var MODEL = new Array();
-var RESULT = new Array();
-var PREFIXES = new Object();	// RDF prefixes		
-var BASEPREFIX;
-
-// TODO: put PREFIXES and BASEPREFIX into MODEL as Objects
+var _ID_ = "rdform",
+	rdform, // rdform DOM object
+	MODEL = new Array(),
+	RESULT = new Array(),
+	JSON_RESULT = new Object(),
+	CONTEXT = new Object();
 
 /**
   * RDForm Plugin base constructor
@@ -22,7 +20,6 @@ var BASEPREFIX;
 		data: "",
 		hooks: "js/hooks.js",
 		lang: "",
-		ontologie: "",
 		cache: false,
 	}	
 	
@@ -30,85 +27,77 @@ var BASEPREFIX;
 	  * plugin base constructor
 	  *
 	  * @param[] options, override default settings
-	  * @return void
+	  * @return this
 	  */
 	$.fn.RDForm = function( options ) {		
 
 		// overide defaults settings
-        $.extend(settings, options);
-		
+        $.extend(settings, options);		
 		rdform = $(this);
-		rdform.append( '<div class="row"><p id="error-msg" class="alert alert-error hide"></p></div>' );				
+		rdform.append( '<div class="row rdform-alert"></p></div>' );
 
-		// loading bootstrap
-		/*
-		$.ajax({
-            url:"css/bootstrap.min.css",
-            success:function(data){
-                 $("<style></style>").appendTo("head").html(data);
-            }
-        })
-		*/
-
-		// load setting file
+		// loading language file
 		if ( settings.lang != "" ) {
 			var langFile = "lang/" + settings.lang + ".js";
-			$.getScript( langFile )
-				.fail(function( jqxhr, type, exception ) {
-	    			alert('Error on loading language file "'+ langFile +'"...');
-				})
-				.done(function() {				
-			});
+			ajaxAsyncScript( langFile );
 		}
 
-		// load external ontologie
-		if ( settings.ontologie != "" ) {
-			var ontFile = settings.ontologie;
-			$.getScript( ontFile )
-				.fail(function( jqxhr, type, exception ) {
-	    			alert('Error on loading ontologie file "'+ ontFile +'"...');
-				})
-				.done(function() {	
-			});
-		}
+		//loading hooks file
+		ajaxAsyncScript( settings.hooks );
 
-		// loading hooks js file
-		$.getScript( settings.hooks )
-			.fail(function( jqxhr, type, exception ) {
-    			//$( "div.log" ).text( "Triggered ajaxError handler." );
-    			// TODO: better error reporting, instead alerts...
-    			alert('Error on loading JavaScript hooks file "'+settings.hooks+'". Is the filename right?');
-			})
-			.done(function() {			
-				var modelFile = settings.cache ? settings.model : settings.model + "?" + (new Date()).getTime();
-
-				// load and parse model file
-				$.ajax({ 
-					url: modelFile,
-					type: "GET",
-					dataType: "text",
-					success: function( model ) {
-						RDForm.parseFormModel( 'rdform', model )
-						
-						rdform.append( RDForm.createHTMLForm() );
-
-						rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
-											'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
-											'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
-										'</div></div>' );
-						RDForm.initFormHandler();
-					},
-					error: function() {
-						alert('Error when calling data model file "'+settings.model+'". Is the filename right?');
-					}
-				});
+		// loading model file
+		var modelFile = settings.cache ? settings.model : settings.model + "?" + (new Date()).getTime();
+		var model = "";
+		$.ajax({
+			url: modelFile,
+			type: "GET",
+			dataType: "text",
+			async: false,
+			success: function( m ) {
+				model = m;
+			},
+			error: function( jqxhr, type, exception ) {
+				RDForm.showAlert( "error", 'Error "'+exception+'" on loading data model file "'+ settings.model +'"');
+			}
 		});
+		if ( "" == model ) return this;
+
+		// parsing model
+		RDForm.parseFormModel( 'rdform', model )
+						
+		//add model-form to my form
+		rdform.append( RDForm.createHTMLForm() );		
+
+		// append submit button
+		rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
+							'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
+							'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
+						'</div></div>' );
+
+		// init form action handler
+		RDForm.initFormHandler();
+
+		// maybe add existing data
+		if ( settings.data != "" ) {
+			RDForm.addExistingData( undefined, settings.data );
+		}
 
 		// add result div
 		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
 
     	return this;
-	};	
+	};
+
+	ajaxAsyncScript = function( script ) {
+		$.ajax({
+			url: script,
+			dataType: "script",
+			async: false,
+			error: function( jqxhr, type, exception ) {
+				RDForm.showAlert( "error", 'Error on loading script "'+ script +'": '+exception );
+			}
+		});
+	};
 
 }( jQuery ));
 
@@ -130,7 +119,7 @@ RDForm = {
 				RDForm.parseRDFormModel( model );
 				break;
 			default:
-				alert( "Unknown model type \"" + type  + "\"" );
+				RDForm.showAlert( "error", "Unknown model type \"" + type  + "\"" );
 				break;
 		}
 	},
@@ -147,17 +136,17 @@ RDForm = {
 
 		// get base
 		if ( $(dom_model).attr("base") ) {
-			BASEPREFIX = $(dom_model).attr("base");
+			CONTEXT["@base"] = $(dom_model).attr("base");
 		}		
 
 		// get prefixes
 		if ( $(dom_model).attr("prefix") ) {
 			var prefixesArr = $(dom_model).attr("prefix").split(" ");
 			if ( prefixesArr.length % 2 != 0 ) {
-				alert( "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
+				RDForm.showAlert( "warning", "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
 			}
 			for (var i = 0; i < prefixesArr.length - 1; i += 2) {
-				PREFIXES[ prefixesArr[i] ] = prefixesArr[i+1];
+				CONTEXT[ prefixesArr[i] ] = prefixesArr[i+1];
 			}
 		}	
 
@@ -178,80 +167,58 @@ RDForm = {
 
 			// walk the input-properties
 			$(this).children('input').each(function() {
+				var success = true;
 				var curProperty = new Object();
 
-				if ( ! $(this).attr("type") ) {
+				if ( $(this).attr("type") === undefined ) { // check if type exists, set literal as default
 					$(this).attr("type", "literal");
 					console.log( "Model parsing exception: type attribute in property \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\" is not set. I manually added it as literal..." );
-				}				
+				}
+				if ( $(this).attr("name") === undefined ) { // check if name exists
+					RDForm.showAlert( "warning", "Attention: Unnamed Property-" + $(this).attr("type") + " in \"" + curClass['typeof'] + "\". Please add any name." );
+					success = false;
+				}
 
-				curProperty['type'] = $(this).attr("type");
-				curProperty['name'] = $(this).attr("name");
-				curProperty['value'] = $(this).val();
-				curProperty['label'] = RDForm.l( $(this).prev("label").text() );
-				curProperty['multiple'] = $(this).attr("multiple"); 
-				curProperty['additional'] = $(this).attr("additional");
-				curProperty['readonly'] = $(this).attr("readonly");
+				// add all attributes: type, name, value, multiple, additional, readonly, placeholder, datatype, requiere, autocomplete, textare, boolean, checked, select, ...				
+				$.each ( $(this)[0].attributes, function( ai, attr) {
+					curProperty[ attr.name ] = attr.value;
 
+					// maybe translate same attributes
+					if ( attr.name == "placeholder" || attr.name == "title" || attr.name == "label" ) {
+						curProperty[ attr.name ] = RDForm.l( attr.value );
+					}					
+				});
 				RDForm.validatePrefix( curProperty['name'] );
-
-				var success = true;
+				curProperty['label'] = RDForm.l( $(this).prev("label").text() );				
+				
+				// do some property-type specific things
 				switch ( curProperty['type'] ) {
-					case "literal":
-						// TODO use a function to get all optiional/required attributes
-						// -> http://stackoverflow.com/questions/14645806/get-all-attributes-of-an-element-using-jquery
-						curProperty['datatype'] = $(this).attr("datatype");
-						curProperty['placeholder'] = RDForm.l( $(this).attr("placeholder") );
-						curProperty['required'] = $(this).attr("required");						
-						curProperty['autocomplete'] = $(this).attr("autocomplete");
-						curProperty['textarea'] = $(this).attr("textarea");
-						curProperty['boolean'] = $(this).attr("boolean");
-						curProperty['checked'] = $(this).attr("checked");
-
-						if ( $(this).attr("autocomplete") !== undefined )  {
-							curProperty['query-endpoint'] = $(this).attr("query-endpoint");
-							curProperty['query-apitype'] = $(this).attr("query-apitype");
-							curProperty['query-values'] = $(this).attr("query-values");
-							curProperty['query'] = $(this).attr("query");							
-						}
-
-						if ( $(this).attr("select") !== undefined ) {
-							curProperty["select"] = $(this).attr("select");
-							curProperty["select-options"] = $(this).attr("select-options");
-						}
-
-						break;			
-					
 					case "resource":
 						curProperty['typeof'] = curClass['typeof'];
-						curProperty['title'] = RDForm.l( $(this).attr("title") );
 						
-						//curProperty['argument'] = $(this).attr("argument");
-						curProperty['arguments'] = $(this).attr("arguments");
-						curProperty['external'] = $(this).attr("external");
-
-						// test if resource class exists if its not an external resource
+						// test if the resource class exists (if not external)
 						if ( curProperty['external'] === undefined ) {
 							if ( $(dom_model).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
-								alert( "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
+								RDForm.showAlert( "warning", "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
 								success = false;
 							}
 						}
+						// add arguments-index for multiple resources
 						if ( curProperty['multiple'] !== undefined ) {
-							var arguments = new Object();
-							if ( curProperty['arguments'] !== undefined ) {
-								arguments = $.parseJSON( curProperty['arguments'] );
-							} 
+							var arguments = ( curProperty['arguments'] === undefined ) ? new Object() : $.parseJSON( curProperty['arguments'] );
 							arguments['i'] = 1;
 							curProperty['arguments'] = JSON.stringify( arguments );
 						}
-						break;										
+						break;		
+
+					case "literal":
+						break;									
 
 					case "hidden":						
 						break;
 
 					default:
-						alert("Unknown type \"" + $(this).attr("type") + "\" at property \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\" on parsing model found. I will ignore this property..." );
+						RDForm.showAlert( "warning", "Unknown type \"" + $(this).attr("type") + "\" at property \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\" on parsing model found. I will ignore this property..." );
 						success = false;
 						break;
 				}
@@ -262,21 +229,25 @@ RDForm = {
 			curClass['properties'] = properties;
 
 			if ( properties.length == 0 ) {
-				alert( "No properties stored in class \"" + curClass['typeof'] + "\" on parsing model found..." );
+				RDForm.showAlert( "warning", "No properties stored in class \"" + curClass['typeof'] + "\" on parsing model found..." );
 			}
 
 			MODEL.push( curClass );
 		})
 		
-		// define if a class is a root class (and not a resource class of another class)		
+		// define if a class as a root class (and not a resource class of another class)		
 		// TODO BUG: on relation: person -> has -> cat, cat -> lives with -> person NO ROOT CLASS exists
 		for ( var mi in MODEL ) {
 			var isRootClass = true;
 			for ( var mi2 in MODEL ) {
+				// dont need to test the same class
+				if ( MODEL[mi]['typeof'] == MODEL[mi2]['typeof'] ) continue;
+
+				// test if any resource property in model2 points to current class
 				for ( var mi2pi in MODEL[mi2]['properties'] ) {
 					var thisProperty = MODEL[mi2]['properties'][mi2pi];
-					if (   MODEL[mi]['typeof'] != MODEL[mi2]['typeof']
-						&& thisProperty['type'] == 'resource' 
+					if ( thisProperty['type'] == 'resource' 
+						&& thisProperty['value'] !== undefined
 						&& (   thisProperty['value'] == MODEL[mi]['typeof'] 
 							|| thisProperty['value'] == MODEL[mi]['id'] 
 							)
@@ -307,7 +278,7 @@ RDForm = {
 			}
 		}
 		if ( ! classModel ) {
-			alert( "Class \"" + classTypeof + "\" doesnt exists but refered..." );
+			RDForm.showAlert( "warning", "Class \"" + classTypeof + "\" doesnt exists but refered..." );
 		}
 		return classModel;
 	},
@@ -353,7 +324,7 @@ RDForm = {
 		
 		var attrs = $.extend( true, {}, classModel );
 		delete attrs['properties']; 
-		thisClass.attr( attrs ); // add all attributes insead the array properties
+		thisClass.attr( attrs ); // add all attributes except the array properties
 		
 		var thisLegend = $( "<legend>"+ classModel['legend'] +"</legend>" );
 		/*
@@ -362,7 +333,7 @@ RDForm = {
 			thisLegend.prepend( "<small>"+ classModel['name'] +"</small> " );
 		
 		if ( classModel['isRootClass'] ) {
-			thisLegend.prepend( "<small class='rdform-class-baseprefix'>"+ BASEPREFIX +"</small> " );
+			thisLegend.prepend( "<small class='rdform-class-baseprefix'>"+ CONTEXT[@base] +"</small> " );
 		}
 
 		if ( classModel['return-resource'] ) {
@@ -389,7 +360,7 @@ RDForm = {
 		}		
 
 		// add button for multiple classes
-		if ( classModel['multiple'] ) {
+		if ( classModel['multiple'] !== undefined ) {
 			//thisClass.attr('index', 1);
 			thisClass.append('<button type="button" class="btn btn-default btn-xs duplicate-class" title="'+ RDForm.l("Duplicate class %s", classModel['typeof']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
 		}
@@ -410,7 +381,8 @@ RDForm = {
 		switch ( property['type'] ) {
 
 			case "hidden":
-				thisProperty = $( '<div class="'+_ID_+'-hidden-group"><input type="hidden" name="'+ property['name'] +'" id="" value="'+ property['value'] +'" /></div>' );
+				var val = ( property['value'] !== undefined ) ? property['value'] : "";
+				thisProperty = $( '<div class="'+_ID_+'-hidden-group"><input type="hidden" name="'+ property['name'] +'" id="" value="'+ val +'" /></div>' );
 				break;
 
 			case "literal":
@@ -421,7 +393,7 @@ RDForm = {
 				break;			
 
 			default:
-				alert("Unknown property type \""+property['type']+"\" detected on creating HTML property.");
+				RDForm.showAlert( "warning", "Unknown property type \""+property['type']+"\" detected on creating HTML property.");
 				break;
 
 		}
@@ -475,7 +447,7 @@ RDForm = {
 		});		
 		thisInput.attr( literal );
 
-		if ( literal['datatype'] ) {
+		if ( literal['datatype'] !== undefined ) {
 			if (  literal['datatype'].search(/.*date/) != -1 || literal['name'].search(/.*date/) != -1 ) {
 				thisInputContainer.removeClass( "col-xs-9" );
 				thisInputContainer.addClass( "col-xs-3" );
@@ -506,7 +478,7 @@ RDForm = {
 
 		thisInputContainer.append( thisInput );
 
-		if ( literal['multiple'] ) {
+		if ( literal['multiple'] != undefined ) {
 			thisInput.attr('index', 1);
 			thisInputContainer.append('<button type="button" class="btn btn-default btn-xs duplicate-literal" title="'+ RDForm.l("Duplicate literal %s", literal['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
 		}
@@ -541,7 +513,7 @@ RDForm = {
 				else
 					var btnText = resource['title'] ? resource['title'] : resource['name'] + " - " + resource['value'];
 
-				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="Add resource-class '+resource['value']+'">' + 
+				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="' + RDForm.l("Add class %s", resource['value'])+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
 			} 			
@@ -560,7 +532,6 @@ RDForm = {
 			'name': resource['name'],
 			'additional': resource['additional'],
 			'multiple': resource['multiple'],
-			//'argument': resource['argument'],
 			'arguments': resource['arguments'],
 		});
 
@@ -577,6 +548,7 @@ RDForm = {
 				'class': 'form-control input-sm',
 				'value': resource['value'],
 				'readonly': resource['readonly'],
+				'placeholder': resource['placeholder'],
 			});
 
 			var thisLabel = $("<label>...</label>");
@@ -592,6 +564,92 @@ RDForm = {
 		}
 
 		return curFormGroup;
+	},
+
+	/**
+	 * Add existing data from a JSON-LD object to the form
+	 *
+	 * @param string|undefined name Name of the current field (for multiple literal)
+	 * @param array|object data Values to insert
+	 * @param object env DOM modell of current environment class
+	 */
+	addExistingData : function( name, data, env ) {
+		if ( typeof env === 'undefined' ) {
+			// TODO: what to do if @type doesnt exists?
+			env = rdform.find( 'div[typeof="'+data["@type"]+'"]' );
+		}
+		var prevKey = "";
+
+		for ( var i in data ) {
+			var curName = ( name === undefined ) ? i : name;	
+
+			if ( i[0] != "@" ) { // we dont want @id, @type, ...
+
+				if ( typeof data[i] === "string" ) { // its a literal					
+
+					var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+
+					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
+						var addBtn = $(env).children("div.rdform-literal-group").find( 'button.add-class-literal[name="'+curName+'"]' );
+						if ( $(addBtn).length == 0 ) {
+							RDForm.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }' );
+							continue;
+						}
+						$(addBtn).trigger("click");
+						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+					}
+
+					if ( prevKey == curName ) { // same key -> try to duplicate
+						$(literal).next().trigger("click");
+						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+					}
+
+					$(literal).val( data[i] );	
+					$(literal).trigger("keyup");
+
+					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
+						if ( data[i] == "0" || data[i] == "false" ) {
+							$(literal).removeAttr("checked");							
+						} else {
+							$(literal).trigger("click");
+						}
+					}				
+
+				} else { // its an array: literals or resource ( $.isArray(data[i]) )
+
+					if ( data[i][0]["@type"] ) { // its a resource
+
+						var subEnv = $(env).find( 'div[typeof="'+data[i][0]["@type"]+'"]' ).last();
+
+						if ( $(subEnv).length == 0 ) { // resourc not found -> try to find additional button
+							var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+data[i][0]["@type"]+'"]' );
+							if ( $(addBtn).length == 0 ) {
+								RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+data[i][0]["@type"]+'": "' + JSON.stringify(data[i]) + '" }' );
+								continue;
+							}
+							$(addBtn).trigger("click");
+							subEnv = $(env).find( 'div[typeof="'+data[i][0]["@type"]+'"]' ).last();
+						}
+
+						if ( i != $(subEnv).attr("name")  ) {
+							RDForm.showAlert( "info", 'Der Datensatz enthält die Propertie "'+i+'", die im Modell zu "'+$(subEnv).attr("name")+'" verändert ist.' );
+						}
+
+						for ( var j in data[i] ) { 
+							if ( j > 0 ) { // multiple resource -> trigger duplication
+								$(subEnv).find( 'button.duplicate-class' ).trigger("click");
+								subEnv = $(env).find( 'div[typeof="'+data[i][j]["@type"]+'"]' )[j];
+							}
+							RDForm.addExistingData( undefined, data[i][j], subEnv );
+						}
+					}	
+					else { // its multiple literals
+						RDForm.addExistingData( i, data[i], env );
+					}				
+				}
+			}
+			prevKey = curName;
+		}
 	},
 
 	/*******************************************************
@@ -769,7 +827,7 @@ RDForm = {
 
 			//add remove button
 			if ( $(literalContainer).find('button.remove-literal').length == 0 ) {
-				$('button.duplicate-literal', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(this).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
+				$('button.duplicate-literal', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(thisLiteral).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
 			}
 
 			// rewrite index, radio input names index and references in wildcards
@@ -877,7 +935,7 @@ RDForm = {
 
 			// test if property exists
 			if ( wcdTarget.length == 0 ) {
-				alert( 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
+				RDForm.showAlert("error", 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
 			}
 
 			return wcdTarget;
@@ -985,7 +1043,7 @@ RDForm = {
 
 		// reset button, reset form and values
 		rdform.find("button[type=reset]").click(function() {		
-			$("#error-msg").hide();
+			$(".rdform-alert").hide();
 			rdform[0].reset();
 			// TODO: remove duplicates, selects ...
 			$(".rdform-result").hide();
@@ -995,15 +1053,14 @@ RDForm = {
 
 		// submit formular
 		rdform.submit(function() {			
-			$("#error-msg").hide();
+			$(".rdform-alert").hide();
 			var proceed = true;
 
 			// validate required inputs
 			$("input[required]").each(function() {
 				if ( $(this).val() == "" ) {
 					$(this).parents(".form-group").addClass("error");
-					$("#error-msg").text("Bitte alle rot hinterlegten Felder ausfüllen!");
-					$("#error-msg").show();
+					RDForm.showAlert( "warning", "Bitte alle rot hinterlegten Felder ausfüllen!");
 					proceed = false;
 				} else {
 					$(this).parents(".form-group").removeClass("error");
@@ -1031,16 +1088,43 @@ RDForm = {
 	  */
 	createResult: function() {
 
-		RESULT = new Array();
-
+		//RESULT = new Array();		
+		/*
 		rdform.children("div[typeof]").each(function( ci ) {
 			RDForm.createResultClass( $(this) );
 		});
+		*/
 
-		if ( typeof __filterRESULT !== "undefined" )
-			RESULT = __filterRESULT( RESULT );
+		JSON_RESULT = new Object();			
 
-		console.log( "Result = ", RESULT );
+		rdform.children("div[typeof]").each(function( ci ) {			
+			var curClass = RDForm.getResultClass( $(this) );
+			if ( ! $.isEmptyObject( curClass ) ) { // dont add empty classes
+				if (! JSON_RESULT.hasOwnProperty( curClass["@resource"] ) ) {
+					JSON_RESULT[ curClass["@resource"] ] = new Array();
+				}
+				JSON_RESULT[ curClass["@resource"] ].push( curClass["@value"] );
+			}
+		});
+
+		// make one length array classes to normal classes
+		for ( var ci in JSON_RESULT ) {
+			if ( JSON_RESULT[ci].length == 1 ) {
+				JSON_RESULT[ci] = JSON_RESULT[ci][0];
+			}
+		}
+
+		// if just one rootClass set as only class
+		if ( Object.keys(JSON_RESULT).length == 1 ) {
+			for ( var ci in JSON_RESULT ) {
+				JSON_RESULT = JSON_RESULT[ci];
+			}
+		}
+
+		// add context
+		JSON_RESULT['@context'] = CONTEXT;
+
+		console.log( "Result = ", JSON_RESULT );		
 	},
 
 	/**
@@ -1049,6 +1133,79 @@ RDForm = {
 	  * @cls HTML DOM object of the current class
 	  * @return the ID for this class or the return ID
 	  */
+	getResultClass: function( cls ) {
+
+		var thisClass = new Object(),
+			properties = new Object();
+
+		// walk each property (div-group literal,resource,hidden)
+		cls.children("div").each(function() {
+
+			var property = new Object();
+			//var curPropName = "";
+
+			if ( typeof __createResultClassProperty !== "undefined" )
+				__createResultClassProperty( $(this) ); // TODO: give input or resource class
+
+			// decide if its a hidden,literal or resource property
+			if ( $(this).hasClass(_ID_ + "-hidden-group") ) {
+				//property = RDForm.createResultHidden( $(this).find('input') );
+			}
+			else if ( $(this).hasClass(_ID_ + "-literal-group") ) {
+				property = RDForm.getResultLiteral( $(this).find('input,textarea,select') );
+			}
+			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
+				property = RDForm.getResultResource( $(this) );
+			}
+			else {
+				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
+			}
+
+			if ( ! $.isEmptyObject( property ) ) { // dont add empty properties
+				if (! properties.hasOwnProperty( property["@resource"] ) ) {
+					properties[ property["@resource"] ] = new Array();
+				}
+				properties[ property["@resource"] ].push( property["@value"] );
+			}
+		});
+
+		if ( $.isEmptyObject( properties ) ) { // dont create empty classes
+			console.log( 'Skip class "' + $(cls).attr("typeof") + '" because it has no properties' );
+			return new Object();
+		}
+
+		// make one length array properties to normal properties
+		for ( pi in properties ) {
+			if ( properties[pi].length == 1 ) {
+				properties[pi] = properties[pi][0];
+			}
+		}
+
+		if ( typeof __createClass !== "undefined" )
+			__createClass( $(cls) );		
+
+		var classResource = $(cls).attr("resource");
+		var wildcardsFct = RDForm.replaceWildcards( classResource, $(cls), RDForm.getWebsafeString );
+
+		// dont save classes with wildcard pointers when every value is empty
+		if ( classResource.search(/\{.*\}/) != -1 && wildcardsFct['count'] == 0 ) {
+			console.log( 'Skip class "' + $(cls).attr("typeof") + '" because it has wildcards, but every pointer property is empty.' );
+			return new Object();
+		}
+
+		thisClass["@resource"] = $(cls).attr("typeof");
+
+		// if it has a return-resource take this for the return
+		if ( $(cls).attr("return-resource") ) {
+			thisClass["@resource"] = RDForm.replaceWildcards( $(cls).attr("return-resource"), $(cls), RDForm.getWebsafeString )['str'];
+		}
+
+		thisClass["@value"] = { "@id" : wildcardsFct['str'], "@type" : $(cls).attr("typeof") };
+		$.extend(true, thisClass["@value"], properties );
+
+		return thisClass;
+	},
+	// deprecated
 	createResultClass: function( cls )  {
 
 		var thisClass = new Object();
@@ -1123,6 +1280,7 @@ RDForm = {
 	  * @hidden HTML DOM Object of the current hidden input
 	  * @return Object of this hidden property
 	  */
+	  // deprecated
 	createResultHidden: function( hidden ) {
 		var thisHidden = new Object();		
 
@@ -1133,7 +1291,7 @@ RDForm = {
 		thisHidden['value'] = '"' + val + '"';
 		
 		var name = $(hidden).attr("name");
-		thisHidden['name'] = name;
+		thisHidden['name'] = name;		
 
 		return thisHidden;
 	},
@@ -1144,6 +1302,36 @@ RDForm = {
 	  * @literal HTML DOM Object of the current hidden input
 	  * @return Object of this property
 	  */
+	getResultLiteral: function( literal ) {
+		var thisLiteral = new Object();	
+
+		if ( $(literal).length == 0 ) {
+			return thisLiteral; // return empty object fur null litreal e.g. add btn
+		}
+
+		var val = $(literal).val();		
+
+		if ( $(literal).attr("type") == "checkbox" ) {
+			val = $(literal).prop("checked").toString();
+		}
+		
+		if ( $(literal).prop("tagName") == "SELECT" ) {
+			val = $( ":selected", $(literal) ).val();
+		}
+
+		if ( val != "" ) {
+
+			thisLiteral["@value"] = RDForm.replaceWildcards( val, $(literal).parentsUntil("div[typeof]").parent() )['str'];			
+			thisLiteral['@resource'] = $(literal).attr("name");
+
+			if ( $(literal).attr("datatype") !== undefined ) {
+				CONTEXT[ thisLiteral['@resource'] ] = { "@type" : $(literal).attr("datatype") };
+			}
+		}		
+
+		return thisLiteral;
+	},
+	// deprecated
 	createResultLiteral: function( literal ) {
 		var thisLiteral = new Object();	
 
@@ -1185,6 +1373,30 @@ RDForm = {
 	  * @env HTML DOM Object of the current resource group
 	  * @return Object of this resource property
 	  */
+	getResultResource: function( env ) {
+		var resource = new Object(),
+			resourceGroup;
+
+		// search for a normal resource class children
+		resourceGroup = $(env).children('div[typeof]');
+		if ( resourceGroup.length > 0 ) { 
+			// create a new class for this resource and take its return ID
+			resource = RDForm.getResultClass( resourceGroup );
+		}
+		// search for a external resource input
+		else if ( $(env).find('input[external]').length > 0 ) {
+			resourceGroup = $(env).find('input[external]');			
+			resource['@resource'] = $(resourceGroup).attr("name");
+			resource["@value"] = RDForm.replaceWildcards( $(resourceGroup).val(), $(env).parent("div[typeof]"), RDForm.getWebsafeString )['str'];
+		}
+
+		/*if ( ! $.isEmptyObject( resource ) ) {
+
+		}*/
+
+		return resource;
+	},
+	// deprecated
 	createResultResource: function( env ) {
 
 		var resource = new Object();
@@ -1210,6 +1422,13 @@ RDForm = {
 		}
 
 		return resource;
+	},	
+
+	/**
+	  * TODO: JSON-LD to turtle
+	  */
+	createTurtleResult: function() {
+
 	},
 
 	/**
@@ -1218,16 +1437,29 @@ RDForm = {
 	  * @return void
 	  */
 	outputResult: function() {
+		
+		var resultStr = JSON.stringify(JSON_RESULT, null, 2);
+				
+		$("."+_ID_+"-result").show();	
+		$("."+_ID_+"-result textarea").val( resultStr );
+		var lines = resultStr.split("\n");
+		$("."+_ID_+"-result textarea").attr( "rows" , ( lines.length ) );
+		$('html, body').animate({ scrollTop: $("."+_ID_+"-result").offset().top }, 200);		
+
+	}, // end of creating result
+	// deprecated
+	outputTurtle: function() {
+
 		var resultStr = "";
 
-		if ( BASEPREFIX != "" ) {
+		/*if ( BASEPREFIX != "" ) {
 			resultStr += "@base <" + BASEPREFIX + "> .\n";
 		}
 
 		//create prefixes
 		for ( var prefix in PREFIXES ) {
 			resultStr += "@prefix " + prefix + ": <" + PREFIXES[prefix] + "> .\n";
-		}
+		}*/
 
 		// output classes
 		for ( var ci in RESULT ) {
@@ -1255,14 +1487,8 @@ RDForm = {
 				resultStr += ( ( 1 + parseInt(pi) ) == RESULT[ci]['properties'].length ) ? " .\n" : " ;\n";
 			}
 		}
-		
-		$("."+_ID_+"-result").show();
-		$("."+_ID_+"-result textarea").val( resultStr );		
-		var lines = resultStr.split("\n");
-		$("."+_ID_+"-result textarea").attr( "rows" , ( lines.length ) );
-		$('html, body').animate({ scrollTop: $("."+_ID_+"-result").offset().top }, 200);		
-
-	}, // end of creating result
+		return resultStr;
+	},
 
 
 	/************************** HELPER FUNCTIONS ******************************/
@@ -1305,7 +1531,7 @@ RDForm = {
 
 				// test if property exists
 				if ( wcdVal.length == 0 ) {
-					alert( 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
+					RDForm.showAlert( "error", 'Error: cannot find property "' + wcd + '" for wildcard replacement.' );
 					continue;
 				}
 
@@ -1344,6 +1570,7 @@ RDForm = {
 	  * @return Boolean if its valid or null if the string does not has any prefix
 	  */
 	validatePrefix: function( str ) {
+		if ( str === undefined ) return null
 
 		if ( str.search(":") != -1 ) {
 			str = str.split(":")[0];
@@ -1351,8 +1578,7 @@ RDForm = {
 			return null;
 		}
 
-		for ( var prefix in PREFIXES ) {
-			//resultStr += "@prefix " + prefix + " <" + PREFIXES[prefix] + "> .\n";
+		for ( var prefix in CONTEXT ) {
 			if ( str == prefix ) {
 				return true;
 			}
@@ -1486,6 +1712,41 @@ RDForm = {
 			}
 		}
 		return str;
+	},
+
+	/**
+	  * Show a message in a colorred box above the form
+	  *
+	  * @param String type Message type (succes, error, warning)
+	  * @param String msg The message
+	  * @return viod
+	  */
+	showAlert : function( type, msg ) {
+
+		var cls = "";
+
+		switch ( type ) {
+
+			case "success" :
+				cls = "alert-success";				
+				break;
+
+			case "error" :
+				cls = "alert-danger";				
+				break;
+
+			case "warning" :
+				cls = "alert-warning";
+				break;
+
+			default :
+				cls = "alert-info";
+
+		}
+
+		console.log( "RDForm Alert ("+type+"): " + msg );
+		$(".rdform-alert").append('<p class="alert '+cls+'" role="alert">' + msg + '</p>');
+
 	},
 
 }
