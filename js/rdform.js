@@ -1104,6 +1104,9 @@ RDForm = {
 		});
 		*/
 
+		if ( typeof __createResult !== "undefined" )
+			__createResult();
+
 		JSON_RESULT = new Object();			
 
 		// walk every root class
