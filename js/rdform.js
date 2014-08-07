@@ -585,8 +585,6 @@ RDForm = {
 
 			if ( i[0] != "@" ) { // we dont want @id, @type, ...
 
-				// TODO: external resources
-
 				if ( typeof data[i] === "string" ) { // its a literal	
 
 					var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
@@ -619,6 +617,7 @@ RDForm = {
 
 				} else { // its an array: multiple literals or resource ( $.isArray(data[i]) )
 
+					// push single/multiple resources or multiple resources as array of objects
 					var thisData = new Array();
 					if ( $.isArray(data[i]) ) {
 						thisData = data[i];
@@ -631,7 +630,15 @@ RDForm = {
 					}
 					else { // its one or mutliple resources
 
-						for ( var di in thisData ) { 
+						for ( var di in thisData ) {
+
+							if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
+								var resource = $(env).children("div.rdform-resource-group").find( 'input[name="'+i+'"]' ).last();
+								if ( $(resource).length != 0 ) {
+									$(resource).val( thisData[di]["@id"] );	
+									continue;
+								}
+							}
 
 							var subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
 
@@ -1408,12 +1415,10 @@ RDForm = {
 		else if ( $(env).find('input[external]').length > 0 ) {
 			resourceGroup = $(env).find('input[external]');			
 			resource['@resource'] = $(resourceGroup).attr("name");
-			resource["@value"] = RDForm.replaceWildcards( $(resourceGroup).val(), $(env).parent("div[typeof]"), RDForm.getWebsafeString )['str'];
+			resource["@value"] = {
+				"@id" : RDForm.replaceWildcards( $(resourceGroup).val(), $(env).parent("div[typeof]"), RDForm.getWebsafeString )['str']
+			};
 		}
-
-		/*if ( ! $.isEmptyObject( resource ) ) {
-
-		}*/
 
 		return resource;
 	},
