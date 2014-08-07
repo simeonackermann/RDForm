@@ -1413,7 +1413,10 @@ RDForm = {
 		}
 		// search for a external resource input
 		else if ( $(env).find('input[external]').length > 0 ) {
-			resourceGroup = $(env).find('input[external]');			
+			resourceGroup = $(env).find('input[external]');
+			if ( $(resourceGroup).val() == "" ) {
+				return resource;
+			}
 			resource['@resource'] = $(resourceGroup).attr("name");
 			resource["@value"] = {
 				"@id" : RDForm.replaceWildcards( $(resourceGroup).val(), $(env).parent("div[typeof]"), RDForm.getWebsafeString )['str']
