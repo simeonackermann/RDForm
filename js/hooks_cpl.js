@@ -55,7 +55,15 @@ __afterDuplicateClass = function ( thisClass ) {
 
 __createResult = function() {
 
-	var forenames = $(rdform).find('input[name="forenames"]').val();
+	var forenames = "";
+		
+		rdform.find('div[typeof="cpm:Forename"]').each(function() {
+			if ( $(this).find('input[name="cpm:isFirstName"]').prop("checked") ) {
+				forenames += $(this).find('input[name="cpm:forename"]').val() + " ";
+			}
+		});
+	forenames = forenames.trim();
+	//var forenames = $(rdform).find('input[name="forenames"]').val();
 	var surname = $(rdform).find('input[name="cpm:surname"]').val();
 	var resource = forenames + " " + surname;
 

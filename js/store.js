@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-	rdform = $("form.rdform");
+	rdform = $("form.rdform");	
 
 	var showForm = false;
 	$(document).on("click", ".show-list", function() {		
@@ -38,9 +38,18 @@ $(document).ready(function(){
 		});
 		rdform.show("fast");
 		$(".show-list").show();
+
+		// unbind original submit, set own new
+		rdform.unbind( "submit" );
+		$(rdform).submit(function() {
+			RDForm.createResult();
+			writeFile();
+			return false;
+		});
 	}
 
-	$(".show-form").click(function() {
+	$(document).on("click", ".show-form", function() {
+		$(rdform).html("");
 		myShowForm();
 	});	
 
@@ -96,6 +105,7 @@ $(document).ready(function(){
 	
 	});
 
+	/*
 	$(document).on( "click", "button.rdform-write-file", function() {
 
 		var name = $("#rdform-prof-filename").val();
@@ -113,6 +123,38 @@ $(document).ready(function(){
 				getFiles();
 		});
 	});
+	*/
+
+	writeFile = function(  ) {
+
+		var name = $("#rdform-prof-filename").val();
+		
+		var content = JSON.stringify(JSON_RESULT, null, '\t');
+
+		$(rdform).hide();
+
+		$(".rdform-result").html("");
+		var resultMsg = $('<p></p>');
+
+		
+		$.post( "store/writeFile.php", { name: name, content: content })
+			.done(function( jsondata ) {
+				if ( jsondata.result ) {
+					$(resultMsg).addClass("text-success");
+				} else {
+					$(resultMsg).addClass("text-danger");
+				}
+				$(resultMsg).text( jsondata.msg );
+
+				//getFiles();
+		});
+
+			$(".rdform-result").append( resultMsg );
+		$(".rdform-result").append( $('<button type="submit" class="btn btn-default btn-xs show-form">Neuen Datensatz anlegen</button>') );
+		
+		$(".rdform-result").show();
+
+	}
 
 	
 
