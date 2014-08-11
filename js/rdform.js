@@ -232,6 +232,10 @@ RDForm = {
 				RDForm.showAlert( "warning", "No properties stored in class \"" + curClass['typeof'] + "\" on parsing model found..." );
 			}
 
+			if ( $(this).find("p.help") ) {
+				curClass['help'] = $(this).find("p.help").html();
+			}
+
 			MODEL.push( curClass );
 		})
 		
@@ -348,6 +352,13 @@ RDForm = {
 
 		thisLegend.append( '<small>a '+ classModel['typeof'] +'</small>' );	
 		thisClass.append( thisLegend );
+
+		if ( classModel['help'] !== undefined ) {
+			thisClass.append(	'<div class="form-group rdform-class-help hidden">' +
+									'<span class="help-block col-xs-12">'+classModel['help']+'</span>' +
+								'</div>' );
+			thisLegend.prepend( '<span class="glyphicon glyphicon-question-sign btn rdform-show-class-help"></span>' );
+		}
 
 		// add the properties
 		for ( var pi in classModel['properties'] ) {
@@ -481,6 +492,11 @@ RDForm = {
 		if ( literal['multiple'] != undefined ) {
 			thisInput.attr('index', 1);
 			thisInputContainer.append('<button type="button" class="btn btn-default btn-xs duplicate-literal" title="'+ RDForm.l("Duplicate literal %s", literal['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
+		}
+
+		if ( literal['help'] !== undefined ) {
+			thisInputContainer.append( '<span class="glyphicon glyphicon-question-sign btn rdform-show-literal-help"></span>' );
+			thisInputContainer.append(	'<span class="help-block rdform-literal-help hidden">' + literal['help'] + '</span>' );			
 		}
 
 		thisFormGroup.append( thisInputContainer );		
@@ -696,6 +712,18 @@ RDForm = {
 		// validate input values on change
 		rdform.on("change", "input", function() {
 			RDForm.userInputValidation( $(this) );
+		});
+
+		// BUTTON: show help class text
+		rdform.on("click", ".rdform-show-class-help", function() {
+			var classHelp =  $(this).parentsUntil("div[typeof]").parent().find("div.rdform-class-help").first();
+			$(classHelp).toggleClass("hidden");
+		});
+
+		// BUTTON: show literal help text
+		rdform.on("click", ".rdform-show-literal-help", function() {
+			var classHelp =  $(this).parent().find("span.rdform-literal-help");
+			$(classHelp).toggleClass("hidden");
 		});
 
 		// BUTTON: add a class-literal

@@ -34,6 +34,15 @@ body {
 	margin: 3px 0px;
 }
 
+.glyphicon-question-sign {
+	padding: 4px;
+	top: 0px;
+	opacity: 0.8;
+}
+.glyphicon-question-sign:hover {
+	opacity: 1;	
+}
+
 .rdform-edit-class-resource {
 	display: inline;
 	margin: 0 5px;
