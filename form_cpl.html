@@ -158,8 +158,10 @@
     <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>  
 
-  <legend>Studium / Schule</legend>
+  <legend>Schule / Ausbildung / Studium</legend>
   <div typeof="cpm:Study" resource="cpl:Study/{puri}/{rdfs:label}">
+    <p class="help">Eingabe der schulischen und universitären Ausbildung einschließlich Abschluss.<br />Nutzung auch für berufliche Ausbildung</p>
+
     <label>Ausbildungsabschnitt</label>
     <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
 
@@ -175,6 +177,8 @@
 
   <legend>Karriere</legend>
   <div typeof="cpm:Career" resource="cpl:Career/{puri}/{rdfs:label}">
+    <p class="help">Außeruniversitäre Karriereabschnitte z. B. in der Industrie</p>
+
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" />
 
@@ -190,6 +194,8 @@
 
   <legend>Qualifikation</legend>
   <div typeof="cpm:Qualification" resource="cpl:Qualification/{puri}/{rdfs:label}" multiple>
+    <p class="help">Akademische Karriere (Dissertation, Habilitation, Facultas docendi,) mit Thema, Ort, Jahr Umwidmung Dissertation B in Habilitation</p>
+
     <label>Bezeichnung</label>
     <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Qualifikationsbeschreibung" />
 
@@ -202,6 +208,8 @@
 
   <legend>Mitgliedschaften</legend>
   <div typeof="cpm:membership" resource="cpl:membership/{puri}/{rdfs:label}" multiple>
+    <p class="help">Mitgliedschaften in Parteien, Organisationen (DTSB, KdT u. ä) mit Funktionen</p>
+
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
@@ -232,6 +240,8 @@
 
   <legend>Universitätsämter</legend>
   <div typeof="cpm:Office" resource="cpl:Office/{puri}/{rdfs:label}" multiple>
+    <p class="help">Lehrstühle, Ämter in den Fakultäten, Sektionen u. ä.</p>
+
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
