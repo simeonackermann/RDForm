@@ -678,7 +678,8 @@ RDForm = {
 									if( thisData[di]["@type"] == thisData[ri]["@type"] ) {										
 										$(subEnv).find( 'button.duplicate-class' ).trigger("click");
 										subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
-										$(subEnv).attr("style", ""); // bugfix: some duplicated classes have hidden inline style
+										$(subEnv).removeAttr("style"); // bugfix: some classes have hidden inline style
+										break;
 									}
 								}
 							}
@@ -841,6 +842,7 @@ RDForm = {
 			var thisClass = $(classContainer).children("div[typeof]");			
 
 			$(thisClass).find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
+			$(thisClass).find('texteare:not([value*="{"]):not([readonly])').val("");
 
 			$(thisClass).children("legend").hide(); // hide legend
 			$(thisClass).find("div").removeClass("error");
@@ -857,7 +859,8 @@ RDForm = {
 
 			$(classContainer).hide();			
 			$(this).parentsUntil("div.rdform-resource-group").parent().after( classContainer );
-			$(classContainer).show("slow");						
+			$(classContainer).show("slow");
+			$(classContainer).removeAttr("style"); // remove style (BUGIF in addExistingDate, on duplicate multiple resource the classConainer is hidden...)
 			$(this).remove(); // remove duplicate btn
 
 			if ( typeof __afterDuplicateClass !== "undefined" )
