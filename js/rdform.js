@@ -16,11 +16,11 @@ var _ID_ = "rdform",
 	  * default plugin settings
 	  */
 	var settings = {
-		model: "form.html",
-		data: "",
-		hooks: "js/hooks.js",
-		lang: "",
-		cache: false,
+		model: 	"form.html",
+		data: 	"",
+		hooks: 	"",
+		lang: 	"",
+		cache: 	false,
 	}	
 	
 	/**
@@ -34,16 +34,20 @@ var _ID_ = "rdform",
 		// overide defaults settings
         $.extend(settings, options);		
 		rdform = $(this);
-		rdform.append( '<div class="row rdform-alert"></p></div>' );
+
+		//add an alert area before the form
+		rdform.before( '<div class="row rdform-alert"></p></div>' );
 
 		// loading language file
 		if ( settings.lang != "" ) {
 			var langFile = "lang/" + settings.lang + ".js";
-			ajaxAsyncScript( langFile );
-		}
+			rdform_ajaxAsyncScript( langFile );
+		}		
 
 		//loading hooks file
-		ajaxAsyncScript( settings.hooks );
+		if ( settings.hooks != "" ) {
+			rdform_ajaxAsyncScript( settings.hooks );
+		}
 
 		// loading model file
 		var modelFile = settings.cache ? settings.model : settings.model + "?" + (new Date()).getTime();
@@ -64,7 +68,17 @@ var _ID_ = "rdform",
 
 		// parsing model
 		RDForm.parseFormModel( 'rdform', model )
-						
+
+		// create form, fill with modell, buttons, data and ad buttons
+		rdform_createForm();
+
+		// add result div after form
+		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
+
+    	return this;
+	};
+
+	rdform_createForm = function() {
 		//add model-form to my form
 		rdform.append( RDForm.createHTMLForm() );		
 
@@ -81,14 +95,9 @@ var _ID_ = "rdform",
 		if ( settings.data != "" ) {
 			RDForm.addExistingData( undefined, settings.data );
 		}
-
-		// add result div
-		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
-
-    	return this;
 	};
 
-	ajaxAsyncScript = function( script ) {
+	rdform_ajaxAsyncScript = function( script ) {
 		$.ajax({
 			url: script,
 			dataType: "script",
@@ -1119,24 +1128,24 @@ RDForm = {
 
 		// reset button, reset form and values
 		rdform.find("button[type=reset]").click(function() {		
-			$(".rdform-alert").hide();
-			rdform[0].reset();
-			// TODO: remove duplicates, selects ...
-			$(".rdform-result").hide();
-			$(".rdform-result textarea").val( "" );
-			// TODO: remove duplicated datasets
+			$(rdform).html("");
+			$("."+_ID_+"-result").hide();
+			$("."+_ID_+"-result textarea").val( '' );
+
+			// create form, fill with modell, buttons, data and ad buttons();
+			rdform_createForm();
 		});
 
 		// submit formular
 		rdform.submit(function() {			
-			$(".rdform-alert").hide();
+			$("."+_ID_+"-alert").hide();
 			var proceed = true;
 
 			// validate required inputs
 			$("input[required]").each(function() {
 				if ( $(this).val() == "" ) {
 					$(this).parents(".form-group").addClass("error");
-					RDForm.showAlert( "warning", "Bitte alle rot hinterlegten Felder ausfüllen!");
+					RDForm.showAlert( "warning", "Please fillout all required re marked fields!");
 					proceed = false;
 				} else {
 					$(this).parents(".form-group").removeClass("error");
@@ -1145,8 +1154,7 @@ RDForm = {
 
 			// proceed
 			if ( proceed ) {
-				$("button[type=submit]").html("Datensatz aktualisieren");
-				//createClasses();
+				$("button[type=submit]").html("update");
 				RDForm.createResult();
 
 				RDForm.outputResult();
@@ -1309,6 +1317,9 @@ RDForm = {
 			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
 				property = RDForm.createResultResource( $(this) );
 			}
+			else if ( $(this).hasClass(_ID_ + "-class-help") ) {
+				property = RDForm.createResultResource( $(this) );
+			}			
 			else {
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
@@ -1827,6 +1838,7 @@ RDForm = {
 
 		console.log( "RDForm Alert ("+type+"): " + msg );
 		$(".rdform-alert").append('<p class="alert '+cls+'" role="alert">' + msg + '</p>');
+		$("."+_ID_+"-alert").show();
 
 	},
 
