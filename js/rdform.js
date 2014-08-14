@@ -3,6 +3,7 @@
   */
 var _ID_ = "rdform",
 	rdform, // rdform DOM object
+	initedFormHandler = false,
 	MODEL = new Array(),
 	RESULT = new Array(),
 	JSON_RESULT = new Object(),
@@ -88,8 +89,9 @@ var _ID_ = "rdform",
 							'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
 						'</div></div>' );
 
-		// init form action handler
-		RDForm.initFormHandler();
+		if ( RDForm.initFormHandler.called != true ) {
+			RDForm.initFormHandler();
+		}
 
 		// maybe add existing data
 		if ( settings.data != "" ) {
@@ -720,6 +722,7 @@ RDForm = {
 	 * 
 	 *******************************************************/
 	initFormHandler: function() {
+		RDForm.initFormHandler.called = true;
 		/*
 		$('body').on('focus',".date", function(){
 			//$(".datepicker").datepicker('hide'); // if enabled resets the format
@@ -1134,6 +1137,9 @@ RDForm = {
 
 			// create form, fill with modell, buttons, data and ad buttons();
 			rdform_createForm();
+
+			// find wildcard inputs again
+			findWildcardInputs( rdform );
 		});
 
 		// submit formular
@@ -1145,7 +1151,7 @@ RDForm = {
 			$("input[required]").each(function() {
 				if ( $(this).val() == "" ) {
 					$(this).parents(".form-group").addClass("error");
-					RDForm.showAlert( "warning", "Please fillout all required re marked fields!");
+					RDForm.showAlert( "warning", "Please fillout all required red marked fields!");
 					proceed = false;
 				} else {
 					$(this).parents(".form-group").removeClass("error");
@@ -1159,7 +1165,6 @@ RDForm = {
 
 				RDForm.outputResult();
 			}
-
 			return false;
 		});
 
@@ -1245,9 +1250,13 @@ RDForm = {
 			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
 				property = RDForm.getResultResource( $(this) );
 			}
+			else if ( $(this).hasClass(_ID_ + "-class-help") ) {
+				property = RDForm.createResultResource( $(this) );
+			}
 			else {
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
+
 
 			if ( ! $.isEmptyObject( property ) ) { // dont add empty properties
 				if (! properties.hasOwnProperty( property["@resource"] ) ) {
@@ -1319,7 +1328,7 @@ RDForm = {
 			}
 			else if ( $(this).hasClass(_ID_ + "-class-help") ) {
 				property = RDForm.createResultResource( $(this) );
-			}			
+			}
 			else {
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
