@@ -62,7 +62,7 @@
     />
 
     <input name="cpm:has-period" type="resource" value="cpm:Faculty" title="Fakultät" 
-      arguments='{"puri":"{puri}"}' additional
+      arguments='{"puri":"{puri}"}' additional multiple
     />
     
     <input name="cpm:has-period" type="resource" value="cpm:Honour" title="Ehrungen" 
@@ -75,15 +75,18 @@
     />
     -->
 
-    <label>Veröffentlichungen</label>
-    <input type="literal" name="cpm:publication" multiple />
+    <label>Veröffentlichungen / Publikationen</label>
+    <!--<input type="literal" name="cpm:publication" multiple />-->
+    <input name="cpm:publication" textarea type="literal" datatype="xsd:string" multiple />
+
 
     <label>DNB-Link:</label>
     <!-- TODO: link http://dn-b ... generieren -->
-    <input type="resource" external name="cpm:gnd" datatype="xsd:string" placeholder="Bsp. 645320599" />
+    <input type="resource" external name="cpm:gnd" datatype="xsd:string" />
 
     <label>Literatur</label>
-    <input type="literal" name="cpm:literature" multiple />
+    <!--<input type="literal" name="cpm:literature" multiple />-->
+    <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple />
 
     <!--
     <input name="cpm:Literatur" type="resource" value="cpm:Literatur" title="Literatur" 
@@ -97,8 +100,11 @@
     <label>Links:</label>
     <input type="literal" name="cpm:weblinks" datatype="xsd:string" multiple />
 
-    <label>Weitere Informationen / Kommentare</label>
-    <input name="cpm:furtherInformaiton" textarea type="literal" datatype="xsd:string" multiple additional />
+    <label>Weitere Informationen</label>
+    <input name="cpm:furtherInformation" textarea type="literal" datatype="xsd:string" multiple />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
 
   </div>  
 
@@ -129,7 +135,10 @@
     <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string"  />
 
     <label>Land</label>
-    <input name="cpm:country" type="literal" datatype="xsd:string"  />    
+    <input name="cpm:country" type="literal" datatype="xsd:string"  />   
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional /> 
   </div>  
 
   <legend>Tod</legend>
@@ -147,46 +156,80 @@
 
     <label>Land:</label>
     <input name="cpm:country" type="literal" datatype="xsd:string"  />    
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>  
 
-  <legend>Studium / Schule</legend>
+  <legend>Schule / Ausbildung / Studium</legend>
   <div typeof="cpm:Study" resource="cpl:Study/{puri}/{rdfs:label}">
+    <p class="help">Eingabe der schulischen und universitären Ausbildung einschließlich Abschluss.<br />Nutzung auch für berufliche Ausbildung</p>
+
     <label>Ausbildungsabschnitt</label>
     <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
 
     <label>von:</label>
-    <input name="cpm:from" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input name="cpm:from" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
 
     <label>bis:</label>
-    <input name="cpm:to" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input name="cpm:to" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>
 
   <legend>Karriere</legend>
   <div typeof="cpm:Career" resource="cpl:Career/{puri}/{rdfs:label}">
+    <p class="help">Außeruniversitäre Karriereabschnitte z. B. in der Industrie</p>
+
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" />
 
     <label>von:</label>
-    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM" />
 
     <label>bis:</label>
-    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM" />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>
 
   <legend>Qualifikation</legend>
   <div typeof="cpm:Qualification" resource="cpl:Qualification/{puri}/{rdfs:label}" multiple>
+    <p class="help">Akademische Karriere (Dissertation, Habilitation, Facultas docendi) mit Thema, Ort, Jahr Umwidmung Dissertation B in Habilitation</p>
+
+    <label>Bezeichnung</label>
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Qualifikationsbeschreibung" />
+
+    <label>Jahr:</label>
+    <input type="literal" name="cpm:date" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
+  </div>
+
+  <legend>Universitätsämter</legend>
+  <div typeof="cpm:Office" resource="cpl:Office/{puri}/{rdfs:label}" multiple>
+    <p class="help">Lehrstühle, Ämter in den Fakultäten, Sektionen u.ä.  innerhalb der Universität Leipzig</p>
+
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
     <label>von:</label>
-    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM" />
 
     <label>bis:</label>
-    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM" />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>
 
-  <legend>Mitgliedschaften</legend>
+  <legend>Mitgliedschaften / Funktionen</legend>
   <div typeof="cpm:membership" resource="cpl:membership/{puri}/{rdfs:label}" multiple>
+    <p class="help">Mitgliedschaften in Parteien, Organisationen (DTSB, KdT u. ä) oder Universitätsämter außerhalb der Universität Leipzig mit Funktionen</p>
+
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
@@ -195,9 +238,12 @@
 
     <label>bis:</label>
     <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>
 
-  <legend>Fakultät</legend>
+  <legend>Fakultät / Sektion / Institut</legend>
   <div typeof="cpm:Faculty" resource="cpl:Faculty/{puri}/{rdfs:label}" multiple>
     <label>Fakultät</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="" />
@@ -207,18 +253,15 @@
 
     <label>Institut</label>
     <input type="literal" name="rdfs:institute" datatype="xsd:string" />
-  </div>
-
-  <legend>Universitätsämter</legend>
-  <div typeof="cpm:Office" resource="cpl:Office/{puri}/{rdfs:label}" multiple>
-    <label>Bezeichnung</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
 
     <label>von:</label>
-    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ" />
 
     <label>bis:</label>
-    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+    <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ" />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>
 
   <legend>Ehrungen</legend>
@@ -228,30 +271,9 @@
 
     <label>Jahr:</label>
     <input type="literal" name="cpm:date" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-  </div>
 
-  <!--
-  <legend>Veröffentlichungen</legend>
-  <div typeof="cpm:Publication" resource="cpl:Publication/{puri}/{rdfs:label}" multiple>
-    <label>Bezeichnung</label>
-    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Titel, Verlag, ..." />
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>
-  -->
-
-  <!--
-  <legend>Literatur</legend>
-  <div typeof="cpm:Literatur" resource="cpl:Literatur/{puri}/{rdfs:label}" multiple>
-    <label>Bezeichnung</label>
-    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Verfasser, Titel, Verlag, Jahr ..." />
-  </div>
-  -->
-
-  <!--
-  <legend>Referenzen und Quellen</legend>
-  <div typeof="cpm:references" resource="cpl:Quellen/{puri}/{rdfs:seeAlso}" multiple>
-    <label>Bezeichnung</label>
-    <input type="literal" textarea name="rdfs:seeAlso" datatype="xsd:string" />
-  </div>
-  -->
-
+  
 </form> 
