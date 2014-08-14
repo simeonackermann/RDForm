@@ -24,7 +24,7 @@ if ( $filename && $content ) {
 		exit;
 	}
 
-	 echo json_encode( array('result' => true, 'msg' => 'Datei "' . $filename . '" erfolgreich geschrieben.') );
+	 echo json_encode( array('result' => true, 'msg' => 'Datensatz "' . $filename . '" erfolgreich geschrieben.') );
 
 	 fclose($handle);
 
