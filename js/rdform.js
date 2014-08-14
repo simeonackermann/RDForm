@@ -514,6 +514,7 @@ RDForm = {
 
 		var curFormGroup = $('<div class="form-group '+_ID_+'-resource-group"></div>');
 		var resourceClass;
+		var showHelp = false;
 
 		if ( resource['external'] !== undefined ) {	// add simple input for external resources
 			resourceClass = $("<input />");						
@@ -532,6 +533,11 @@ RDForm = {
 				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="' + RDForm.l("Add class %s", resource['value'])+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
+
+
+				if ( classModel['help'] ) {
+					showHelp = true;					
+				}
 			} 			
 			else { // create class-model for the resource
 				classModel['name'] = resource['name'];
@@ -577,6 +583,13 @@ RDForm = {
 			
 			var thisInputContainer = $('<div class="col-xs-9"></div>');	
 			resourceClass.wrap( thisInputContainer );
+		}
+
+		if ( showHelp == true ) {
+			curFormGroup.append('<div class="rdform-resource-help-container">' +
+									'<span class="glyphicon glyphicon-question-sign btn rdform-show-resource-help"></span>' +
+									'<span class="help-block rdform-resource-help hidden">' + classModel['help'] + '</span>' +
+								'</div>' );			
 		}
 
 		return curFormGroup;
@@ -727,6 +740,13 @@ RDForm = {
 			$(classHelp).toggleClass("hidden");
 		});
 
+		// BUTTON: show literal help text
+		rdform.on("click", ".rdform-show-resource-help", function() {
+			var classHelp =  $(this).parent().find("span.rdform-resource-help");
+			$(classHelp).toggleClass("hidden");
+			return false;
+		});
+
 		// BUTTON: add a class-literal
 		rdform.on("click", "button.add-class-literal", function() {
 			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent();
@@ -771,7 +791,8 @@ RDForm = {
 			$(thisClass).hide();
 			$(this).before( thisClass );
 			$(thisClass).show("slow");
-			$(this).remove();
+			$(this).parent().children("div.rdform-resource-help-container").remove();
+			$(this).remove();			
 
 			findWildcardInputs( thisClass );
 

@@ -123,3 +123,9 @@ input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:fo
 .rdform .form-group {
 	display: block;
 }*/
+.rdform-resource-help {
+	font-size: 0.9em;
+}
+.rdform-resource-help-container {
+	display:inline
+}
