@@ -37,7 +37,9 @@ $(document).ready(function(){
 			lang: "de"
 		});
 		rdform.show("fast");
-		$(".show-list").show();
+		$(".show-list").show();		
+
+		$(rdform).find("button:submit").text("Datensatz anlegen");
 
 		// unbind original submit, set own new
 		rdform.unbind( "submit" );
@@ -50,7 +52,8 @@ $(document).ready(function(){
 
 	$(document).on("click", ".show-form", function() {
 		$(rdform).html("");
-		myShowForm();
+		$(".rdform-result").html("");
+		myShowForm(undefined);
 	});	
 
 	// show feeedback
@@ -65,6 +68,7 @@ $(document).ready(function(){
 	});
 
 	// add some buttons on first form submitting
+	/*
 	var firstSubmit = true;
 	$("form.rdform").submit(function() {
 		if ( firstSubmit )
@@ -75,6 +79,7 @@ $(document).ready(function(){
 
 		firstSubmit = false;		
 	});
+	*/		
 
 	// choose a file from files-list
 	$(document).on("click", "#rdform-filestore a.prof-label", function() {		
@@ -83,6 +88,7 @@ $(document).ready(function(){
 				if ( jsondata.result && jsondata.content != "" ) {
 					var data = $.parseJSON( jsondata.content );
 					myShowForm(data);
+					$(rdform).find("button:submit").text("Datensatz aktualisieren");
 				}
 
 		});
@@ -150,7 +156,7 @@ $(document).ready(function(){
 		});
 
 			$(".rdform-result").append( resultMsg );
-		$(".rdform-result").append( $('<button type="submit" class="btn btn-default btn-xs show-form">Neuen Datensatz anlegen</button>') );
+		//$(".rdform-result").append( $('<button type="submit" class="btn btn-default btn-xs show-form">Neuen Datensatz anlegen</button>') );
 		
 		$(".rdform-result").show();
 
