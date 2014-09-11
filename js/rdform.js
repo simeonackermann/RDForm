@@ -640,8 +640,9 @@ RDForm = {
 					}
 
 					if ( prevKey == curName ) { // same key -> try to duplicate
-						$(literal).next().trigger("click");
+						$(literal).nextAll("button.duplicate-literal").trigger("click");
 						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 					}
 
 					$(literal).val( data[i] );	
