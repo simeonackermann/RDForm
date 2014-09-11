@@ -875,7 +875,7 @@ RDForm = {
 			var thisClass = $(classContainer).children("div[typeof]");			
 
 			$(thisClass).find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
-			$(thisClass).find('texteare:not([value*="{"]):not([readonly])').val("");
+			$(thisClass).find('textarea:not([value*="{"]):not([readonly])').val("");
 
 			$(thisClass).children("legend").hide(); // hide legend
 			$(thisClass).find("div").removeClass("error");
