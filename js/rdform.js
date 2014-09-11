@@ -616,8 +616,9 @@ RDForm = {
 					}
 
 					if ( prevKey == curName ) { // same key -> try to duplicate
-						$(literal).next().trigger("click");
+						$(literal).nextAll("button.duplicate-literal").trigger("click");
 						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 					}
 
 					$(literal).val( data[i] );	
@@ -842,7 +843,7 @@ RDForm = {
 			var thisClass = $(classContainer).children("div[typeof]");			
 
 			$(thisClass).find('input[type="text"]:not([value*="{"]):not([readonly])').val(""); // reset values
-			$(thisClass).find('texteare:not([value*="{"]):not([readonly])').val("");
+			$(thisClass).find('textarea:not([value*="{"]):not([readonly])').val("");
 
 			$(thisClass).children("legend").hide(); // hide legend
 			$(thisClass).find("div").removeClass("error");
