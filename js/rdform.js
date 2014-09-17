@@ -615,8 +615,12 @@ RDForm = {
 	 */
 	addExistingData : function( name, data, env ) {
 		if ( typeof env === 'undefined' ) {
-			// TODO: what to do if @type doesnt exists?
 			env = rdform.find( 'div[typeof="'+data["@type"]+'"]' );
+
+			if ( env.length == 0 ) {
+				RDForm.showAlert( "warning", 'Der Datensatz enthält die nicht im Modell vorhandene Klasse { "'+data["@type"]+'" }' );
+				return;
+			}
 		}
 		var prevKey = "";
 
