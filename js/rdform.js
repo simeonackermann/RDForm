@@ -1684,6 +1684,10 @@ RDForm = {
 			return null;
 		}
 
+		if ( str == "http" ) {
+			return true;
+		}
+
 		for ( var prefix in CONTEXT ) {
 			if ( str == prefix ) {
 				return true;
