@@ -679,7 +679,7 @@ RDForm = {
 							liArr.push( thisData[li]["@value"] );
 						}
 						RDForm.addExistingData( i, liArr, env );
-					}
+					}				
 					else { // its one or mutliple resources
 
 						for ( var di in thisData ) {
@@ -1722,7 +1722,7 @@ RDForm = {
 	  */
 	getWebsafeString: function ( str ) {
 		// str= str.replace(/[ÀÁÂÃÄÅ]/g,"A");
-		// replace dictionary
+		// replace dictionary		
 		var dict = {
 			"ä": "ae", "ö": "oe", "ü": "ue",
 			"Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
@@ -1741,6 +1741,7 @@ RDForm = {
 		str = str.replace(/[^\w ]/gi, function(char) {
 			return dict[char] || char;
 		});
+		str = str.replace(/ /gi,'_');
 		return str.replace(/[^a-z0-9-_]/gi,'');
 	},
 
