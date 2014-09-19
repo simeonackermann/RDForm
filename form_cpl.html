@@ -231,6 +231,8 @@
 
   <legend>Fakultät / Sektion / Institut</legend>
   <div typeof="cpm:Institution" resource="cpl:Institution/{puri}/{rdfs:label}" multiple>
+    <p class="help">Die Felder Sektion und FB/WG/WB sind nur für den Zeitraum von 1968/69 bis 1990/91 auszufüllen.<br />WB - Wissenschaftsbereich, WG - Wissenschaftsgebiet, FB - Forschungsbereich</p>
+
     <label>Fakultät</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="" />    
 
@@ -243,7 +245,7 @@
     <label>Sektion (69-90)</label>
     <input type="literal" name="cpm:section" datatype="xsd:string" />
 
-    <label>Lehr- und Forschungsgebiete FB, WG, WB (69-90)</label>
+    <label>FB/WG/WB (69-90)</label>
     <input type="literal" name="cpm:studyField" datatype="xsd:string" />
 
     <label>von:</label>
