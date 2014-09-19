@@ -646,11 +646,11 @@ RDForm = {
 					if ( prevKey == curName ) { // same key -> try to duplicate
 						$(literal).nextAll("button.duplicate-literal").trigger("click");
 						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
-						$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 					}
 
 					$(literal).val( data[i] );	
 					//$(literal).trigger("keyup");
+					$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
 						if ( data[i] == "0" || data[i] == "false" ) {
@@ -672,6 +672,13 @@ RDForm = {
 
 					if ( typeof thisData[0] === "string" ) { // its multiple literal
 						RDForm.addExistingData( i, thisData, env );
+					}
+					else if ( ! thisData[0].hasOwnProperty("@id") ) { // its a literal in an object	
+						var liArr = new Array();
+						for ( var li in thisData ) {
+							liArr.push( thisData[li]["@value"] );
+						}
+						RDForm.addExistingData( i, liArr, env );
 					}
 					else { // its one or mutliple resources
 
