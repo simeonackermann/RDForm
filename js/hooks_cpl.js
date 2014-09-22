@@ -21,8 +21,6 @@ __initFormHandlers = function () {
 		$(this).val( $(this).prop("checked") ? "1" : "0" );
 	});
 
-
-
 	// on change forename insert all forenames (rufname) into global input
 	rdform.on("keyup change", 'div[typeof="cpm:Forename"]', function() {
 		var forenames = "";
@@ -39,6 +37,10 @@ __initFormHandlers = function () {
 		rdform.find('input[name="forenames"]').trigger( "keyup" );
 
 	});
+
+	// big publication literal highlighting
+
+	rdform.find('label:contains("Veröffentlichungen / Publikationen")').first().parent().before("<div class='rdform-hidden-group'><legend>Veröffentlichungen, Literatur, Sonstiges</legend></div>");
 
 }
 
