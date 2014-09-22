@@ -45,6 +45,11 @@
     <input name="cpm:has-period" type="resource" value="cpm:Study"
       arguments='{"puri":"{puri}"}' multiple additional 
     />    
+
+    <input name="cpm:has-period" type="resource" value="cpm:PeriodOfLife"
+      arguments='{"puri":"{puri}"}' multiple additional 
+    />  
+
     <input name="cpm:has-period" type="resource" value="cpm:Career"
       arguments='{"puri":"{puri}"}' multiple additional 
     />
@@ -152,7 +157,24 @@
     <p class="help">Eingabe der schulischen und universitären Ausbildung einschließlich Abschluss.<br />Nutzung auch für berufliche Ausbildung.</p>
 
     <label>Ausbildungsabschnitt</label>
-    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
+    <input name="rdfs:label" textarea type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
+
+    <label>von:</label>
+    <input name="cpm:from" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
+
+    <label>bis:</label>
+    <input name="cpm:to" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
+  </div>
+
+  <legend>Weiterer Lebensabschnitt</legend>
+  <div typeof="cpm:PeriodOfLife" resource="cpl:PeriodOfLife/{puri}/{rdfs:label}">
+    <p class="help">Weitere Lebensabschnitte wie z.B. Militärdienst, Reichsarbeitsdienst, Gefangenschaft</p>
+
+    <label>Bezeichnung</label>
+    <input name="rdfs:label" textarea type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
 
     <label>von:</label>
     <input name="cpm:from" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
@@ -169,7 +191,7 @@
     <p class="help">Außeruniversitäre Karriereabschnitte z. B. in der Industrie</p>
 
     <label>Bezeichnung</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" />
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" />
 
     <label>von:</label>
     <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM" />
