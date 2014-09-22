@@ -11,7 +11,7 @@ body {
 	max-width: 960px;
 }
 
-.rdform-result {
+.rdform-result-container {
 	display: none;
 	margin-bottom: 10px;
 }
