@@ -13,6 +13,8 @@ if ($handle = opendir('files/')) {
     closedir($handle);
 }
 
+sort($files);
+
 echo json_encode( array('files' => $files) );
 
 ?>
