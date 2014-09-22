@@ -3,6 +3,7 @@
   */
 var _ID_ = "rdform",
 	rdform, // rdform DOM object
+	initedFormHandler = false,
 	MODEL = new Array(),
 	RESULT = new Array(),
 	JSON_RESULT = new Object(),
@@ -16,11 +17,11 @@ var _ID_ = "rdform",
 	  * default plugin settings
 	  */
 	var settings = {
-		model: "form.html",
-		data: "",
-		hooks: "js/hooks.js",
-		lang: "",
-		cache: false,
+		model: 	"form.html",
+		data: 	"",
+		hooks: 	"",
+		lang: 	"",
+		cache: 	false,
 	}	
 	
 	/**
@@ -34,16 +35,20 @@ var _ID_ = "rdform",
 		// overide defaults settings
         $.extend(settings, options);		
 		rdform = $(this);
-		rdform.append( '<div class="row rdform-alert"></p></div>' );
+
+		//add an alert area before the form
+		rdform.before( '<div class="row rdform-alert"></p></div>' );
 
 		// loading language file
 		if ( settings.lang != "" ) {
 			var langFile = "lang/" + settings.lang + ".js";
-			ajaxAsyncScript( langFile );
-		}
+			rdform_ajaxAsyncScript( langFile );
+		}		
 
 		//loading hooks file
-		ajaxAsyncScript( settings.hooks );
+		if ( settings.hooks != "" ) {
+			rdform_ajaxAsyncScript( settings.hooks );
+		}
 
 		// loading model file
 		var modelFile = settings.cache ? settings.model : settings.model + "?" + (new Date()).getTime();
@@ -64,7 +69,17 @@ var _ID_ = "rdform",
 
 		// parsing model
 		RDForm.parseFormModel( 'rdform', model )
-						
+
+		// create form, fill with modell, buttons, data and ad buttons
+		rdform_createForm();
+
+		// add result div after form
+		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
+
+    	return this;
+	};
+
+	rdform_createForm = function() {
 		//add model-form to my form
 		rdform.append( RDForm.createHTMLForm() );		
 
@@ -74,21 +89,17 @@ var _ID_ = "rdform",
 							'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
 						'</div></div>' );
 
-		// init form action handler
-		RDForm.initFormHandler();
+		if ( RDForm.initFormHandler.called != true ) {
+			RDForm.initFormHandler();
+		}
 
 		// maybe add existing data
 		if ( settings.data != "" ) {
 			RDForm.addExistingData( undefined, settings.data );
 		}
-
-		// add result div
-		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
-
-    	return this;
 	};
 
-	ajaxAsyncScript = function( script ) {
+	rdform_ajaxAsyncScript = function( script ) {
 		$.ajax({
 			url: script,
 			dataType: "script",
@@ -514,6 +525,7 @@ RDForm = {
 
 		var curFormGroup = $('<div class="form-group '+_ID_+'-resource-group"></div>');
 		var resourceClass;
+		var showHelp = false;
 
 		if ( resource['external'] !== undefined ) {	// add simple input for external resources
 			resourceClass = $("<input />");						
@@ -532,6 +544,11 @@ RDForm = {
 				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="' + RDForm.l("Add class %s", resource['value'])+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
+
+
+				if ( classModel['help'] ) {
+					showHelp = true;					
+				}
 			} 			
 			else { // create class-model for the resource
 				classModel['name'] = resource['name'];
@@ -579,6 +596,13 @@ RDForm = {
 			resourceClass.wrap( thisInputContainer );
 		}
 
+		if ( showHelp == true ) {
+			curFormGroup.append('<div class="rdform-resource-help-container">' +
+									'<span class="glyphicon glyphicon-question-sign btn rdform-show-resource-help"></span>' +
+									'<span class="help-block rdform-resource-help hidden">' + classModel['help'] + '</span>' +
+								'</div>' );			
+		}
+
 		return curFormGroup;
 	},
 
@@ -591,8 +615,12 @@ RDForm = {
 	 */
 	addExistingData : function( name, data, env ) {
 		if ( typeof env === 'undefined' ) {
-			// TODO: what to do if @type doesnt exists?
 			env = rdform.find( 'div[typeof="'+data["@type"]+'"]' );
+
+			if ( env.length == 0 ) {
+				RDForm.showAlert( "warning", 'Der Datensatz enthält die nicht im Modell vorhandene Klasse { "'+data["@type"]+'" }' );
+				return;
+			}
 		}
 		var prevKey = "";
 
@@ -623,6 +651,7 @@ RDForm = {
 
 					$(literal).val( data[i] );	
 					//$(literal).trigger("keyup");
+					$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
 						if ( data[i] == "0" || data[i] == "false" ) {
@@ -645,6 +674,13 @@ RDForm = {
 					if ( typeof thisData[0] === "string" ) { // its multiple literal
 						RDForm.addExistingData( i, thisData, env );
 					}
+					else if ( ! thisData[0].hasOwnProperty("@id") ) { // its a literal in an object	
+						var liArr = new Array();
+						for ( var li in thisData ) {
+							liArr.push( thisData[li]["@value"] );
+						}
+						RDForm.addExistingData( i, liArr, env );
+					}				
 					else { // its one or mutliple resources
 
 						for ( var di in thisData ) {
@@ -699,6 +735,7 @@ RDForm = {
 	 * 
 	 *******************************************************/
 	initFormHandler: function() {
+		RDForm.initFormHandler.called = true;
 		/*
 		$('body').on('focus',".date", function(){
 			//$(".datepicker").datepicker('hide'); // if enabled resets the format
@@ -726,6 +763,13 @@ RDForm = {
 		rdform.on("click", ".rdform-show-literal-help", function() {
 			var classHelp =  $(this).parent().find("span.rdform-literal-help");
 			$(classHelp).toggleClass("hidden");
+		});
+
+		// BUTTON: show literal help text
+		rdform.on("click", ".rdform-show-resource-help", function() {
+			var classHelp =  $(this).parent().find("span.rdform-resource-help");
+			$(classHelp).toggleClass("hidden");
+			return false;
 		});
 
 		// BUTTON: add a class-literal
@@ -772,7 +816,8 @@ RDForm = {
 			$(thisClass).hide();
 			$(this).before( thisClass );
 			$(thisClass).show("slow");
-			$(this).remove();
+			$(this).parent().children("div.rdform-resource-help-container").remove();
+			$(this).remove();			
 
 			findWildcardInputs( thisClass );
 
@@ -1099,24 +1144,27 @@ RDForm = {
 
 		// reset button, reset form and values
 		rdform.find("button[type=reset]").click(function() {		
-			$(".rdform-alert").hide();
-			rdform[0].reset();
-			// TODO: remove duplicates, selects ...
-			$(".rdform-result").hide();
-			$(".rdform-result textarea").val( "" );
-			// TODO: remove duplicated datasets
+			$(rdform).html("");
+			$("."+_ID_+"-result").hide();
+			$("."+_ID_+"-result textarea").val( '' );
+
+			// create form, fill with modell, buttons, data and ad buttons();
+			rdform_createForm();
+
+			// find wildcard inputs again
+			findWildcardInputs( rdform );
 		});
 
 		// submit formular
 		rdform.submit(function() {			
-			$(".rdform-alert").hide();
+			$("."+_ID_+"-alert").hide();
 			var proceed = true;
 
 			// validate required inputs
 			$("input[required]").each(function() {
 				if ( $(this).val() == "" ) {
 					$(this).parents(".form-group").addClass("error");
-					RDForm.showAlert( "warning", "Bitte alle rot hinterlegten Felder ausfüllen!");
+					RDForm.showAlert( "warning", "Please fillout all required red marked fields!");
 					proceed = false;
 				} else {
 					$(this).parents(".form-group").removeClass("error");
@@ -1125,13 +1173,11 @@ RDForm = {
 
 			// proceed
 			if ( proceed ) {
-				$("button[type=submit]").html("Datensatz aktualisieren");
-				//createClasses();
+				$("button[type=submit]").html("update");
 				RDForm.createResult();
 
 				RDForm.outputResult();
 			}
-
 			return false;
 		});
 
@@ -1217,9 +1263,13 @@ RDForm = {
 			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
 				property = RDForm.getResultResource( $(this) );
 			}
+			else if ( $(this).hasClass(_ID_ + "-class-help") ) {
+				property = RDForm.createResultResource( $(this) );
+			}
 			else {
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
+
 
 			if ( ! $.isEmptyObject( property ) ) { // dont add empty properties
 				if (! properties.hasOwnProperty( property["@resource"] ) ) {
@@ -1287,6 +1337,9 @@ RDForm = {
 				property = RDForm.createResultLiteral( $(this).find('input,textarea,select') );
 			}
 			else if ( $(this).hasClass(_ID_ + "-resource-group") ) {
+				property = RDForm.createResultResource( $(this) );
+			}
+			else if ( $(this).hasClass(_ID_ + "-class-help") ) {
 				property = RDForm.createResultResource( $(this) );
 			}
 			else {
@@ -1639,6 +1692,10 @@ RDForm = {
 			return null;
 		}
 
+		if ( str == "http" ) {
+			return true;
+		}
+
 		for ( var prefix in CONTEXT ) {
 			if ( str == prefix ) {
 				return true;
@@ -1666,7 +1723,7 @@ RDForm = {
 	  */
 	getWebsafeString: function ( str ) {
 		// str= str.replace(/[ÀÁÂÃÄÅ]/g,"A");
-		// replace dictionary
+		// replace dictionary		
 		var dict = {
 			"ä": "ae", "ö": "oe", "ü": "ue",
 			"Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
@@ -1685,6 +1742,7 @@ RDForm = {
 		str = str.replace(/[^\w ]/gi, function(char) {
 			return dict[char] || char;
 		});
+		str = str.replace(/ /gi,'_');
 		return str.replace(/[^a-z0-9-_]/gi,'');
 	},
 
@@ -1807,6 +1865,7 @@ RDForm = {
 
 		console.log( "RDForm Alert ("+type+"): " + msg );
 		$(".rdform-alert").append('<p class="alert '+cls+'" role="alert">' + msg + '</p>');
+		$("."+_ID_+"-alert").show();
 
 	},
 

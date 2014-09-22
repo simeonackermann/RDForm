@@ -79,10 +79,14 @@
 
 
     <label>DNB-Link</label>
-    <!-- TODO: link http://dn-b ... generieren -->
     <input name="cpm:gnd" type="resource" external datatype="xsd:string" placeholder="http://d-nb.info/gnd/..." />
 
     <label>Biografische / autobiografische Literatur</label>
+    <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple />
+
+    <input type="resource" external name="cpm:gnd" datatype="xsd:string" />
+
+    <label>Literatur</label>
     <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple />
 
     <label>Referenzen und Quellen</label>
@@ -152,9 +156,9 @@
     <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>  
 
-  <legend>Schule / Lehre / Studium</legend>
+  <legend>Schule / Ausbildung / Studium</legend>
   <div typeof="cpm:Study" resource="cpl:Study/{puri}/{rdfs:label}">
-    <p class="help">Eingabe der schulischen und universitären Ausbildung einschließlich Abschluss.<br />Nutzung auch für berufliche Ausbildung.</p>
+    <p class="help">Eingabe der schulischen und universitären Ausbildung einschließlich Abschluss.<br />Nutzung auch für berufliche Ausbildung</p>
 
     <label>Ausbildungsabschnitt</label>
     <input name="rdfs:label" textarea type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
@@ -256,13 +260,13 @@
     <p class="help">Die Felder Sektion und FB/WG/WB sind nur für den Zeitraum von 1968/69 bis 1990/91 auszufüllen.<br />WB - Wissenschaftsbereich, WG - Wissenschaftsgebiet, FB - Forschungsbereich</p>
 
     <label>Fakultät</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="" />    
+    <input type="literal" name="rdfs:label" datatype="xsd:string" />    
 
     <label>Institut</label>
     <input type="literal" name="cpm:institute" datatype="xsd:string" />
 
     <label>Lehrstuhl</label>
-    <input type="literal" name="cpm:chair" datatype="xsd:string" placeholder="" />
+    <input type="literal" name="cpm:chair" datatype="xsd:string" />
 
     <label>Sektion (69-90)</label>
     <input type="literal" name="cpm:section" datatype="xsd:string" />
