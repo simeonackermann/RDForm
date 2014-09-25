@@ -89,7 +89,7 @@ var _ID_ = "rdform",
 		rdform.append( RDForm.createHTMLForm() );		
 
 		// append submit button
-		rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
+		rdform.append(	'<div class="form-group '+_ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' + 
 							//'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
 							'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
 						'</div></div>' );
@@ -100,6 +100,9 @@ var _ID_ = "rdform",
 
 		// maybe add existing data
 		if ( settings.data != "" ) {
+			if ( settings.data.length == 1 )
+					settings.data = settings.data[0];
+
 			RDForm.addExistingData( undefined, settings.data );
 		}
 	};
@@ -1599,6 +1602,7 @@ RDForm = {
 	  *	Create result string from baseprefix, prefixes and RESULT array and output it in the result textarea
 	  *
 	  * @return void
+	*/
 	outputResult: function() {
 
 		// callback function submit
