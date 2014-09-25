@@ -36,13 +36,15 @@ $(document).ready(function(){
 			lang: "de",
 			submit: function() {
 
-				submitRDForm( $(this) );
+				submitRDForm( $(this)[0] );
 
 			}
 		});
 		rdform.show("fast");
-		$(".show-list").show();		
+		//$(".show-list").show();		
+		$(rdform).before('<p><button type="button" class="btn btn-link btn-xs show-list">zurück zur Liste</button></p>');
 
+		$(".rdform-submit-btn-group div").prepend('<button type="reset" class="btn btn-default show-list">Abbrechen</button>  ');
 		$(rdform).find("button:submit").text("Datensatz anlegen");
 
 	}
