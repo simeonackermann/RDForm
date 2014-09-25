@@ -22,6 +22,8 @@ var _ID_ = "rdform",
 		hooks: 	"",
 		lang: 	"",
 		cache: 	false,
+
+		submit: function() {},
 	}	
 	
 	/**
@@ -71,13 +73,16 @@ var _ID_ = "rdform",
 		RDForm.parseFormModel( 'rdform', model )
 
 		// create form, fill with modell, buttons, data and ad buttons
-		rdform_createForm();
+		rdform_createForm();		
 
-		// add result div after form
-		rdform.after( '<div class="row '+_ID_+'-result"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control" rows="10"></textarea></div></div>' );
+		// add submit callback function
+		rdform.submit(function() {
+			rdform_submit();
+			return false;
+		});
 
     	return this;
-	};
+	};	
 
 	rdform_createForm = function() {
 		//add model-form to my form
@@ -85,7 +90,7 @@ var _ID_ = "rdform",
 
 		// append submit button
 		rdform.append(	'<div class="form-group"><div class="col-xs-12 text-right">' + 
-							'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
+							//'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
 							'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
 						'</div></div>' );
 
@@ -108,6 +113,35 @@ var _ID_ = "rdform",
 				RDForm.showAlert( "error", 'Error on loading script "'+ script +'": '+exception );
 			}
 		});
+	};
+
+	// submit callback function
+	rdform_submit = function() {
+
+		$("."+_ID_+"-alert").hide();
+		var proceed = true;
+
+		// validate required inputs
+		$("input[required]").each(function() {
+			if ( $(this).val() == "" ) {
+				$(this).parents(".form-group").addClass("error");
+				RDForm.showAlert( "warning", "Please fillout all required red marked fields!");
+				proceed = false;
+			} else {
+				$(this).parents(".form-group").removeClass("error");
+			}
+		});
+
+		// proceed
+		if ( proceed ) {
+			//$("button[type=submit]").html("update");
+			RDForm.createResult();
+			//RDForm.outputResult();
+
+			// callback function submit
+			settings.submit.call( JSON_RESULT );
+		}
+
 	};
 
 }( jQuery ));
@@ -1143,6 +1177,8 @@ RDForm = {
 		});
 
 		// reset button, reset form and values
+		// deprecated: reset button removed
+		/*
 		rdform.find("button[type=reset]").click(function() {		
 			$(rdform).html("");
 			$("."+_ID_+"-result").hide();
@@ -1154,9 +1190,14 @@ RDForm = {
 			// find wildcard inputs again
 			findWildcardInputs( rdform );
 		});
+		*/
 
-		// submit formular
-		rdform.submit(function() {			
+		// submit formular		
+		//rdform.on( "submit", RDForm.onSubmit );
+		rdform.submit(function() {		
+
+			//RDForm.onSubmit();	
+			/*
 			$("."+_ID_+"-alert").hide();
 			var proceed = true;
 
@@ -1178,10 +1219,20 @@ RDForm = {
 
 				RDForm.outputResult();
 			}
-			return false;
+			*/
+			//return false;
 		});
+		
 
 	}, // end of initFormHandler	
+
+	/*
+	onSubmit: function() {
+
+		alert("submitted...");
+		RDForm.settings.onSubmit.call( this );
+
+	},*/
 
 	/**
 	  * Walk every class (div[typeof]) in the HTML form to create the RESULT
@@ -1549,16 +1600,22 @@ RDForm = {
 	  *	Create result string from baseprefix, prefixes and RESULT array and output it in the result textarea
 	  *
 	  * @return void
-	  */
+	*/
 	outputResult: function() {
+
+		// callback function submit
+		// add result div
+		if ( $("." + _ID_ + "-result").length == 0 ) {
+			rdform.after( '<div class="row '+_ID_+'-result-container"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control '+_ID_+'-result" rows="10"></textarea></div></div>' );
+		}
 		
 		var resultStr = JSON.stringify(JSON_RESULT, null, '\t');
 				
-		$("."+_ID_+"-result").show();	
-		$("."+_ID_+"-result textarea").val( resultStr );
+		$("."+_ID_+"-result-container").show();	
+		$("."+_ID_+"-result").val( resultStr );
 		var lines = resultStr.split("\n");
-		$("."+_ID_+"-result textarea").attr( "rows" , ( lines.length ) );
-		$('html, body').animate({ scrollTop: $("."+_ID_+"-result").offset().top }, 200);		
+		$("."+_ID_+"-result").attr( "rows" , ( lines.length ) );
+		$('html, body').animate({ scrollTop: $("."+_ID_+"-result-container").offset().top }, 200);		
 
 	}, // end of creating result
 	// deprecated

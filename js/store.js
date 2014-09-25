@@ -34,25 +34,22 @@ $(document).ready(function(){
 			model: "form_cpl.html",
 			data: data,
 			hooks: "js/hooks_cpl.js",
-			lang: "de"
+			lang: "de",
+			submit: function() {
+				RDForm.outputResult();
+				writeFile();
+			}
 		});
 		rdform.show("fast");
 		$(".show-list").show();		
 
 		$(rdform).find("button:submit").text("Datensatz anlegen");
 
-		// unbind original submit, set own new
-		rdform.unbind( "submit" );
-		$(rdform).submit(function() {
-			RDForm.createResult();
-			writeFile();
-			return false;
-		});
 	}
 
 	$(document).on("click", ".show-form", function() {
 		$(rdform).html("");
-		$(".rdform-result").html("");
+		$(".rdform-result-container").html("");
 		myShowForm(undefined);
 	});	
 
@@ -72,7 +69,7 @@ $(document).ready(function(){
 	var firstSubmit = true;
 	$("form.rdform").submit(function() {
 		if ( firstSubmit )
-			$(".rdform-result").after(  '<p><button type="button" class="btn btn-info rdform-write-file">In Datei schreiben</button></p>' +
+			$(".rdform-result-container").after(  '<p><button type="button" class="btn btn-info rdform-write-file">In Datei schreiben</button></p>' +
 										'<p><button type="button" class="btn btn-link btn-xs show-list">zurück zur Liste</button></p>' +
 										'<p id="rdform-store-msg"></p>'
 				);
@@ -115,7 +112,7 @@ $(document).ready(function(){
 	$(document).on( "click", "button.rdform-write-file", function() {
 
 		var name = $("#rdform-prof-filename").val();
-		var content = $(".rdform-result").find("textarea").val();
+		var content = $(".rdform-result-container").find("textarea").val();
 
 		$.post( "store/writeFile.php", { name: name, content: content })
 			.done(function( jsondata ) {
@@ -139,7 +136,7 @@ $(document).ready(function(){
 
 		$(rdform).hide();
 
-		$(".rdform-result").html("");
+		$(".rdform-result-container").html("");
 		var resultMsg = $('<p></p>');
 
 		
@@ -155,10 +152,10 @@ $(document).ready(function(){
 				//getFiles();
 		});
 
-			$(".rdform-result").append( resultMsg );
-		//$(".rdform-result").append( $('<button type="submit" class="btn btn-default btn-xs show-form">Neuen Datensatz anlegen</button>') );
+			$(".rdform-result-container").append( resultMsg );
+		//$(".rdform-result-container").append( $('<button type="submit" class="btn btn-default btn-xs show-form">Neuen Datensatz anlegen</button>') );
 		
-		$(".rdform-result").show();
+		$(".rdform-result-container").show();
 
 	}
 

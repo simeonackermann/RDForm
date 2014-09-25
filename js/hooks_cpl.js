@@ -39,7 +39,6 @@ __initFormHandlers = function () {
 	});
 
 	// big publication literal highlighting
-
 	rdform.find('label:contains("Veröffentlichungen / Publikationen")').first().parent().before("<div class='rdform-hidden-group'><legend>Veröffentlichungen, Literatur, Sonstiges</legend></div>");
 
 }
