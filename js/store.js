@@ -1,12 +1,7 @@
 $(document).ready(function(){
 
 	rdform = $("form.rdform");	
-
 	var showForm = false;
-	$(document).on("click", ".show-list", function() {		
-		showForm = false;
-		window.location.reload();
-	});
 
 	// alert a message before closing/reload window
 	window.onbeforeunload = function (e) {
@@ -26,6 +21,10 @@ $(document).ready(function(){
 		}
 	};
 
+	/*
+	open new form
+	@param data json data or undefined for empty form
+	*/
 	function myShowForm( data ) {
 		showForm = true;
 		$(".rdform-filestore-wrapper").hide("slow");	
@@ -36,8 +35,9 @@ $(document).ready(function(){
 			hooks: "js/hooks_cpl.js",
 			lang: "de",
 			submit: function() {
-				RDForm.outputResult();
-				writeFile();
+
+				submitRDForm( $(this) );
+
 			}
 		});
 		rdform.show("fast");
@@ -47,22 +47,49 @@ $(document).ready(function(){
 
 	}
 
+	// get files from store
+	getFiles = function() {
+		$.ajax("store/getFiles.php")
+			.done(function( jsondata ) {		    
+				printoutFilelist( jsondata.files );
+		});
+	}
+	getFiles();
+
+	//print out files 
+	printoutFilelist = function( files ) {
+		if ( files.length == 0 ) {
+			$("#rdform-filestore").html( "<i>Keine Datensätze gefunden</i>" );
+			return;
+		}
+		var ul = $('<ul></ul>');
+		for ( i in files ) {
+			ul.append( 	"<li class='list-group-item'>" +
+							"<a href='#' title='Professor bearbeiten' class='prof-label' data-file='"+files[i]+"'>"+files[i].replace(/_/g, " ")+"</a>" +
+							'<button type="button" class="btn btn-link btn-xs pull-right delete-prof" title="Diesen Professor löschen""><span class="glyphicon glyphicon-remove"></span> löschen</button>' +
+						"</li>" );
+		}
+		$("#rdform-filestore").html( ul.html() );
+	}
+
+	/*
+	reload window -> go back to list
+	*/
+	$(document).on("click", ".show-list", function() {		
+		showForm = false;
+		window.location.reload();
+	});	
+
+	/*
+	click on new prof button
+	*/
 	$(document).on("click", ".show-form", function() {
 		$(rdform).html("");
 		$(".rdform-result-container").html("");
+		$("#rdform-org-filename").val("");
 		myShowForm(undefined);
 	});	
-
-	// show feeedback
-	$(".feedback button").click(function() {
-		$(this).hide();
-		$(".feedback p").show();
-	});
-	// hide feeedback
-	$(".feedback").focusout(function() {
-		$(".feedback button").show();
-		$(".feedback p").hide();
-	});
+	
 
 	// add some buttons on first form submitting
 	/*
@@ -80,14 +107,15 @@ $(document).ready(function(){
 
 	// choose a file from files-list
 	$(document).on("click", "#rdform-filestore a.prof-label", function() {		
-		$.post( "store/getFile.php", { name: $(this).attr("data-file") })		
+		var filename = $(this).attr("data-file");
+		$.post( "store/getFile.php", { name: filename })		
 			.done(function( jsondata ) {
 				if ( jsondata.result && jsondata.content != "" ) {
-					var data = $.parseJSON( jsondata.content );
+					var data = $.parseJSON( jsondata.content );					
 					myShowForm(data);
 					$(rdform).find("button:submit").text("Datensatz aktualisieren");
+					$("#rdform-org-filename").val(filename);
 				}
-
 		});
 		return false;
 	});	
@@ -108,37 +136,60 @@ $(document).ready(function(){
 	
 	});
 
-	/*
-	$(document).on( "click", "button.rdform-write-file", function() {
 
+	submitRDForm = function( data ) {
 		var name = $("#rdform-prof-filename").val();
-		var content = $(".rdform-result-container").find("textarea").val();
+		var orgName = $("#rdform-org-filename").val();
 
-		$.post( "store/writeFile.php", { name: name, content: content })
-			.done(function( jsondata ) {
-				if ( jsondata.result ) {
-					$("#rdform-store-msg").toggleClass("text-success");
-				} else {
-					$("#rdform-store-msg").toggleClass("text-danger");
-				}
-				$("#rdform-store-msg").text( jsondata.msg );
 
-				getFiles();
-		});
-	});
-	*/
+		if ( orgName == "" ) { // new file, test if exists
 
-	writeFile = function(  ) {
+			$.post( "store/getFile.php", { name: name })
+				.done(function( jsondata ) {
+					if ( jsondata.result ) {
+						var myConfirm = confirm('Der Datensatz "'+name+'" besteht bereits, soll er überschrieben werden?');
+						if (! myConfirm) {
+							return false;
+						}
+					}
+					writeFile( data );
+			});
 
-		var name = $("#rdform-prof-filename").val();
-		
-		var content = JSON.stringify(JSON_RESULT, null, '\t');
+		} else {
 
-		$(rdform).hide();
+			if ( orgName != name ) { // edited file, new name, test if exists
 
-		$(".rdform-result-container").html("");
+				$.post( "store/getFile.php", { name: name })
+					.done(function( jsondata ) {
+						if ( jsondata.result ) {
+							var myConfirm = confirm('Der Datensatz "'+name+'" besteht bereits, soll er überschrieben werden?');
+							if (! myConfirm) {
+								return false;
+							}
+						}
+						writeFile( data );
+
+						$.post( "store/deleteFile.php", { name: orgName });
+
+				});
+
+			} else {
+				writeFile( data );
+			}	
+
+		}
+
+	}
+
+	writeFile = function( data ) {
+
+		var name = $("#rdform-prof-filename").val();		
+		var content = JSON.stringify(data, null, '\t');
+		//$(".rdform-result-container").html("");
+		$(rdform).after( '<div class="row rdform-result-container"></div>' );
+
+		$(rdform).hide();				
 		var resultMsg = $('<p></p>');
-
 		
 		$.post( "store/writeFile.php", { name: name, content: content })
 			.done(function( jsondata ) {
@@ -152,37 +203,22 @@ $(document).ready(function(){
 				//getFiles();
 		});
 
-			$(".rdform-result-container").append( resultMsg );
-		//$(".rdform-result-container").append( $('<button type="submit" class="btn btn-default btn-xs show-form">Neuen Datensatz anlegen</button>') );
-		
+		$(".rdform-result-container").append( resultMsg );
 		$(".rdform-result-container").show();
 
-	}
+	}	
 
-	
 
-	getFiles = function() {
-		$.ajax("store/getFiles.php")
-			.done(function( jsondata ) {		    
-				printoutFilelist( jsondata.files );
-		});
-	}
-	getFiles();
-
-	printoutFilelist = function( files ) {
-		if ( files.length == 0 ) {
-			$("#rdform-filestore").html( "<i>Keine Datensätze gefunden</i>" );
-			return;
-		}
-		var ul = $('<ul></ul>');
-		for ( i in files ) {
-			ul.append( 	"<li class='list-group-item'>" +
-							"<a href='#' title='Professor bearbeiten' class='prof-label' data-file='"+files[i]+"'>"+files[i].replace(/_/g, " ")+"</a>" +
-							'<button type="button" class="btn btn-link btn-xs pull-right delete-prof" title="Diesen Professor löschen""><span class="glyphicon glyphicon-remove"></span> löschen</button>' +
-						"</li>" );
-		}
-		$("#rdform-filestore").html( ul.html() );
-	}
+	// show feeedback
+	$(".feedback button").click(function() {
+		$(this).hide();
+		$(".feedback p").show();
+	});
+	// hide feeedback
+	$(".feedback").focusout(function() {
+		$(".feedback button").show();
+		$(".feedback p").hide();
+	});
 
 	/*
 	THIS IS ONLY A BUGFIX - remove it later then i can call the initFormHandler in rdform.js here!
