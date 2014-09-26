@@ -121,11 +121,19 @@ var _ID_ = "rdform",
 	// submit callback function
 	rdform_submit = function() {
 
-		$("."+_ID_+"-alert").hide();
+		//$("."+_ID_+"-alert").hide();
 		var proceed = true;
 
+		rdform.find("input").each(function() {
+			var valid = RDForm.userInputValidation( $(this) );
+			if ( ! valid ) {
+				proceed = false;
+			}
+		});
+
+		/*
 		// validate required inputs
-		$("input[required]").each(function() {
+		rdform.find("input[required]").each(function() {
 			if ( $(this).val() == "" ) {
 				$(this).parents(".form-group").addClass("error");
 				RDForm.showAlert( "warning", "Please fillout all required red marked fields!");
@@ -134,6 +142,7 @@ var _ID_ = "rdform",
 				$(this).parents(".form-group").removeClass("error");
 			}
 		});
+		*/
 
 		// proceed
 		if ( proceed ) {
@@ -312,6 +321,7 @@ RDForm = {
 				MODEL[mi]['isRootClass'] = true;
 			}			
 		}
+		console.log( "Context = ", CONTEXT );				
 		console.log( "RDForm Model = ", MODEL );				
 	}, // end of parseFormModel	
 
@@ -1266,39 +1276,7 @@ RDForm = {
 			// find wildcard inputs again
 			findWildcardInputs( rdform );
 		});
-		*/
-
-		// submit formular		
-		//rdform.on( "submit", RDForm.onSubmit );
-		rdform.submit(function() {		
-
-			//RDForm.onSubmit();	
-			/*
-			$("."+_ID_+"-alert").hide();
-			var proceed = true;
-
-			// validate required inputs
-			$("input[required]").each(function() {
-				if ( $(this).val() == "" ) {
-					$(this).parents(".form-group").addClass("error");
-					RDForm.showAlert( "warning", "Please fillout all required red marked fields!");
-					proceed = false;
-				} else {
-					$(this).parents(".form-group").removeClass("error");
-				}
-			});
-
-			// proceed
-			if ( proceed ) {
-				$("button[type=submit]").html("update");
-				RDForm.createResult();
-
-				RDForm.outputResult();
-			}
-			*/
-			//return false;
-		});
-		
+		*/		
 
 	}, // end of initFormHandler	
 
@@ -1887,19 +1865,25 @@ RDForm = {
 	 */
 	userInputValidation: function ( property ) {	
 		
+		var valid = true;
 		var value = $(property).val();
 		value = value.trim();
 
-		if ( $(property).attr("datatype") ) {
+		$(property).parentsUntil("div.form-group").parent().removeClass("has-error has-feedback");
+		$(property).next("span.glyphicon-warning-sign").remove();
+
+		if ( $(property).attr("required") ) {
+			if ( $(property).val() == "" ) {
+				valid = false;
+			}
+		}
+		else if ( $(property).attr("datatype") && $(property).val() != "" ) {
 
 			if (   $(property).attr("datatype") == "xsd:date" 
 				|| $(property).attr("datatype") == "xsd:gYearMonth" 
 				|| $(property).attr("datatype") == "xsd:gYear"
 			) {
-				var datatype = "xsd:date";
-				
-				$(property).parentsUntil("div.form-group").parent().removeClass("has-error has-feedback");
-				$(property).next("span.glyphicon").remove();
+				var datatype = "xsd:date";							
 
 				value = value.replace(/\./g, '-');
 				value = value.replace(/[^\d-]/g, '');
@@ -1914,9 +1898,8 @@ RDForm = {
 					datatype = "xsd:date";					
 				} 
 				else {
-					console.log( "Unknown xsd:date format..." );
-					$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
-					$(property).after( '<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>' );
+					console.log( 'Unknown xsd:date format in "'+ property.attr("name") +'"' );
+					valid = false;
 				}
 				$(property).attr( "datatype", datatype );
 			}
@@ -1925,7 +1908,15 @@ RDForm = {
 				value = value.replace(/[^\d]/g, '');
 			}
 		}
+		
+		if ( ! valid ) {
+			$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
+			$(property).after( '<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>' );
+			return false;
+		}
+
 		$(property).attr('value', value );
+		return true;
 	},
 
 	/**
@@ -1940,7 +1931,6 @@ RDForm = {
 
 		if ( typeof str === "string" && str != "" ) {
 
-			//str = str.replace(/l\((.*)\)/, '$1');
 			var translate = str.replace(/.*l\((.*?)\).*/, '$1');
 			var translated = translate;
 
@@ -1948,16 +1938,11 @@ RDForm = {
 				translated = TRANSLATIONS[translate];
 			} 
 
-			//str = str.replace(/l*\(*.*?\)*/, translated);
-			//var regex = new RegExp("\{" + wcd + "\}", "g");
 			if ( str.search( /l\(/ ) != -1 ) {
 				str = str.replace(/l\(.*?\)/, translated);
 			} else {
 				str = str.replace(translate, translated);
 			}
-			//var regex = new RegExp( /l\(/ + translate + /\)/ );
-			//str = str.replace( regex, translated);
-			//str = str.replace(/(.*)l\((.*?)\)(.*)/, '$1' + translated + '$3');
 
 			if ( typeof param !== undefined ) {
 				str = str.replace( /%s/g, param );
