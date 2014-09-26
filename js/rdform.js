@@ -22,6 +22,7 @@ var _ID_ = "rdform",
 		hooks: 	"",
 		lang: 	"",
 		cache: 	false,
+		verbose: false,
 
 		submit: function() {},
 	}	
@@ -130,19 +131,6 @@ var _ID_ = "rdform",
 				proceed = false;
 			}
 		});
-
-		/*
-		// validate required inputs
-		rdform.find("input[required]").each(function() {
-			if ( $(this).val() == "" ) {
-				$(this).parents(".form-group").addClass("error");
-				RDForm.showAlert( "warning", "Please fillout all required red marked fields!");
-				proceed = false;
-			} else {
-				$(this).parents(".form-group").removeClass("error");
-			}
-		});
-		*/
 
 		// proceed
 		if ( proceed ) {
@@ -321,7 +309,7 @@ RDForm = {
 				MODEL[mi]['isRootClass'] = true;
 			}			
 		}
-		console.log( "Context = ", CONTEXT );				
+		//console.log( "Context = ", CONTEXT );				
 		console.log( "RDForm Model = ", MODEL );				
 	}, // end of parseFormModel	
 
@@ -1101,6 +1089,11 @@ RDForm = {
 
 		// find inputs with wildcard
 		function findWildcardInputs( env ) {
+
+			// add asterix to required input fields
+			env.find("input[required]").each(function() {
+				$(this).parentsUntil(".form-group").parent().find("label").append(' <abbr title="'+RDForm.l("Required field")+'">*</abbr>');
+			});
 
 			// reset inputs values with existing modvalue
 			$(env).find('input[modvalue]').each(function() {
@@ -1912,6 +1905,7 @@ RDForm = {
 		if ( ! valid ) {
 			$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
 			$(property).after( '<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>' );
+			$('html, body').animate({ scrollTop: $(property).offset().top }, 100);		
 			return false;
 		}
 
