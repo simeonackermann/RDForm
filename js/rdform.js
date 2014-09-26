@@ -687,16 +687,16 @@ RDForm = {
 						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
 					}
 
-					$(literal).val( data[i] );	
+					$(literal).val( data[i] );
 					//$(literal).trigger("keyup");
 					$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
 						if ( data[i] == "0" || data[i] == "false" ) {
 							$(literal).removeAttr("checked");							
-						} /* else {
+						} else {
 							$(literal).trigger("click");
-						}*/
+						}
 					}				
 
 				} else { // its an array: multiple literals or resource ( $.isArray(data[i]) )
