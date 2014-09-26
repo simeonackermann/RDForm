@@ -734,6 +734,7 @@ RDForm = {
 									if ( di > 0 ) {
 										$(env).find( 'button.duplicate-external-resource' ).trigger("click");
 										resource = $(env).children("div.rdform-resource-group").find( 'input[name="'+i+'"]' ).last();
+										$(resource).parentsUntil(".rdform-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 									}
 									$(resource).val( thisData[di]["@id"] );	
 									continue;
