@@ -560,14 +560,16 @@ RDForm = {
 	  */
 	createHTMLResource: function( resource ) {		
 
-		var curFormGroup = $('<div class="form-group '+_ID_+'-resource-group"></div>');
-		var resourceClass;
+		var curFormGroup = $('<div class="form-group '+_ID_+'-resource-group"></div>');		
 		var showHelp = false;
 
+
 		if ( resource['external'] !== undefined ) {	// add simple input for external resources
-			resourceClass = $("<input />");						
+			var resourceClass = $('<input />');
+			//resourceClass = $();
 		}
 		else { // add regular resource
+			var resourceClass;
 			var classModel = $.extend( true, {}, RDForm.getClassModel(resource['value']) );
 			
 			// add button for additional or same resources (like person knows person)
@@ -611,15 +613,15 @@ RDForm = {
 
 		curFormGroup.append( resourceClass );
 
-		if ( resource['external'] !== undefined ) {
+		if ( resource['external'] !== undefined ) {			
+			resourceClass.prop("type", "text"); // bugfix for jquery < 1.8 
 			resourceClass.attr({
-				'type': "text", 
 				'external': 'external',
 				'class': 'form-control input-sm',
 				'value': resource['value'],
 				'readonly': resource['readonly'],
 				'placeholder': resource['placeholder'],
-			});
+			});			
 
 			var thisLabel = $("<label>...</label>");
 			thisLabel.text( resource['label'] );
