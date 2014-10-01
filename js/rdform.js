@@ -744,7 +744,7 @@ RDForm = {
 						if ( data[i] == "0" || data[i] == "false" ) {
 							$(literal).removeAttr("checked");							
 						} else {
-							$(literal).trigger("click");
+							$(literal).attr( "checked", "checked" );
 						}
 					}				
 
