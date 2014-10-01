@@ -22,6 +22,7 @@ var _ID_ = "rdform",
 		hooks: 	"",
 		lang: 	"",
 		cache: 	false,
+		verbose: false,
 
 		submit: function() {},
 	}	
@@ -121,17 +122,13 @@ var _ID_ = "rdform",
 	// submit callback function
 	rdform_submit = function() {
 
-		$("."+_ID_+"-alert").hide();
+		//$("."+_ID_+"-alert").hide();
 		var proceed = true;
 
-		// validate required inputs
-		$("input[required]").each(function() {
-			if ( $(this).val() == "" ) {
-				$(this).parents(".form-group").addClass("error");
-				RDForm.showAlert( "warning", "Please fillout all required red marked fields!");
+		rdform.find("input").each(function() {
+			var valid = RDForm.userInputValidation( $(this) );
+			if ( ! valid ) {
 				proceed = false;
-			} else {
-				$(this).parents(".form-group").removeClass("error");
 			}
 		});
 
@@ -312,6 +309,7 @@ RDForm = {
 				MODEL[mi]['isRootClass'] = true;
 			}			
 		}
+		//console.log( "Context = ", CONTEXT );				
 		console.log( "RDForm Model = ", MODEL );				
 	}, // end of parseFormModel	
 
@@ -543,7 +541,7 @@ RDForm = {
 		}
 
 		if ( literal['help'] !== undefined ) {
-			thisInputContainer.append( '<span class="glyphicon glyphicon-question-sign btn rdform-show-literal-help"></span>' );
+			thisLabel.prepend( '<span class="glyphicon glyphicon-question-sign btn rdform-show-literal-help"></span>' );
 			thisInputContainer.append(	'<span class="help-block rdform-literal-help hidden">' + literal['help'] + '</span>' );			
 		}
 
@@ -560,14 +558,15 @@ RDForm = {
 	  */
 	createHTMLResource: function( resource ) {		
 
-		var curFormGroup = $('<div class="form-group '+_ID_+'-resource-group"></div>');
-		var resourceClass;
+		var curFormGroup = $('<div class="form-group '+_ID_+'-resource-group"></div>');		
 		var showHelp = false;
 
+
 		if ( resource['external'] !== undefined ) {	// add simple input for external resources
-			resourceClass = $("<input />");						
+			var resourceClass = $('<input />');
 		}
 		else { // add regular resource
+			var resourceClass;
 			var classModel = $.extend( true, {}, RDForm.getClassModel(resource['value']) );
 			
 			// add button for additional or same resources (like person knows person)
@@ -611,15 +610,15 @@ RDForm = {
 
 		curFormGroup.append( resourceClass );
 
-		if ( resource['external'] !== undefined ) {
+		if ( resource['external'] !== undefined ) {			
+			resourceClass.prop("type", "text"); // bugfix for jquery < 1.8 
 			resourceClass.attr({
-				'type': "text", 
 				'external': 'external',
 				'class': 'form-control input-sm',
 				'value': resource['value'],
 				'readonly': resource['readonly'],
 				'placeholder': resource['placeholder'],
-			});
+			});			
 
 			var thisLabel = $("<label>...</label>");
 			thisLabel.text( resource['label'] );
@@ -629,8 +628,14 @@ RDForm = {
 			});
 			curFormGroup.prepend( thisLabel );
 			
-			var thisInputContainer = $('<div class="col-xs-9"></div>');	
+			var thisInputContainer = $('<div class="col-xs-9"></div>');				
 			resourceClass.wrap( thisInputContainer );
+
+			if ( resource['multiple'] !== undefined ) {
+				resourceClass.attr('index', 1);
+				resourceClass.after('<button type="button" class="btn btn-default btn-xs duplicate-external-resource" title="'+ RDForm.l("Duplicate resource %s", resource['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
+			}
+
 		}
 
 		if ( showHelp == true ) {
@@ -641,6 +646,39 @@ RDForm = {
 		}
 
 		return curFormGroup;
+	},
+	
+	replaceStrPrefix : function( str ) {
+		if ( str === undefined ) return str;
+
+		if ( str.search(":") != -1 ) {
+			//str = str.split(":")[0];
+			var str_arr = str.split(":");
+		} else {
+			return str;
+		}
+
+		if ( str_arr[0] == "http" ) {
+			return str;
+		}
+
+		for ( var ci in CONTEXT ) {
+			if ( str_arr[0] == ci ) {
+				return CONTEXT[ci] + str_arr[1];
+			}
+		}
+
+		return str;
+
+	},
+
+	getLiteralsByName : function( env, name) {
+		var literal = $(env).children("div.rdform-literal-group").find("input,textarea").filter(function(index) {			
+			//console.log( name, $(this).attr("name"), RDForm.replaceStrPrefix( $(this).attr("name") ), $(this) );
+			return ( $(this).attr("name") === name ) 
+				|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === name );
+		});
+		return literal;
 	},
 
 	/**
@@ -664,38 +702,50 @@ RDForm = {
 		for ( var i in data ) {
 			var curName = ( name === undefined ) ? i : name;	
 
-			if ( i[0] != "@" ) { // we dont want @id, @type, ...
+			if ( i[0] != "@" ) { // we dont want insert @id, @type, ...
 
-				if ( typeof data[i] === "string" ) { // its a literal	
+				if ( typeof data[i] === "string" ) { // its a literal						
 
-					var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+					//RDForm.addExistingLiteral( name, data, env, ... );
+					//var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+					/*
+					var literal = $(env).children("div.rdform-literal-group").find("input,textarea").filter(function(index) {
+						return ( $(this).attr("name") === curName ) 
+							|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === curName );
+					});
+					*/
+					var literal = RDForm.getLiteralsByName( env, curName );
+
+					console.log( $(literal).length );					
 
 					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
+						// TODO: search for fullname add btn prefix
 						var addBtn = $(env).children("div.rdform-literal-group").find( 'button.add-class-literal[name="'+curName+'"]' );
 						if ( $(addBtn).length == 0 ) {
 							RDForm.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }' );
 							continue;
 						}
 						$(addBtn).trigger("click");
-						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						//literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						literal = RDForm.getLiteralsByName( env, curName ).last();
 					}
 
 					if ( prevKey == curName ) { // same key -> try to duplicate
 						$(literal).nextAll("button.duplicate-literal").trigger("click");
-						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
-						$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
+						//literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						literal = RDForm.getLiteralsByName( env, curName ).last();
 					}
 
-					$(literal).val( data[i] );	
+					$(literal).val( data[i] );
 					//$(literal).trigger("keyup");
 					$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
 						if ( data[i] == "0" || data[i] == "false" ) {
 							$(literal).removeAttr("checked");							
-						} /* else {
+						} else {
 							$(literal).trigger("click");
-						}*/
+						}
 					}				
 
 				} else { // its an array: multiple literals or resource ( $.isArray(data[i]) )
@@ -725,6 +775,11 @@ RDForm = {
 							if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
 								var resource = $(env).children("div.rdform-resource-group").find( 'input[name="'+i+'"]' ).last();
 								if ( $(resource).length != 0 ) {
+									if ( di > 0 ) {
+										$(resource).parent().find( 'button.duplicate-external-resource' ).trigger("click");
+										resource = $(env).children("div.rdform-resource-group").find( 'input[name="'+i+'"]' ).last();
+										$(resource).parentsUntil(".rdform-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
+									}
 									$(resource).val( thisData[di]["@id"] );	
 									continue;
 								}
@@ -767,6 +822,14 @@ RDForm = {
 		}
 	},
 
+	addExistingLiteral : function() {
+
+	},
+
+	addExistingResource : function() {
+
+	},
+
 	/*******************************************************
 	 *	Init form button handlers after building the form
 	 * 
@@ -798,11 +861,11 @@ RDForm = {
 
 		// BUTTON: show literal help text
 		rdform.on("click", ".rdform-show-literal-help", function() {
-			var classHelp =  $(this).parent().find("span.rdform-literal-help");
+			var classHelp =  $(this).parentsUntil("div[typeof]").find("span.rdform-literal-help");
 			$(classHelp).toggleClass("hidden");
 		});
 
-		// BUTTON: show literal help text
+		// BUTTON: show resource help text
 		rdform.on("click", ".rdform-show-resource-help", function() {
 			var classHelp =  $(this).parent().find("span.rdform-resource-help");
 			$(classHelp).toggleClass("hidden");
@@ -954,14 +1017,81 @@ RDForm = {
 			return false;
 		});
 
-		// BUTTON: duplicate a literal
-		rdform.on("click", "button.duplicate-literal", function() {			
-			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent().clone();
+		// BUTTON: duplicate a external resource
+		rdform.on("click", "button.duplicate-external-resource", function() {			
+			var literalContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
 			var thisLiteral = $(literalContainer).find("input,textarea");
 
 			if ( thisLiteral.val().search("{") == -1 ) {
 				thisLiteral.val("");
 			}
+
+			//add remove button
+			if ( $(literalContainer).find('button.remove-external-resource').length == 0 ) {
+				$('button.duplicate-external-resource', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-external-resource" title="'+ RDForm.l("Remove resource %s", $(thisLiteral).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
+			}
+
+			// rewrite index, radio input names index and references in wildcards
+			var index = $(thisLiteral).attr("index");
+			++index;
+			$(thisLiteral).attr("index", index);
+
+			$(literalContainer).hide();	
+			$(this).parentsUntil("div.rdform-resource-group").parent().after( literalContainer );
+			$(literalContainer).show("slow");
+			$(this).remove(); // remove duplicate btn
+
+			findWildcardInputs( literalContainer );
+
+			return false;
+		});	
+
+		// BUTTON: remove external ressource
+		rdform.on("click", "button.remove-external-resource", function() {
+			var literalContainer = $(this).parentsUntil("div.rdform-resource-group").parent();
+			var literalName = $(this).prev().attr("name");
+			var prevLiteral = literalContainer.prev("div.rdform-resource-group").find('*[name="'+literalName+'"]');
+			var nextLiteral = literalContainer.next("div.rdform-resource-group").find('*[name="'+literalName+'"]');
+			
+			// if its the only duplicated literal - add button from model
+			if ( prevLiteral.length == 0 && nextLiteral.length == 0 ) {
+
+				var thisClass = $(this).parentsUntil("div[typeof]").parent();
+				var classModel = RDForm.getClassModel( $(thisClass).attr('typeof') );
+				// find literal in class-model
+				for ( var pi in classModel.properties ) {
+					if ( classModel.properties[pi].name == literalName ) {
+						var thisLiteral = $.extend( true, {}, classModel.properties[pi] );					
+						break;
+					}
+				}				
+				var thisLiteralHTML = RDForm.createHTMLiteral( thisLiteral );
+				literalContainer.before( thisLiteralHTML );
+
+			} 
+			else { // middle or last literal, maybe copy duplicate-btn
+				var addBtn = literalContainer.find("button.duplicate-external-resource");
+				prevLiteral.parent().append( addBtn );
+			}
+
+			literalContainer.hide( "slow", function() {					
+				literalContainer.remove();
+			});
+		});
+
+		// BUTTON: duplicate a literal
+		rdform.on("click", "button.duplicate-literal", function() {			
+			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent().clone();
+			var thisLiteral = $(literalContainer).find("input,textarea");
+
+			// reset values
+			if ( thisLiteral.val().search("{") == -1 ) {
+				thisLiteral.val("");
+			}
+
+			//remove label
+			$(literalContainer).find( "label" ).css( "textIndent", "-9999px" ).css( "textAlign", "left" );
+			$(literalContainer).find(".help-block").hide();
 
 			//add remove button
 			if ( $(literalContainer).find('button.remove-literal').length == 0 ) {
@@ -981,7 +1111,7 @@ RDForm = {
 			findWildcardInputs( literalContainer );
 
 			return false;
-		});		
+		});			
 
 		// BUTTON: remove literal
 		rdform.on("click", "button.remove-literal", function() {
@@ -1011,6 +1141,15 @@ RDForm = {
 				prevLiteral.parent().append( addBtn );
 			}
 
+			if ( prevLiteral.length == 0 && nextLiteral.length != 0 ) {
+				//remove label
+				var nextLiteralClass = $(this).parentsUntil("div[typeof]").parent();
+				$(nextLiteralClass).find( "label" ).css( "textIndent", "0px" ).css( "textAlign", "right" );
+				$(nextLiteralClass).find(".help-block").show();
+			}
+
+			
+
 			literalContainer.hide( "slow", function() {					
 				literalContainer.remove();
 			});
@@ -1018,6 +1157,11 @@ RDForm = {
 
 		// find inputs with wildcard
 		function findWildcardInputs( env ) {
+
+			// add asterix to required input fields
+			env.find("input[required]").each(function() {
+				$(this).parentsUntil(".form-group").parent().find("label").append(' <abbr title="'+RDForm.l("Required field")+'">*</abbr>');
+			});
 
 			// reset inputs values with existing modvalue
 			$(env).find('input[modvalue]').each(function() {
@@ -1193,39 +1337,7 @@ RDForm = {
 			// find wildcard inputs again
 			findWildcardInputs( rdform );
 		});
-		*/
-
-		// submit formular		
-		//rdform.on( "submit", RDForm.onSubmit );
-		rdform.submit(function() {		
-
-			//RDForm.onSubmit();	
-			/*
-			$("."+_ID_+"-alert").hide();
-			var proceed = true;
-
-			// validate required inputs
-			$("input[required]").each(function() {
-				if ( $(this).val() == "" ) {
-					$(this).parents(".form-group").addClass("error");
-					RDForm.showAlert( "warning", "Please fillout all required red marked fields!");
-					proceed = false;
-				} else {
-					$(this).parents(".form-group").removeClass("error");
-				}
-			});
-
-			// proceed
-			if ( proceed ) {
-				$("button[type=submit]").html("update");
-				RDForm.createResult();
-
-				RDForm.outputResult();
-			}
-			*/
-			//return false;
-		});
-		
+		*/		
 
 	}, // end of initFormHandler	
 
@@ -1814,19 +1926,25 @@ RDForm = {
 	 */
 	userInputValidation: function ( property ) {	
 		
+		var valid = true;
 		var value = $(property).val();
 		value = value.trim();
 
-		if ( $(property).attr("datatype") ) {
+		$(property).parentsUntil("div.form-group").parent().removeClass("has-error has-feedback");
+		$(property).next("span.glyphicon-warning-sign").remove();
+
+		if ( $(property).attr("required") ) {
+			if ( $(property).val() == "" ) {
+				valid = false;
+			}
+		}
+		else if ( $(property).attr("datatype") && $(property).val() != "" ) {
 
 			if (   $(property).attr("datatype") == "xsd:date" 
 				|| $(property).attr("datatype") == "xsd:gYearMonth" 
 				|| $(property).attr("datatype") == "xsd:gYear"
 			) {
-				var datatype = "xsd:date";
-				
-				$(property).parentsUntil("div.form-group").parent().removeClass("has-error has-feedback");
-				$(property).next("span.glyphicon").remove();
+				var datatype = "xsd:date";							
 
 				value = value.replace(/\./g, '-');
 				value = value.replace(/[^\d-]/g, '');
@@ -1841,9 +1959,8 @@ RDForm = {
 					datatype = "xsd:date";					
 				} 
 				else {
-					console.log( "Unknown xsd:date format..." );
-					$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
-					$(property).after( '<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>' );
+					console.log( 'Unknown xsd:date format in "'+ property.attr("name") +'"' );
+					valid = false;
 				}
 				$(property).attr( "datatype", datatype );
 			}
@@ -1852,7 +1969,16 @@ RDForm = {
 				value = value.replace(/[^\d]/g, '');
 			}
 		}
+		
+		if ( ! valid ) {
+			$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
+			$(property).after( '<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>' );
+			$('html, body').animate({ scrollTop: $(property).offset().top }, 100);
+			return false;
+		}
+
 		$(property).attr('value', value );
+		return true;
 	},
 
 	/**
@@ -1867,7 +1993,6 @@ RDForm = {
 
 		if ( typeof str === "string" && str != "" ) {
 
-			//str = str.replace(/l\((.*)\)/, '$1');
 			var translate = str.replace(/.*l\((.*?)\).*/, '$1');
 			var translated = translate;
 
@@ -1875,16 +2000,11 @@ RDForm = {
 				translated = TRANSLATIONS[translate];
 			} 
 
-			//str = str.replace(/l*\(*.*?\)*/, translated);
-			//var regex = new RegExp("\{" + wcd + "\}", "g");
 			if ( str.search( /l\(/ ) != -1 ) {
 				str = str.replace(/l\(.*?\)/, translated);
 			} else {
 				str = str.replace(translate, translated);
 			}
-			//var regex = new RegExp( /l\(/ + translate + /\)/ );
-			//str = str.replace( regex, translated);
-			//str = str.replace(/(.*)l\((.*?)\)(.*)/, '$1' + translated + '$3');
 
 			if ( typeof param !== undefined ) {
 				str = str.replace( /%s/g, param );
