@@ -540,10 +540,6 @@ RDForm = {
 			thisInputContainer.append('<button type="button" class="btn btn-default btn-xs duplicate-literal" title="'+ RDForm.l("Duplicate literal %s", literal['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
 		}
 
-		if ( literal['required'] !== undefined ) {	
-			thisLabel.append( ' <abbr title="'+RDForm.l("Required field")+'">*</abbr>' );
-		}
-
 		if ( literal['help'] !== undefined ) {
 			thisLabel.prepend( '<span class="glyphicon glyphicon-question-sign btn rdform-show-literal-help"></span>' );
 			thisInputContainer.append(	'<span class="help-block rdform-literal-help hidden">' + literal['help'] + '</span>' );			
@@ -1094,7 +1090,7 @@ RDForm = {
 			}
 
 			//remove label
-			$(literalContainer).find( "label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
+			$(literalContainer).find( "label" ).css( "textIndent", "-9999px" ).css( "textAlign", "left" );
 			$(literalContainer).find(".help-block").hide();
 
 			//add remove button
@@ -1160,7 +1156,12 @@ RDForm = {
 		});
 
 		// find inputs with wildcard
-		function findWildcardInputs( env ) {			
+		function findWildcardInputs( env ) {
+
+			// add asterix to required input fields
+			env.find("input[required]").each(function() {
+				$(this).parentsUntil(".form-group").parent().find("label").append(' <abbr title="'+RDForm.l("Required field")+'">*</abbr>');
+			});
 
 			// reset inputs values with existing modvalue
 			$(env).find('input[modvalue]').each(function() {
