@@ -541,7 +541,7 @@ RDForm = {
 		}
 
 		if ( literal['help'] !== undefined ) {
-			thisInputContainer.append( '<span class="glyphicon glyphicon-question-sign btn rdform-show-literal-help"></span>' );
+			thisLabel.prepend( '<span class="glyphicon glyphicon-question-sign btn rdform-show-literal-help"></span>' );
 			thisInputContainer.append(	'<span class="help-block rdform-literal-help hidden">' + literal['help'] + '</span>' );			
 		}
 
@@ -647,6 +647,39 @@ RDForm = {
 
 		return curFormGroup;
 	},
+	
+	replaceStrPrefix : function( str ) {
+		if ( str === undefined ) return str;
+
+		if ( str.search(":") != -1 ) {
+			//str = str.split(":")[0];
+			var str_arr = str.split(":");
+		} else {
+			return str;
+		}
+
+		if ( str_arr[0] == "http" ) {
+			return str;
+		}
+
+		for ( var ci in CONTEXT ) {
+			if ( str_arr[0] == ci ) {
+				return CONTEXT[ci] + str_arr[1];
+			}
+		}
+
+		return str;
+
+	},
+
+	getLiteralsByName : function( env, name) {
+		var literal = $(env).children("div.rdform-literal-group").find("input,textarea").filter(function(index) {			
+			//console.log( name, $(this).attr("name"), RDForm.replaceStrPrefix( $(this).attr("name") ), $(this) );
+			return ( $(this).attr("name") === name ) 
+				|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === name );
+		});
+		return literal;
+	},
 
 	/**
 	 * Add existing data from a JSON-LD object to the form
@@ -669,25 +702,38 @@ RDForm = {
 		for ( var i in data ) {
 			var curName = ( name === undefined ) ? i : name;	
 
-			if ( i[0] != "@" ) { // we dont want @id, @type, ...
+			if ( i[0] != "@" ) { // we dont want insert @id, @type, ...
 
-				if ( typeof data[i] === "string" ) { // its a literal	
+				if ( typeof data[i] === "string" ) { // its a literal						
 
-					var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+					//RDForm.addExistingLiteral( name, data, env, ... );
+					//var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+					/*
+					var literal = $(env).children("div.rdform-literal-group").find("input,textarea").filter(function(index) {
+						return ( $(this).attr("name") === curName ) 
+							|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === curName );
+					});
+					*/
+					var literal = RDForm.getLiteralsByName( env, curName );
+
+					console.log( $(literal).length );					
 
 					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
+						// TODO: search for fullname add btn prefix
 						var addBtn = $(env).children("div.rdform-literal-group").find( 'button.add-class-literal[name="'+curName+'"]' );
 						if ( $(addBtn).length == 0 ) {
 							RDForm.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }' );
 							continue;
 						}
 						$(addBtn).trigger("click");
-						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						//literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						literal = RDForm.getLiteralsByName( env, curName ).last();
 					}
 
 					if ( prevKey == curName ) { // same key -> try to duplicate
 						$(literal).nextAll("button.duplicate-literal").trigger("click");
-						literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						//literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
+						literal = RDForm.getLiteralsByName( env, curName ).last();
 					}
 
 					$(literal).val( data[i] );
@@ -776,6 +822,14 @@ RDForm = {
 		}
 	},
 
+	addExistingLiteral : function() {
+
+	},
+
+	addExistingResource : function() {
+
+	},
+
 	/*******************************************************
 	 *	Init form button handlers after building the form
 	 * 
@@ -807,11 +861,11 @@ RDForm = {
 
 		// BUTTON: show literal help text
 		rdform.on("click", ".rdform-show-literal-help", function() {
-			var classHelp =  $(this).parent().find("span.rdform-literal-help");
+			var classHelp =  $(this).parentsUntil("div[typeof]").find("span.rdform-literal-help");
 			$(classHelp).toggleClass("hidden");
 		});
 
-		// BUTTON: show literal help text
+		// BUTTON: show resource help text
 		rdform.on("click", ".rdform-show-resource-help", function() {
 			var classHelp =  $(this).parent().find("span.rdform-resource-help");
 			$(classHelp).toggleClass("hidden");
@@ -1030,9 +1084,14 @@ RDForm = {
 			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent().clone();
 			var thisLiteral = $(literalContainer).find("input,textarea");
 
+			// reset values
 			if ( thisLiteral.val().search("{") == -1 ) {
 				thisLiteral.val("");
 			}
+
+			//remove label
+			$(literalContainer).find( "label" ).css( "textIndent", "-9999px" ).css( "textAlign", "left" );
+			$(literalContainer).find(".help-block").hide();
 
 			//add remove button
 			if ( $(literalContainer).find('button.remove-literal').length == 0 ) {
@@ -1081,6 +1140,15 @@ RDForm = {
 				var addBtn = literalContainer.find("button.duplicate-literal");
 				prevLiteral.parent().append( addBtn );
 			}
+
+			if ( prevLiteral.length == 0 && nextLiteral.length != 0 ) {
+				//remove label
+				var nextLiteralClass = $(this).parentsUntil("div[typeof]").parent();
+				$(nextLiteralClass).find( "label" ).css( "textIndent", "0px" ).css( "textAlign", "right" );
+				$(nextLiteralClass).find(".help-block").show();
+			}
+
+			
 
 			literalContainer.hide( "slow", function() {					
 				literalContainer.remove();
@@ -1905,7 +1973,7 @@ RDForm = {
 		if ( ! valid ) {
 			$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
 			$(property).after( '<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>' );
-			$('html, body').animate({ scrollTop: $(property).offset().top }, 100);		
+			$('html, body').animate({ scrollTop: $(property).offset().top }, 100);
 			return false;
 		}
 
