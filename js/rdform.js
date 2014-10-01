@@ -710,38 +710,27 @@ RDForm = {
 
 				if ( typeof data[i] === "string" ) { // its a literal						
 
-					//RDForm.addExistingLiteral( name, data, env, ... );
-					//var literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
-					/*
-					var literal = $(env).children("div.rdform-literal-group").find("input,textarea").filter(function(index) {
-						return ( $(this).attr("name") === curName ) 
-							|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === curName );
-					});
-					*/
 					var literal = RDForm.getLiteralsByName( env, curName );
 
-					console.log( $(literal).length );					
-
 					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
-						// TODO: search for fullname add btn prefix
-						var addBtn = $(env).children("div.rdform-literal-group").find( 'button.add-class-literal[name="'+curName+'"]' );
+						var addBtn = $(env).children("div.rdform-literal-group").find("button.add-class-literal").filter(function(index) {
+							return ( $(this).attr("name") === curName ) 
+								|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === curName );
+						});
 						if ( $(addBtn).length == 0 ) {
 							RDForm.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }' );
 							continue;
 						}
 						$(addBtn).trigger("click");
-						//literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
 						literal = RDForm.getLiteralsByName( env, curName ).last();
 					}
 
 					if ( prevKey == curName ) { // same key -> try to duplicate
 						$(literal).nextAll("button.duplicate-literal").trigger("click");
-						//literal = $(env).children("div.rdform-literal-group").find( 'input[name="'+curName+'"],textarea[name="'+curName+'"]' ).last();
 						literal = RDForm.getLiteralsByName( env, curName ).last();
 					}
 
 					$(literal).val( data[i] );
-					//$(literal).trigger("keyup");
 					$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
