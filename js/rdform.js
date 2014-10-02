@@ -104,10 +104,11 @@ var _ID_ = "rdform",
 
 		// maybe add existing data
 		if ( settings.data != "" ) {
+			var inputdata = settings.data;
 			if ( settings.data.length == 1 )
-					settings.data = settings.data[0];
+					inputdata = settings.data[0];
 
-			RDForm.addExistingData( undefined, settings.data );
+			RDForm.addExistingData( undefined, inputdata );
 		}
 	};
 
@@ -137,14 +138,20 @@ var _ID_ = "rdform",
 
 		// proceed
 		if ( proceed ) {
-			//$("button[type=submit]").html("update");
-			RDForm.createResult();
-			//RDForm.outputResult();
+			var json_result = RDForm.createResult();
+			
+			jsonld.expand(json_result, function(err, expanded) {
 
-			// callback function submit
-			settings.submit.call( JSON_RESULT );
+				if ( settings.data != "" ) {
+					expanded = RDForm.mergeExistingDataWithResult( JSON_MODEL, expanded, settings.data );
+				}
+
+				JSON_RESULT = expanded;
+				console.log( "RDForm Result = ", JSON_RESULT );
+				
+				settings.submit.call( expanded );
+			});
 		}
-
 	};
 
 }( jQuery ));
@@ -181,7 +188,7 @@ RDForm = {
 			var curClass = new Object();
 
 			curClass['@id'] = $(this).attr("resource");
-			curClass['@type'] = new Array( $(this).attr("typeof") );
+			curClass['@type'] = new Array( RDForm.replaceStrPrefix( $(this).attr("typeof") ) );
 
 			// walk the input-properties
 			$(this).children('input').each(function() {
@@ -195,22 +202,28 @@ RDForm = {
 					curProperty["@type"] = $(this).attr("datatype");
 				}
 				if ( typeof $(this).attr("value") !== "undefined" ) {
-					curProperty["@value"] = $(this).val();	
+					curProperty["@value"] = RDForm.replaceStrPrefix( $(this).val() );	
 				}
 				if ( typeof $(this).attr("external") !== "undefined" ) {					
-					curProperty["@id"] = $(this).attr("name");
+					curProperty["@id"] = RDForm.replaceStrPrefix( $(this).attr("name") );
 					if ( typeof $(this).attr("datatype") !== "undefined" ) {
 						delete curProperty["@type"]
 					}
 				}
+
+				var propName = RDForm.replaceStrPrefix( $(this).attr("name") );
 				
-				curClass[ $(this).attr("name") ] = new Array();
-				curClass[ $(this).attr("name") ].push( curProperty );
+				curClass[ propName ] = new Array();
+				curClass[ propName ].push( curProperty );
 
 			});
 
 			var isRootClass = true;
-			if ( $(dom_model).find('input[value="'+curClass['@type'][0]+'"]').length > 0 ) {
+			var thisClassReference = $(dom_model).find('input').filter(function(index) {			
+				return ( $(this).attr("value") === curClass['@type'][0] ) 
+					|| ( RDForm.replaceStrPrefix( $(this).attr("value") ) === curClass['@type'][0] );
+			});
+			if ( thisClassReference.length > 0 ) {
 				$.each( JSON_MODEL[0], function( key1, value1 ) {
 					if ( typeof value1[0] !== "string"   ) {
 						$.each( value1[0], function( key2, value2 ) {
@@ -226,7 +239,7 @@ RDForm = {
 			}
 			
 		});
-		//console.log( "RDFormJSON Model = ", JSON.stringify( JSON_MODEL, null, '\t' ) );
+		console.log( "RDFormJSON Model = ", JSON_MODEL );
 	},
 
 
@@ -1393,6 +1406,27 @@ RDForm = {
 
 	},*/
 
+	mergeExistingDataWithResult: function( model, result, data ) {
+		var merged = result;
+
+		$.each( data[0], function( key1, value1) {
+			if ( ! model[0].hasOwnProperty( RDForm.replaceStrPrefix(key1) ) ) {
+				// TODO: maybe replace prefixes
+				/* $.each( value1[0], function( key2, value2 ) {
+					var oldKey = key2;
+					var newKey = RDForm.replaceStrPrefix( key2 );
+					if ( oldKey != newKey ) {
+						value1[0][newKey] = value2;	
+						delete value1[0][oldKey];
+					}
+				}); */
+				result[0][ RDForm.replaceStrPrefix( key1 ) ] = value1;
+			}
+		});
+
+		return merged;
+	},
+
 	/**
 	  * Walk every class (div[typeof]) in the HTML form to create the RESULT
 	  *
@@ -1410,37 +1444,36 @@ RDForm = {
 		if ( typeof __createResult !== "undefined" )
 			__createResult();
 
-		JSON_RESULT = new Object();			
+		json_result = new Object();			
 
 		// walk every root class
 		rdform.children("div[typeof]").each(function( ci ) {			
 			var curClass = RDForm.getResultClass( $(this) );
 			if ( ! $.isEmptyObject( curClass ) ) { // dont add empty classes
-				if (! JSON_RESULT.hasOwnProperty( curClass["@resource"] ) ) {
-					JSON_RESULT[ curClass["@resource"] ] = new Array();
+				if (! json_result.hasOwnProperty( curClass["@resource"] ) ) {
+					json_result[ curClass["@resource"] ] = new Array();
 				}
-				JSON_RESULT[ curClass["@resource"] ].push( curClass["@value"] );
+				json_result[ curClass["@resource"] ].push( curClass["@value"] );
 			}
 		});
 
 		// make one length array classes to normal classes
-		for ( var ci in JSON_RESULT ) {
-			if ( JSON_RESULT[ci].length == 1 ) {
-				JSON_RESULT[ci] = JSON_RESULT[ci][0];
+		for ( var ci in json_result ) {
+			if ( json_result[ci].length == 1 ) {
+				json_result[ci] = json_result[ci][0];
 			}
 		}
 
 		// if just one rootClass set as only class
-		if ( Object.keys(JSON_RESULT).length == 1 ) {
-			for ( var ci in JSON_RESULT ) {
-				JSON_RESULT = JSON_RESULT[ci];
+		if ( Object.keys(json_result).length == 1 ) {
+			for ( var ci in json_result ) {
+				json_result = json_result[ci];
 			}
 		}
 
 		// add context
-		JSON_RESULT['@context'] = CONTEXT;
-
-		console.log( "RDForm Result = ", JSON_RESULT );		
+		json_result['@context'] = CONTEXT;				
+		return json_result;
 	},
 
 	/**
@@ -1768,20 +1801,16 @@ RDForm = {
 			rdform.after( '<div class="row '+_ID_+'-result-container"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control '+_ID_+'-result" rows="10"></textarea></div></div>' );
 		}
 		
-		//var resultStr = JSON.stringify(JSON_RESULT, null, '\t');
+		var resultStr = JSON.stringify(JSON_RESULT, null, '\t');
 
-		//var expanded_result;
-		jsonld.expand(JSON_RESULT, function(err, expanded) {
-			var resultStr = JSON.stringify(expanded, null, '\t');
-
-			$("."+_ID_+"-result-container").show();	
-			$("."+_ID_+"-result").val( resultStr );
-			var lines = resultStr.split("\n");
-			$("."+_ID_+"-result").attr( "rows" , ( lines.length ) );
-			$('html, body').animate({ scrollTop: $("."+_ID_+"-result-container").offset().top }, 200);		
-		});		
+		$("."+_ID_+"-result-container").show();	
+		$("."+_ID_+"-result").val( resultStr );
+		var lines = resultStr.split("\n");
+		$("."+_ID_+"-result").attr( "rows" , ( lines.length ) );
+		$('html, body').animate({ scrollTop: $("."+_ID_+"-result-container").offset().top }, 200);				
 
 	}, // end of creating result
+
 	// deprecated
 	outputTurtle: function() {
 
