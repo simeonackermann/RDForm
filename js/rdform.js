@@ -5,6 +5,7 @@ var _ID_ = "rdform",
 	rdform, // rdform DOM object
 	initedFormHandler = false,
 	MODEL = new Array(),
+	JSON_MODEL = new Array(),
 	RESULT = new Array(),
 	JSON_RESULT = new Object(),
 	CONTEXT = new Object();
@@ -46,7 +47,9 @@ var _ID_ = "rdform",
 		if ( settings.lang != "" ) {
 			var langFile = "lang/" + settings.lang + ".js";
 			rdform_ajaxAsyncScript( langFile );
-		}		
+		}
+
+		rdform_ajaxAsyncScript( "js/jsonld.js" );		
 
 		//loading hooks file
 		if ( settings.hooks != "" ) {
@@ -162,11 +165,68 @@ RDForm = {
 		switch (type) {
 			case 'rdform':
 				RDForm.parseRDFormModel( model );
+				RDForm.parseRDFormModelToJSON( model );
 				break;
 			default:
 				RDForm.showAlert( "error", "Unknown model type \"" + type  + "\"" );
 				break;
 		}
+	},
+
+	parseRDFormModelToJSON: function( data ) {
+		var dom_model = $.parseHTML( data );
+
+		// walk the classes
+		$(dom_model).children('div[typeof]').each(function() {
+			var curClass = new Object();
+
+			curClass['@id'] = $(this).attr("resource");
+			curClass['@type'] = new Array( $(this).attr("typeof") );
+
+			// walk the input-properties
+			$(this).children('input').each(function() {
+				var curProperty = new Object();
+
+				if ( $(this).attr("type") == "hidden" ) {
+					return true;
+				}
+
+				if ( typeof $(this).attr("datatype") !== "undefined" ) {
+					curProperty["@type"] = $(this).attr("datatype");
+				}
+				if ( typeof $(this).attr("value") !== "undefined" ) {
+					curProperty["@value"] = $(this).val();	
+				}
+				if ( typeof $(this).attr("external") !== "undefined" ) {					
+					curProperty["@id"] = $(this).attr("name");
+					if ( typeof $(this).attr("datatype") !== "undefined" ) {
+						delete curProperty["@type"]
+					}
+				}
+				
+				curClass[ $(this).attr("name") ] = new Array();
+				curClass[ $(this).attr("name") ].push( curProperty );
+
+			});
+
+			var isRootClass = true;
+			if ( $(dom_model).find('input[value="'+curClass['@type'][0]+'"]').length > 0 ) {
+				$.each( JSON_MODEL[0], function( key1, value1 ) {
+					if ( typeof value1[0] !== "string"   ) {
+						$.each( value1[0], function( key2, value2 ) {
+							if ( value2 == curClass['@type'][0] ) {
+								JSON_MODEL[0][key1][0] = curClass;
+							}
+						});
+					}
+				});
+				
+			} else {
+				JSON_MODEL.push( curClass );
+			}
+			
+		});
+		//console.log( "RDFormJSON Model = ", JSON.stringify( JSON_MODEL, null, '\t' ) );
 	},
 
 
@@ -1708,13 +1768,18 @@ RDForm = {
 			rdform.after( '<div class="row '+_ID_+'-result-container"><legend>'+ RDForm.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control '+_ID_+'-result" rows="10"></textarea></div></div>' );
 		}
 		
-		var resultStr = JSON.stringify(JSON_RESULT, null, '\t');
-				
-		$("."+_ID_+"-result-container").show();	
-		$("."+_ID_+"-result").val( resultStr );
-		var lines = resultStr.split("\n");
-		$("."+_ID_+"-result").attr( "rows" , ( lines.length ) );
-		$('html, body').animate({ scrollTop: $("."+_ID_+"-result-container").offset().top }, 200);		
+		//var resultStr = JSON.stringify(JSON_RESULT, null, '\t');
+
+		//var expanded_result;
+		jsonld.expand(JSON_RESULT, function(err, expanded) {
+			var resultStr = JSON.stringify(expanded, null, '\t');
+
+			$("."+_ID_+"-result-container").show();	
+			$("."+_ID_+"-result").val( resultStr );
+			var lines = resultStr.split("\n");
+			$("."+_ID_+"-result").attr( "rows" , ( lines.length ) );
+			$('html, body').animate({ scrollTop: $("."+_ID_+"-result-container").offset().top }, 200);		
+		});		
 
 	}, // end of creating result
 	// deprecated
