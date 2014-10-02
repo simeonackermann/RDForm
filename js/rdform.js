@@ -676,13 +676,12 @@ RDForm = {
 
 	},
 
-	getLiteralsByName : function( env, name) {
-		var literal = $(env).children("div.rdform-literal-group").find("input,textarea").filter(function(index) {			
-			//console.log( name, $(this).attr("name"), RDForm.replaceStrPrefix( $(this).attr("name") ), $(this) );
+	getElementInGroupByName : function( env, name ) {
+		var el = $(env).filter(function(index) {			
 			return ( $(this).attr("name") === name ) 
 				|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === name );
 		});
-		return literal;
+		return el;
 	},
 
 	/**
@@ -710,24 +709,21 @@ RDForm = {
 
 				if ( typeof data[i] === "string" ) { // its a literal						
 
-					var literal = RDForm.getLiteralsByName( env, curName );
+					var literal = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("input,textarea"), curName );
 
 					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
-						var addBtn = $(env).children("div.rdform-literal-group").find("button.add-class-literal").filter(function(index) {
-							return ( $(this).attr("name") === curName ) 
-								|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === curName );
-						});
+						var addBtn = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("button.add-class-literal"), curName );
 						if ( $(addBtn).length == 0 ) {
 							RDForm.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }' );
 							continue;
 						}
 						$(addBtn).trigger("click");
-						literal = RDForm.getLiteralsByName( env, curName ).last();
+						literal = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("input,textarea"), curName ).last();
 					}
 
 					if ( prevKey == curName ) { // same key -> try to duplicate
 						$(literal).nextAll("button.duplicate-literal").trigger("click");
-						literal = RDForm.getLiteralsByName( env, curName ).last();
+						literal = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("input,textarea"), curName ).last();
 					}
 
 					$(literal).val( data[i] );
@@ -766,11 +762,11 @@ RDForm = {
 						for ( var di in thisData ) {
 
 							if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
-								var resource = $(env).children("div.rdform-resource-group").find( 'input[name="'+i+'"]' ).last();
+								var resource = RDForm.getElementInGroupByName( $(env).children("div.rdform-resource-group").find("input"), i );
 								if ( $(resource).length != 0 ) {
 									if ( di > 0 ) {
 										$(resource).parent().find( 'button.duplicate-external-resource' ).trigger("click");
-										resource = $(env).children("div.rdform-resource-group").find( 'input[name="'+i+'"]' ).last();
+										resource = RDForm.getElementInGroupByName( $(env).children("div.rdform-resource-group").find("input"), i ).last();
 										$(resource).parentsUntil(".rdform-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 									}
 									$(resource).val( thisData[di]["@id"] );	
