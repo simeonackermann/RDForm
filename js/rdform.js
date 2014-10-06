@@ -48,7 +48,9 @@ var _ID_ = "rdform",
 			rdform_ajaxAsyncScript( langFile );
 		}
 
-		rdform_ajaxAsyncScript( "js/jsonld.js" );		
+		if ( typeof jsonld === 'undefined' ) {
+			rdform_ajaxAsyncScript( "js/jsonld.js" );
+		}		
 
 		//loading hooks file
 		if ( settings.hooks != "" ) {
