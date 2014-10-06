@@ -724,38 +724,6 @@ RDForm = {
 
 		return curFormGroup;
 	},
-	
-	replaceStrPrefix : function( str ) {
-		if ( str === undefined ) return str;
-
-		if ( str.search(":") != -1 ) {
-			//str = str.split(":")[0];
-			var str_arr = str.split(":");
-		} else {
-			return str;
-		}
-
-		if ( str_arr[0] == "http" ) {
-			return str;
-		}
-
-		for ( var ci in CONTEXT ) {
-			if ( str_arr[0] == ci ) {
-				return CONTEXT[ci] + str_arr[1];
-			}
-		}
-
-		return str;
-
-	},
-
-	getElementInGroupByName : function( env, name ) {
-		var el = $(env).filter(function(index) {			
-			return ( $(this).attr("name") === name ) 
-				|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === name );
-		});
-		return el;
-	},
 
 	/**
 	 * Add existing data from a JSON-LD object to the form
@@ -884,12 +852,18 @@ RDForm = {
 		}
 	},
 
-	addExistingLiteral : function() {
-
-	},
-
-	addExistingResource : function() {
-
+	/**
+	 * Search element in DOM group by its name-attribute
+	 * @param DOM env
+	 * @param String name
+	 * @return DOM element
+	 */
+	getElementInGroupByName : function( env, name ) {
+		var el = $(env).filter(function(index) {			
+			return ( $(this).attr("name") === name ) 
+				|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === name );
+		});
+		return el;
 	},
 
 	/*******************************************************
@@ -1398,28 +1372,20 @@ RDForm = {
 
 	}, // end of initFormHandler	
 
-	/*
-	onSubmit: function() {
-
-		alert("submitted...");
-		RDForm.settings.onSubmit.call( this );
-
-	},*/
-
 	mergeExistingDataWithResult: function( model, result, data ) {
 		var merged = result;
 
 		$.each( data[0], function( key1, value1) {
 			if ( ! model[0].hasOwnProperty( RDForm.replaceStrPrefix(key1) ) ) {
 				// TODO: maybe replace prefixes
-				/* $.each( value1[0], function( key2, value2 ) {
+				$.each( value1[0], function( key2, value2 ) {
 					var oldKey = key2;
 					var newKey = RDForm.replaceStrPrefix( key2 );
 					if ( oldKey != newKey ) {
 						value1[0][newKey] = value2;	
 						delete value1[0][oldKey];
 					}
-				}); */
+				});
 				result[0][ RDForm.replaceStrPrefix( key1 ) ] = value1;
 			}
 		});
@@ -2057,6 +2023,32 @@ RDForm = {
 
 		$(property).attr('value', value );
 		return true;
+	},
+
+	/**
+	 * Search und reaplce a prfix in a String if defined in the context
+	 * 
+	 * @param String str 
+	 * @return String with (maybe) replaced prefix
+	 */
+	replaceStrPrefix : function( str ) {
+		if ( str === undefined ) return str;
+
+		if ( str.search(":") != -1 ) {
+			var str_arr = str.split(":");
+		} else {
+			return str;
+		}
+		if ( str_arr[0] == "http" ) {
+			return str;
+		}
+
+		for ( var ci in CONTEXT ) {
+			if ( str_arr[0] == ci ) {
+				return CONTEXT[ci] + str_arr[1];
+			}
+		}
+		return str;
 	},
 
 	/**
