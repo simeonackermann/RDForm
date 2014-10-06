@@ -104,12 +104,8 @@ var _ID_ = "rdform",
 		}
 
 		// maybe add existing data
-		if ( settings.data != "" ) {
-			var inputdata = settings.data;
-			if ( settings.data.length == 1 )
-					inputdata = settings.data[0];
-
-			RDForm.addExistingData( undefined, inputdata );
+		if ( settings.data != "" ) {			
+			RDForm.addExistingData( settings.data );
 		}
 	};
 
@@ -143,8 +139,8 @@ var _ID_ = "rdform",
 			
 			jsonld.expand(json_result, function(err, expanded) {
 
-				if ( settings.data != "" ) {
-					expanded = RDForm.mergeExistingDataWithResult( JSON_MODEL, expanded, settings.data );
+				if ( RDForm.data != "" ) {
+					expanded = RDForm.mergeExistingDataWithResult( JSON_MODEL, expanded, RDForm.data );
 				}
 
 				JSON_RESULT = expanded;
@@ -162,6 +158,8 @@ var _ID_ = "rdform",
   *
   */
 RDForm = {
+
+	data : "",
 
 	/**
 	  * Parse form model, get the type via param
@@ -727,13 +725,25 @@ RDForm = {
 	},
 
 	/**
+	 * Public addExistingData call function to insert data from a JSON-LD object to the form
+	 *
+	 * @param array|object data Values to insert
+	 */
+	 addExistingData : function( data ) {
+	 	if ( data.length == 1 ) {
+			RDForm.data = data[0];
+		}
+		RDForm.addExistingDataFct( undefined, RDForm.data );
+	 },
+
+	 /**
 	 * Add existing data from a JSON-LD object to the form
 	 *
 	 * @param string|undefined name Name of the current field (for multiple literal)
 	 * @param array|object data Values to insert
 	 * @param object env DOM modell of current environment class
 	 */
-	addExistingData : function( name, data, env ) {
+	addExistingDataFct : function( name, data, env ) {
 		if ( typeof env === 'undefined' ) {
 			env = rdform.find( 'div[typeof="'+data["@type"]+'"]' );
 
@@ -790,14 +800,14 @@ RDForm = {
 					}
 
 					if ( typeof thisData[0] === "string" ) { // its multiple literal
-						RDForm.addExistingData( i, thisData, env );
+						RDForm.addExistingDataFct( i, thisData, env );
 					}
 					else if ( ! thisData[0].hasOwnProperty("@id") ) { // its a literal in an object	
 						var liArr = new Array();
 						for ( var li in thisData ) {
 							liArr.push( thisData[li]["@value"] );
 						}
-						RDForm.addExistingData( i, liArr, env );
+						RDForm.addExistingDataFct( i, liArr, env );
 					}				
 					else { // its one or mutliple resources
 
@@ -844,7 +854,7 @@ RDForm = {
 								}
 							}
 							
-							RDForm.addExistingData( undefined, thisData[di], subEnv );
+							RDForm.addExistingDataFct( undefined, thisData[di], subEnv );
 						}
 					}		
 				}
@@ -1376,17 +1386,18 @@ RDForm = {
 	mergeExistingDataWithResult: function( model, result, data ) {
 		var merged = result;
 
-		$.each( data[0], function( key1, value1) {
+		$.each( data, function( key1, value1) {
 			if ( ! model[0].hasOwnProperty( RDForm.replaceStrPrefix(key1) ) ) {
-				// TODO: maybe replace prefixes
-				$.each( value1[0], function( key2, value2 ) {
-					var oldKey = key2;
-					var newKey = RDForm.replaceStrPrefix( key2 );
-					if ( oldKey != newKey ) {
-						value1[0][newKey] = value2;	
-						delete value1[0][oldKey];
-					}
-				});
+				if ( typeof value1[0] !== 'string') {
+					$.each( value1[0], function( key2, value2 ) {
+						var oldKey = key2;
+						var newKey = RDForm.replaceStrPrefix( key2 );
+						if ( oldKey != newKey ) {
+							value1[0][newKey] = value2;	
+							delete value1[0][oldKey];
+						}
+					});
+				}
 				result[0][ RDForm.replaceStrPrefix( key1 ) ] = value1;
 			}
 		});
