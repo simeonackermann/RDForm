@@ -754,7 +754,7 @@ RDForm = {
 					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
 						var addBtn = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("button.add-class-literal"), curName );
 						if ( $(addBtn).length == 0 ) {
-							RDForm.showAlert( "info", '<span class="insert-data-info">Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }</span>', false );
+							RDForm.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }', false );
 							continue;
 						}
 						$(addBtn).trigger("click");
@@ -819,7 +819,7 @@ RDForm = {
 							if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
 								var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+thisData[di]["@type"]+'"]' );
 								if ( $(addBtn).length == 0 ) {
-									RDForm.showAlert( "info", '<span class="insert-data-info">Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisData[di]["@type"]+'": "' + JSON.stringify(thisData) + '" }</span>', false );
+									RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisData[di]["@type"]+'": "' + JSON.stringify(thisData) + '" }', false );
 									continue;
 								}
 								$(addBtn).trigger("click");
