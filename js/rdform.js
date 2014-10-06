@@ -778,7 +778,7 @@ RDForm = {
 						literal = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("input,textarea"), curName ).last();
 					}
 
-					$(literal).attr( "value", data[i] );
+					$(literal).val( data[i] );
 					$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
@@ -821,7 +821,7 @@ RDForm = {
 										resource = RDForm.getElementInGroupByName( $(env).children("div.rdform-resource-group").find("input"), i ).last();
 										$(resource).parentsUntil(".rdform-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 									}
-									$(resource).attr( "value", thisData[di]["@id"] );	
+									$(resource).val( thisData[di]["@id"] );	
 									continue;
 								}
 							}
