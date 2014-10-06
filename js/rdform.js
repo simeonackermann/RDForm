@@ -821,7 +821,7 @@ RDForm = {
 										resource = RDForm.getElementInGroupByName( $(env).children("div.rdform-resource-group").find("input"), i ).last();
 										$(resource).parentsUntil(".rdform-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 									}
-									$(literal).attr( "value", thisData[di]["@id"] );	
+									$(resource).attr( "value", thisData[di]["@id"] );	
 									continue;
 								}
 							}
