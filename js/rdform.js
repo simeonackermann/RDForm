@@ -734,6 +734,8 @@ RDForm = {
 			RDForm.data = data[0];
 		}
 		RDForm.addExistingDataFct( undefined, RDForm.data );
+		if ( typeof __afterInsertData !== "undefined" )
+				__afterInsertData();
 	 },
 
 	 /**

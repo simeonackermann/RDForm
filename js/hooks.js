@@ -29,6 +29,11 @@ __afterDuplicateClass = function ( thisClass ) {
 __afterDuplicateExternalResource = function ( thisResource ) {
 }
 
+// after instert existing data into the form
+__afterInsertData = function() {
+
+}
+
 // before creating result object from html formula
 _createResult = function() {
 }
