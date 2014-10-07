@@ -1151,16 +1151,20 @@ RDForm = {
 
 		// BUTTON: duplicate a external resource
 		rdform.on("click", "button.duplicate-external-resource", function() {			
-			var ResourceContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
-			var thisResource = $(ResourceContainer).find("input,textarea");
+			var resourceContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
+			var thisResource = $(resourceContainer).find("input,textarea");
 
 			if ( thisResource.val().search("{") == -1 ) {
 				thisResource.val("");
 			}
 
+			//remove label
+			$(resourceContainer).find( "label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
+			$(resourceContainer).find(".help-block").hide();
+
 			//add remove button
-			if ( $(ResourceContainer).find('button.remove-external-resource').length == 0 ) {
-				$('button.duplicate-external-resource', ResourceContainer).before('<button type="button" class="btn btn-link btn-xs remove-external-resource" title="'+ RDForm.l("Remove resource %s", $(thisResource).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
+			if ( $(resourceContainer).find('button.remove-external-resource').length == 0 ) {
+				$('button.duplicate-external-resource', resourceContainer).before('<button type="button" class="btn btn-link btn-xs remove-external-resource" title="'+ RDForm.l("Remove resource %s", $(thisResource).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
 			}
 
 			// rewrite index, radio input names index and references in wildcards
@@ -1168,15 +1172,15 @@ RDForm = {
 			++index;
 			$(thisResource).attr("index", index);
 
-			$(ResourceContainer).hide();	
-			$(this).parentsUntil("div.rdform-resource-group").parent().after( ResourceContainer );
-			$(ResourceContainer).show("slow");
+			$(resourceContainer).hide();	
+			$(this).parentsUntil("div.rdform-resource-group").parent().after( resourceContainer );
+			$(resourceContainer).show("slow");
 			$(this).remove(); // remove duplicate btn
 
 			if ( typeof __afterDuplicateExternalResource !== "undefined" )
-				__afterDuplicateExternalResource( ResourceContainer );
+				__afterDuplicateExternalResource( resourceContainer );
 
-			findWildcardInputs( ResourceContainer );
+			findWildcardInputs( resourceContainer );
 
 			return false;
 		});	// end of duplcate external resource
