@@ -653,7 +653,7 @@ RDForm = {
 				else
 					var btnText = resource['title'] ? resource['title'] : resource['name'] + " - " + resource['value'];
 
-				var resourceClass = $(	'<button type="button" class="btn btn-default add-class-resource" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="' + RDForm.l("Add class %s", resource['value'])+'">' + 
+				var resourceClass = $(	'<button type="button" class="btn btn-default add-class" name="'+ resource['name'] +'" value="'+ resource['value'] +'" title="' + RDForm.l("Add class %s", resource['value'])+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 										'</button>' );
 
@@ -829,7 +829,7 @@ RDForm = {
 							var subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
 
 							if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
-								var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class-resource[value="'+thisData[di]["@type"]+'"]' );
+								var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class[value="'+thisData[di]["@type"]+'"]' );
 								if ( $(addBtn).length == 0 ) {
 									RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisData[di]["@type"]+'": "' + JSON.stringify(thisData) + '" }', false );
 									continue;
@@ -942,14 +942,94 @@ RDForm = {
 			$(literalContainer).before( thisLiteralHTML );
 			$(thisLiteralHTML).show("slow");
 			$(literalContainer).remove();
+
+			if ( typeof __afterAddLiteral !== "undefined" )
+				__afterAddLiteral( thisLiteralHTML );
 			
 			findWildcardInputs( thisLiteralHTML );
 
 			return false;
-		});
+		}); // end of add literal
 
-		// BUTTON: add a class-resource
-		rdform.on("click", "button.add-class-resource", function() {
+		// BUTTON: duplicate a literal
+		rdform.on("click", "button.duplicate-literal", function() {			
+			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent().clone();
+			var thisLiteral = $(literalContainer).find("input,textarea");
+
+			// reset values
+			if ( thisLiteral.val().search("{") == -1 ) {
+				thisLiteral.val("");
+			}
+
+			//remove label
+			$(literalContainer).find( "label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
+			$(literalContainer).find(".help-block").hide();
+
+			//add remove button
+			if ( $(literalContainer).find('button.remove-literal').length == 0 ) {
+				$('button.duplicate-literal', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(thisLiteral).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
+			}
+
+			// rewrite index, radio input names index and references in wildcards
+			var index = $(thisLiteral).attr("index");
+			++index;
+			$(thisLiteral).attr("index", index);
+
+			$(literalContainer).hide();	
+			$(this).parentsUntil("div.rdform-literal-group").parent().after( literalContainer );
+			$(literalContainer).show("slow");
+			$(this).remove(); // remove duplicate btn
+
+			if ( typeof __afterDuplicateLiteral !== "undefined" )
+				__afterDuplicateLiteral( literalContainer );
+
+			findWildcardInputs( literalContainer );
+
+			return false;
+		});	//end of duplicate literal	
+
+		// BUTTON: remove literal
+		rdform.on("click", "button.remove-literal", function() {
+			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent();
+			var literalName = $(this).prev().attr("name");
+			var prevLiteral = literalContainer.prev("div.rdform-literal-group").find('*[name="'+literalName+'"]');
+			var nextLiteral = literalContainer.next("div.rdform-literal-group").find('*[name="'+literalName+'"]');
+			
+			// if its the only duplicated literal - add button from model
+			if ( prevLiteral.length == 0 && nextLiteral.length == 0 ) {
+
+				var thisClass = $(this).parentsUntil("div[typeof]").parent();
+				var classModel = RDForm.getClassModel( $(thisClass).attr('typeof') );
+				// find literal in class-model
+				for ( var pi in classModel.properties ) {
+					if ( classModel.properties[pi].name == literalName ) {
+						var thisLiteral = $.extend( true, {}, classModel.properties[pi] );					
+						break;
+					}
+				}				
+				var thisLiteralHTML = RDForm.createHTMLiteral( thisLiteral );
+				literalContainer.before( thisLiteralHTML );
+
+			} 
+			else { // middle or last literal, maybe copy duplicate-btn
+				var addBtn = literalContainer.find("button.duplicate-literal");
+				prevLiteral.parent().append( addBtn );
+			}
+
+			if ( prevLiteral.length == 0 && nextLiteral.length != 0 ) {
+				//remove label
+				var nextLiteralClass = $(this).parentsUntil("div[typeof]").parent();
+				$(nextLiteralClass).find( "label" ).css( "textIndent", "0px" ).css( "textAlign", "right" );
+				$(nextLiteralClass).find(".help-block").show();
+			}			
+
+			literalContainer.hide( "slow", function() {					
+				literalContainer.remove();
+			});
+		}); // end of removeLiteral
+
+		// BUTTON: add a class
+		rdform.on("click", "button.add-class", function() {
 			//var classModel = getClassModel( $(this).val() );
 			var classModel = $.extend( true, {}, RDForm.getClassModel( $(this).val() ) );
 			classModel['multiple'] = $(this).attr("multiple");
@@ -966,10 +1046,13 @@ RDForm = {
 			$(this).parent().children("div.rdform-resource-help-container").remove();
 			$(this).remove();			
 
+			if ( typeof __afterAddClass !== "undefined" )
+				__afterAddClass( thisClass );
+
 			findWildcardInputs( thisClass );
 
 			return false;
-		});
+		}); // end of add class resource
 
 		// BUTTON: remove a class resource
 		rdform.on("click", "button.remove-class", function() {
@@ -1027,9 +1110,9 @@ RDForm = {
 			}
 
 			return false;
-		});
+		}); // end of remove class resource
 
-		// BUTTON: duplicate a class
+		// BUTTON: duplicate a class resource
 		rdform.on("click", "button.duplicate-class", function() {			
 			var classContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();			
 			var thisClass = $(classContainer).children("div[typeof]");			
@@ -1062,36 +1145,39 @@ RDForm = {
 			findWildcardInputs( classContainer );
 
 			return false;
-		});
+		}); // end of duplicateClass
 
 		// BUTTON: duplicate a external resource
 		rdform.on("click", "button.duplicate-external-resource", function() {			
-			var literalContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
-			var thisLiteral = $(literalContainer).find("input,textarea");
+			var ResourceContainer = $(this).parentsUntil("div.rdform-resource-group").parent().clone();
+			var thisResource = $(ResourceContainer).find("input,textarea");
 
-			if ( thisLiteral.val().search("{") == -1 ) {
-				thisLiteral.val("");
+			if ( thisResource.val().search("{") == -1 ) {
+				thisResource.val("");
 			}
 
 			//add remove button
-			if ( $(literalContainer).find('button.remove-external-resource').length == 0 ) {
-				$('button.duplicate-external-resource', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-external-resource" title="'+ RDForm.l("Remove resource %s", $(thisLiteral).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
+			if ( $(ResourceContainer).find('button.remove-external-resource').length == 0 ) {
+				$('button.duplicate-external-resource', ResourceContainer).before('<button type="button" class="btn btn-link btn-xs remove-external-resource" title="'+ RDForm.l("Remove resource %s", $(thisResource).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
 			}
 
 			// rewrite index, radio input names index and references in wildcards
-			var index = $(thisLiteral).attr("index");
+			var index = $(thisResource).attr("index");
 			++index;
-			$(thisLiteral).attr("index", index);
+			$(thisResource).attr("index", index);
 
-			$(literalContainer).hide();	
-			$(this).parentsUntil("div.rdform-resource-group").parent().after( literalContainer );
-			$(literalContainer).show("slow");
+			$(ResourceContainer).hide();	
+			$(this).parentsUntil("div.rdform-resource-group").parent().after( ResourceContainer );
+			$(ResourceContainer).show("slow");
 			$(this).remove(); // remove duplicate btn
 
-			findWildcardInputs( literalContainer );
+			if ( typeof __afterDuplicateExternalResource !== "undefined" )
+				__afterDuplicateExternalResource( ResourceContainer );
+
+			findWildcardInputs( ResourceContainer );
 
 			return false;
-		});	
+		});	// end of duplcate external resource
 
 		// BUTTON: remove external ressource
 		rdform.on("click", "button.remove-external-resource", function() {
@@ -1124,83 +1210,7 @@ RDForm = {
 			literalContainer.hide( "slow", function() {					
 				literalContainer.remove();
 			});
-		});
-
-		// BUTTON: duplicate a literal
-		rdform.on("click", "button.duplicate-literal", function() {			
-			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent().clone();
-			var thisLiteral = $(literalContainer).find("input,textarea");
-
-			// reset values
-			if ( thisLiteral.val().search("{") == -1 ) {
-				thisLiteral.val("");
-			}
-
-			//remove label
-			$(literalContainer).find( "label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
-			$(literalContainer).find(".help-block").hide();
-
-			//add remove button
-			if ( $(literalContainer).find('button.remove-literal').length == 0 ) {
-				$('button.duplicate-literal', literalContainer).before('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ RDForm.l("Remove literal %s", $(thisLiteral).attr("name") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ RDForm.l("remove") +'</button>');
-			}
-
-			// rewrite index, radio input names index and references in wildcards
-			var index = $(thisLiteral).attr("index");
-			++index;
-			$(thisLiteral).attr("index", index);
-
-			$(literalContainer).hide();	
-			$(this).parentsUntil("div.rdform-literal-group").parent().after( literalContainer );
-			$(literalContainer).show("slow");
-			$(this).remove(); // remove duplicate btn
-
-			findWildcardInputs( literalContainer );
-
-			return false;
-		});			
-
-		// BUTTON: remove literal
-		rdform.on("click", "button.remove-literal", function() {
-			var literalContainer = $(this).parentsUntil("div.rdform-literal-group").parent();
-			var literalName = $(this).prev().attr("name");
-			var prevLiteral = literalContainer.prev("div.rdform-literal-group").find('*[name="'+literalName+'"]');
-			var nextLiteral = literalContainer.next("div.rdform-literal-group").find('*[name="'+literalName+'"]');
-			
-			// if its the only duplicated literal - add button from model
-			if ( prevLiteral.length == 0 && nextLiteral.length == 0 ) {
-
-				var thisClass = $(this).parentsUntil("div[typeof]").parent();
-				var classModel = RDForm.getClassModel( $(thisClass).attr('typeof') );
-				// find literal in class-model
-				for ( var pi in classModel.properties ) {
-					if ( classModel.properties[pi].name == literalName ) {
-						var thisLiteral = $.extend( true, {}, classModel.properties[pi] );					
-						break;
-					}
-				}				
-				var thisLiteralHTML = RDForm.createHTMLiteral( thisLiteral );
-				literalContainer.before( thisLiteralHTML );
-
-			} 
-			else { // middle or last literal, maybe copy duplicate-btn
-				var addBtn = literalContainer.find("button.duplicate-literal");
-				prevLiteral.parent().append( addBtn );
-			}
-
-			if ( prevLiteral.length == 0 && nextLiteral.length != 0 ) {
-				//remove label
-				var nextLiteralClass = $(this).parentsUntil("div[typeof]").parent();
-				$(nextLiteralClass).find( "label" ).css( "textIndent", "0px" ).css( "textAlign", "right" );
-				$(nextLiteralClass).find(".help-block").show();
-			}
-
-			
-
-			literalContainer.hide( "slow", function() {					
-				literalContainer.remove();
-			});
-		});
+		});	// end  of remove external resource
 
 		// find inputs with wildcard
 		function findWildcardInputs( env ) {			

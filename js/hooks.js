@@ -13,15 +13,24 @@ __initFormHandlers = function () {
 
 }
 
+__afterAddLiteral = function ( thisLiteral ) {
+}
+
+__afterDuplicateLiteral = function ( thisLiteral ) {
+}
+
+__afterAddClass = function ( thisResource ) {
+}
+
 // after pressing the duplicate button
 __afterDuplicateClass = function ( thisClass ) {
+}
 
-	
+__afterDuplicateExternalResource = function ( thisResource ) {
 }
 
 // before creating result object from html formula
 _createResult = function() {
-
 }
 
 // before creating the class properties from input values
@@ -36,5 +45,4 @@ __createResultClassProperty = function( propertyContainer ) {
 
 // before generating the class object from input values and properties
 __createClass = function ( thisClass ) {
-		
 }
