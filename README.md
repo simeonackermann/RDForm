@@ -8,7 +8,6 @@ The inserting of existing data and the output is done as a JavaScript object wit
 
 > This software is currently in a very early state. Please be careful when use it in a productive environment.
 
-
 ## Screenshot ##
 
 ![](screenshot.png)
@@ -16,16 +15,22 @@ The inserting of existing data and the output is done as a JavaScript object wit
 ## Installation ##
 
 * download the source code
-* edit temples/form.html to your requirements
-* open index.html in your browser
+* open [index.html](index.html) in your browser for a sample form.
+* to create a own form edit [templates/form.html](templates/form.html) to your requirements or create a new
 
-For a more complex example change in index.html the line 68 to:
+If you want to integrate RDForm into an existing project you have to include [jQuery](http://jquery.com/) (> 1.8) (and for a good style [Bootstrap](getbootstrap.com/)). Have a look at [index.html](index.html) for the right structure.
+
+The basic initialization of the plugin with callback function on submit is:
 
 ```js
 $(document).ready(function(){
 	$(".rdform").RDForm({
-		model: "form_cpl.html",
-		hooks: "js/hooks_cpl.js"
+		model: "templates/form.html",
+		hooks: "js/hooks/hooks.js",
+
+		submit: function() {
+			console.log( $(this) );
+		},
 	});
 });
 ```
