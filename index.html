@@ -45,138 +45,16 @@
     <script src="js/rdform.js"></script>
 
     <script type="text/javascript">    
-
-    var data = {
-	"@id": "cpl:Professor/Schuecking_24",
-	"@type": "cpm:Professor",
-	"rdfs:label": "Prof. Dr. phil. habil. Levin Schücking",
-	"hp:isPublic": "true",
-	"cpm:fullAcademicalTitle": "Prof. Dr. phil. habil.",
-	"cpm:surname": [{
-		"@value" : "Schücking",
-		"@type" : "xsd:string"
-	}],
-	"cpm:furtherInformation": [
-		{ "@value": "Further info 1" },
-		{ "@value": "Further info 2" }
-	],
-	"rdfs:comment": [
-		"Test Comment 1",
-		"Test Comment 2"
-	],
-	"cpm:has-forename": [
-		{
-			"@id": "cpl:Forename/Levin-1-true",
-			"@type": "cpm:Forename",
-			"cpm:forename": "Levin",
-			"cpm:isFirstName": "true"
-		},
-		{
-			"@id": "cpl:Forename/Ludwig-2-false",
-			"@type": "cpm:Forename",
-			"cpm:forename": "Ludwig",
-			"cpm:isFirstName": "false"
-		}
-	],
-	"cpm:has-period": [
-		{
-			"@id": "cpl:Birth/Schuecking_24",
-			"@type": "cpm:Birth",
-			"cpm:date": "1878-05-29",
-			"rdfs:label": "Burgsteinfurt"
-		},
-		{
-			"@id": "cpl:Study/Schuecking_24/StudiumderNeuerenSprachenundKunstgeschichteandenUniversitaetenFreiburgGoettingenBerlinundMuenchen",
-			"@type": "cpm:Study",
-			"rdfs:label": "Studium der Neueren Sprachen und Kunstgeschichte an den Universitäten Freiburg, Göttingen, Berlin und München",
-			"cpm:from": "1901",
-			"cpm:to": "1897"
-		},
-		{
-			"@id": "cpl:Study/Schuecking_24/StudyBlaBla",
-			"@type": "cpm:Study",
-			"rdfs:label": "Study Bla Bla",
-			"cpm:from": "1900",
-			"cpm:to": "2000"
-		},
-		{
-			"@id": "cpl:Study/Schuecking_24/StudyBlaDrei",
-			"@type": "cpm:Study",
-			"rdfs:label": "Study Drei..",
-			"cpm:from": "1900",
-			"cpm:to": "2000"
-		},
-		{
-			"@id": "cpl:Qualification/Schuecking_24/HabilitationfuerEnglischePhilologieanderUniversitaetGoettingen",
-			"@type": "cpm:Qualification",
-			"rdfs:label": "Habilitation für Englische Philologie an der Universität Göttingen",
-			"cpm:date": "1904"
-		},
-	],
-	"cpm:gnd": {
-		"@id" : "http://dnb.info.de/113"
-	},
-	"@context": {
-		"@base": "http://catalogus-professorum.org/cpm/",
-		"cpm": "...",
-		"cpl": "...",
-		"rdfs": "...",
-		"hp": "...",
-		"rdfs:label": {
-			"@type": "xsd:string"
-		},
-		"hp:isPublic": {
-			"@type": "xsd:boolean"
-		},
-		"cpm:fullAcademicalTitle": {
-			"@type": "xsd:string"
-		},
-		"cpm:surname": {
-			"@type": "xsd:string"
-		},
-		"cpm:forename": {
-			"@type": "xsd:string"
-		},
-		"cpm:isFirstName": {
-			"@type": "xsd:boolean"
-		},
-		"cpm:date": {
-			"@type": "xsd:date"
-		},
-		"cpm:from": {
-			"@type": "xsd:date"
-		},
-		"cpm:to": {
-			"@type": "xsd:date"
-		}
-	}
-};
-
-    /*
-			model: "form_pfarrerbuch.html",
-			lang: "pfarrerbuch_hu"
-
-			model: "form_cpl.html",
-			hooks: "js/hooks_cpl.js"
-    */
 	$(document).ready(function(){
 		$(".rdform").RDForm({
-			model: "form.html",
-			//data: data,
-			hooks: "js/hooks.js",
-			lang: "de",
+			model: "templates/form.html",
+			hooks: "js/hooks/hooks.js",
 
 			submit: function() {
-
-				console.log( $(this) );
-
 				RDForm.outputResult();
-
 			},
 		});
 	});
-
-
 	</script>
 
 </body>

@@ -1,3 +1,7 @@
+/*
+RDForm Hooks-File - to hook in on certain points of application execution
+*/
+
 // after model is parsed - init form handlers
 __initFormHandlers = function () {
 
@@ -13,28 +17,32 @@ __initFormHandlers = function () {
 
 }
 
+// after instert existing data into the form
+__afterInsertData = function() {
+}
+
+// after the addLiteral button was clicked
 __afterAddLiteral = function ( thisLiteral ) {
 }
 
+// after the duplicateLiteral button was clicked
 __afterDuplicateLiteral = function ( thisLiteral ) {
 }
 
+// after the addClass button was clicked
 __afterAddClass = function ( thisResource ) {
 }
 
-// after pressing the duplicate button
+// after the duplicateClass button was clicked
 __afterDuplicateClass = function ( thisClass ) {
 }
 
+// after the duplicateExternalResource button was pressed
 __afterDuplicateExternalResource = function ( thisResource ) {
 }
 
-// after instert existing data into the form
-__afterInsertData = function() {
 
-}
-
-// before creating result object from html formula
+// before creating the result object from the html form
 _createResult = function() {
 }
 
