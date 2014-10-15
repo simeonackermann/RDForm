@@ -1,26 +1,34 @@
 # RDForm #
 
-generates a fully functionall HTML5 form parsed from a flexible data model and exports the data into RDF (turtle notation). 
-The data model is based on the RDFa notation with flexible possiilities to creating classes, properties, resources, relations and datatypes.
+RDForm is a jQuery plugin for creating and editing RDF data in a clean and modern HTML form.
 
-> This software is currently in a very early state and does not include every HTML or RDF element.
+With templates based on the [RDFa](https://en.wikipedia.org/wiki/RDFa) notation (see template documentation) its easy to create classes, properties with datatypes, resources and class-relations.
 
-## Install ##
+The inserting of existing data and the output is done as a JavaScript object with the [JSON-LD](https://github.com/digitalbazaar/jsonld.js) notation.
 
-* **Requirements:** only JavaScript (JQuery) in a modern browser
+> This software is currently in a very early state. Please be careful when use it in a productive environment.
+
+
+## Screenshot ##
+
+![](screenshot.png)
+
+## Installation ##
+
 * download the source code
-* edit form.html to your requirements
+* edit temples/form.html to your requirements
 * open index.html in your browser
 
 For a more complex example change in index.html the line 68 to:
 
-	$(document).ready(function(){
-		$(".rdform").RDForm({
-			model: "form_cpl.html",
-			hooks: "js/hooks_cpl.js"
-		});
+```js
+$(document).ready(function(){
+	$(".rdform").RDForm({
+		model: "form_cpl.html",
+		hooks: "js/hooks_cpl.js"
 	});
-
+});
+```
 
 ## Documentation ##
 
@@ -118,8 +126,6 @@ Classes can contain properties with a refernce to another class. eg:
 With hooks its easier to include own JavaScript functions. Have a look to js/hooks.js for more information.
 
 
-## Changelog ##
+## License ##
 
-### 0.1
-
-* initial version
+OntoWiki is licensed under the [GNU General Public License Version 2, June 1991](http://www.gnu.org/licenses/gpl-2.0.txt).
