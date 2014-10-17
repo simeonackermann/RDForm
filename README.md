@@ -38,7 +38,7 @@ $(document).ready(function(){
 
 ### Content ###
 
-- [Template Documentation](./#template-documentation)
+- [Template Documentation](README.md#template-documentation)
 	- Classes
 	- Literal-Properties
 	- Class-Resources
