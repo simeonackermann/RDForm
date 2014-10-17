@@ -33,9 +33,12 @@ $(document).ready(function(){
 	});
 });
 ```
-## Content ##
 
-- Template Documentation
+# Documentation #
+
+### Content ###
+
+- [Template Documentation](./#template-documentation)
 	- Classes
 	- Literal-Properties
 	- Class-Resources
