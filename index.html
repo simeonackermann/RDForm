@@ -18,6 +18,21 @@
 	<!-- style -->
 	<link href="css/rdform.css" rel="stylesheet" media="screen">
 
+    <style type="text/css">
+    body {
+        background: url("img/noise.png"), -o-linear-gradient(top, #F4F4F4 0px, #EEEEEE 100%) transparent;    
+        background: url("img/noise.png") repeat scroll 0% 0%, -moz-linear-gradient(center top , #F4F4F4 0%, #EEEEEE 100%) repeat scroll 0% 0% transparent;
+    }
+    .container {
+        border: 1px solid lightGray;
+        padding: 2% 8%;
+        border-radius: 10px;
+        margin: 10px auto;
+        background: white;
+        max-width: 960px;
+    }
+    </style>
+
 	<title>RDForm</title>
 </head>
 <body>
@@ -45,10 +60,27 @@
     <script src="js/rdform.js"></script>
 
     <script type="text/javascript">    
+
+    var data = 
+    {
+    "@id": "http://json-ld.org/playground/Person-Karl",
+    "@type": [
+      "http://xmlns.com/foaf/0.1/Person"
+    ],
+    "http://xmlns.com/foaf/0.1/name": [
+      {
+        "@type": "xsd:string",
+        "@value": "Karl"
+      }
+    ]
+}
+    ;
+
 	$(document).ready(function(){
 		$(".rdform").RDForm({
-			model: "templates/form.html",
+			//model: "templates/form.html",
 			hooks: "js/hooks/hooks.js",
+			data: data,
 
 			submit: function() {
 				RDForm.outputResult();

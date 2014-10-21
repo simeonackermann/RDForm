@@ -1,16 +1,3 @@
-body {
-	background: url("../img/noise.png"), -o-linear-gradient(top, #F4F4F4 0px, #EEEEEE 100%) transparent;	
-	background: url("../img/noise.png") repeat scroll 0% 0%, -moz-linear-gradient(center top , #F4F4F4 0%, #EEEEEE 100%) repeat scroll 0% 0% transparent;
-}
-.container {
-	border: 1px solid lightGray;
-	padding: 2% 8%;
-	border-radius: 10px;
-	margin: 10px auto;
-	background: white;
-	max-width: 960px;
-}
-
 .rdform-result-container {
 	display: none;
 	margin-bottom: 10px;
@@ -24,6 +11,10 @@ body {
 	color: #555;
 	font-size: 60%;
 }
+
+/*.rdform-alert span.insert-data-info {
+	display: none;
+}*/
 
 .rdform .control-label {
 	font-weight: normal;
