@@ -759,7 +759,10 @@ RDForm = {
 	 */
 	addExistingDataFct : function( name, data, env ) {
 		if ( typeof env === 'undefined' ) {
-			env = rdform.find( 'div[typeof="'+data["@type"]+'"]' );
+			env = $(rdform).find('div').filter(function(index) {			
+				return ( $(this).attr("typeof") === data["@type"][0] ) 
+					|| ( RDForm.replaceStrPrefix( $(this).attr("typeof") ) === data["@type"][0] );
+			});
 
 			if ( env.length == 0 ) {
 				RDForm.showAlert( "warning", 'Der Datensatz enthält die nicht im Modell vorhandene Klasse { "'+data["@type"]+'" }' );
