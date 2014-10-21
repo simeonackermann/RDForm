@@ -1352,27 +1352,27 @@ RDForm = {
 			var queryStr = $(this).attr("query");
 			var apitype = $(this).attr("query-apitype");
 			var queryValues = $(this).attr("query-values");
+			var queryDataType = $(this).attr("query-datatype");
 
 				switch (apitype) {
 
 					case "sparql" :
-
 						$(this).autocomplete({
 							source: function( request, response ) {		
 								var query = queryStr.replace(/%s/g, "'" + request.term + "'");
 								$.ajax({
 									url: queryEndpoint,
-									dataType: "json",
+									dataType: queryDataType,									
 									data: {
-										//'default-graph-uri': "http%3A%2F%2Fdbpedia.org",
 										query: query,
 										format: "json"
-									},
+									},									
 									success: function( data ) {						
+										console.log(data);
 										response( $.map( data.results.bindings, function( item ) {
 											return {
 												label: item.label.value, // wird angezeigt
-												value: item.label.value
+												value: item.item.value
 											}
 						            	}));
 						            },
@@ -1383,19 +1383,16 @@ RDForm = {
 					      	},
 							minLength: 2
 						});
-
 						break;
 
 					case "local" :
-
 						$(this).autocomplete({
 							source: $.parseJSON( queryValues )
 						});
-
 						break;
 
 					default :
-						console.log( "Unknown autocomplete apitype " + apitype );
+						RDForm.showAlert( "error", "Unknown autocomplete apitype " + apitype );
 				}			
 		});
 
