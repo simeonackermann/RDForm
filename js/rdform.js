@@ -127,8 +127,6 @@ var _ID_ = "rdform",
 
 	// submit callback function
 	rdform_submit = function() {
-
-		//$("."+_ID_+"-alert").hide();
 		var proceed = true;
 
 		rdform.find("input").each(function() {
@@ -143,7 +141,6 @@ var _ID_ = "rdform",
 			var json_result = RDForm.createResult();
 			
 			jsonld.expand(json_result, function(err, expanded) {
-
 				if ( RDForm.data != "" ) {
 					expanded = RDForm.mergeExistingDataWithResult( JSON_MODEL, expanded, RDForm.data );
 				}
@@ -691,7 +688,7 @@ RDForm = {
 
 		curFormGroup.append( resourceClass );
 
-		if ( resource['external'] !== undefined ) {			
+		if ( resource['external'] !== undefined ) {						
 			resourceClass.prop("type", "text"); // bugfix for jquery < 1.8 
 			resourceClass.attr({
 				'external': 'external',
@@ -699,14 +696,14 @@ RDForm = {
 				'value': resource['value'],
 				'readonly': resource['readonly'],
 				'placeholder': resource['placeholder'],
-			});			
+			});						
 
 			var thisLabel = $("<label>...</label>");
 			thisLabel.text( resource['label'] );
 			thisLabel.attr({
 				//'for': curPropertyID,
 				'class': 'col-xs-3 control-label'
-			});
+			});			
 			curFormGroup.prepend( thisLabel );
 			
 			var thisInputContainer = $('<div class="col-xs-9"></div>');				
@@ -715,6 +712,16 @@ RDForm = {
 			if ( resource['multiple'] !== undefined ) {
 				resourceClass.attr('index', 1);
 				resourceClass.after('<button type="button" class="btn btn-default btn-xs duplicate-external-resource" title="'+ RDForm.l("Duplicate resource %s", resource['name']) +'"><span class="glyphicon glyphicon-plus"></span> '+ RDForm.l("add") +'</button>');
+			}
+
+			if ( resource['autocomplete'] !== undefined ) {
+				resourceClass.attr({
+					'autocomplete' : 'autocomplete',
+            		'query-endpoint' : resource['query-endpoint'],
+            		'query-apitype' : resource['query-apitype'],
+            		'query-datatype' : resource['query-datatype'],
+            		'query' : resource['query']
+				});
 			}
 
 		}
@@ -1368,7 +1375,6 @@ RDForm = {
 										format: "json"
 									},									
 									success: function( data ) {						
-										console.log(data);
 										response( $.map( data.results.bindings, function( item ) {
 											return {
 												label: item.label.value, // wird angezeigt
