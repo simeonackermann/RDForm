@@ -164,7 +164,7 @@ var _ID_ = "rdform",
   */
 RDForm = {
 
-	data : "",
+	data : new Array,
 
 	/**
 	  * Parse form model, get the type via param
@@ -735,10 +735,17 @@ RDForm = {
 	 * @param array|object data Values to insert
 	 */
 	 addExistingData : function( data ) {
-	 	if ( data.length == 1 ) {
-			RDForm.data = data[0];
-		}
-		RDForm.addExistingDataFct( undefined, RDForm.data );
+
+	 	if ( typeof(data.length) == "undefined" ) {
+	 		RDForm.data.push(data);
+	 	} else {
+	 		RDForm.data = data;
+	 	}	 	
+
+		$.each( RDForm.data, function( key, value ) {
+			RDForm.addExistingDataFct( undefined, RDForm.data[key] );
+		})
+
 		if ( typeof __afterInsertData !== "undefined" )
 				__afterInsertData();
 	 },
