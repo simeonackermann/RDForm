@@ -18,7 +18,7 @@ var _ID_ = "rdform",
 	  * default plugin settings
 	  */
 	var settings = {
-		model: 	"form.html",
+		model: 	"templates/form.html",
 		data: 	"",
 		hooks: 	"",
 		lang: 	"",
@@ -69,7 +69,7 @@ var _ID_ = "rdform",
 				model = m;
 			},
 			error: function( jqxhr, type, exception ) {
-				RDForm.showAlert( "error", 'Error "'+exception+'" on loading data model file "'+ settings.model +'"');
+				RDForm.showAlert( "error", 'Error on loading template "'+ settings.model +'": '+exception);
 			}
 		});
 		if ( "" == model ) return this;
@@ -91,12 +91,17 @@ var _ID_ = "rdform",
 
 	rdform_createForm = function() {
 		//add model-form to my form
-		rdform.append( RDForm.createHTMLForm() );		
+		rdform.append( RDForm.createHTMLForm() );
+
+		var sbm_text = "create";
+		if ( settings.data != "" ) {
+			sbm_text = "update";
+		}
 
 		// append submit button
 		rdform.append(	'<div class="form-group '+_ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' + 
 							//'<button type="reset" class="btn btn-default">'+ RDForm.l("reset") +'</button> ' + 
-							'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l("create") +'</button>' + 
+							'<button type="submit" class="btn btn-lg btn-primary">'+ RDForm.l(sbm_text) +'</button>' + 
 						'</div></div>' );
 
 		if ( RDForm.initFormHandler.called != true ) {
@@ -1360,6 +1365,9 @@ RDForm = {
 												value: item.label.value
 											}
 						            	}));
+						            },
+						            error: function(e) {
+						            	console.log('Error on autocomplete: ', e);
 						            }
 								});
 					      	},
