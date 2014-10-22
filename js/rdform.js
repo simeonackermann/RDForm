@@ -766,10 +766,8 @@ RDForm = {
 	 */
 	addExistingDataFct : function( name, data, env ) {
 		if ( typeof env === 'undefined' ) {
-			var classTypeof = data["@type"];
-			if ( typeof data["@type"] !== "string"  ) {				
-				classTypeof = data["@type"][0];
-			}
+			var classTypeof = ( typeof data["@type"] === "string" ) ? data["@type"] : data["@type"][0];
+
 			env = $(rdform).find('div').filter(function(index) {			
 				return ( $(this).attr("typeof") === classTypeof ) 
 					|| ( RDForm.replaceStrPrefix( $(this).attr("typeof") ) === classTypeof );
@@ -837,7 +835,7 @@ RDForm = {
 						}
 						RDForm.addExistingDataFct( i, liArr, env );
 					}				
-					else { // its one or mutliple resources
+					else { // its one or multiple resources
 
 						for ( var di in thisData ) {
 
@@ -854,28 +852,30 @@ RDForm = {
 								}
 							}
 
-							var subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
+							var thisType = ( typeof thisData[di]["@type"] === "string" ) ? thisData[di]["@type"] : thisData[di]["@type"][0];
+							var subEnv = RDForm.getElement( $(env).find("div"), 'typeof', thisType ).last();
 
 							if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
-								var addBtn = $(env).children("div.rdform-resource-group").find( 'button.add-class[value="'+thisData[di]["@type"]+'"]' );
+								var addBtn = RDForm.getElement( $(env).children("div.rdform-resource-group").find( 'button.add-class'), 'value', thisType );
 								if ( $(addBtn).length == 0 ) {
-									RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisData[di]["@type"]+'": "' + JSON.stringify(thisData) + '" }', false );
+									RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData) + '" }', false );
 									continue;
 								}
 								$(addBtn).trigger("click");
-								subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
+								subEnv = RDForm.getElement( $(env).find("div"), 'typeof', thisType ).last();
 							}
 
-							if ( i != $(subEnv).attr("name")  ) {
+							if ( i != $(subEnv).attr("name") && i != RDForm.replaceStrPrefix($(subEnv).attr("name")) ) {
 								RDForm.showAlert( "info", 'Der Datensatz enthält die Propertie "'+i+'", die im Modell zu "'+$(subEnv).attr("name")+'" verändert ist.', false );
 							}
 
 							// on multiple resource (walk thisData backwards) -> duplicate the subEnv
 							if ( di > 0 ) {
 								for (var ri = di-1; ri >= 0; ri--) {
-									if( thisData[di]["@type"] == thisData[ri]["@type"] ) {										
+									var thisRType = ( typeof thisData[ri]["@type"] === "string" ) ? thisData[ri]["@type"] : thisData[ri]["@type"][0];
+									if( thisData[di]["@type"] == thisRType ) {
 										$(subEnv).find( 'button.duplicate-class' ).trigger("click");
-										subEnv = $(env).find( 'div[typeof="'+thisData[di]["@type"]+'"]' ).last();
+										subEnv = RDForm.getElement( $(env).find("div"), 'typeof', thisType ).last();
 										$(subEnv).removeAttr("style"); // bugfix: some classes have hidden inline style
 										break;
 									}
@@ -901,6 +901,14 @@ RDForm = {
 		var el = $(env).filter(function(index) {			
 			return ( $(this).attr("name") === name ) 
 				|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === name );
+		});
+		return el;
+	},
+
+	getElement : function( env, attr, name ) {
+		var el = $(env).filter(function(index) {			
+			return ( $(this).attr(attr) === name ) 
+				|| ( RDForm.replaceStrPrefix( $(this).attr(attr) ) === name );
 		});
 		return el;
 	},
