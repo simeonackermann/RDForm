@@ -142,7 +142,7 @@ var _ID_ = "rdform",
 			
 			jsonld.expand(json_result, function(err, expanded) {
 				if ( RDForm.data != "" ) {
-					expanded = RDForm.mergeExistingDataWithResult( JSON_MODEL, expanded, RDForm.data );
+					expanded = RDForm.mergeExistingDataWithResult( JSON_MODEL, expanded );
 				}
 
 				JSON_RESULT = expanded;
@@ -769,7 +769,6 @@ RDForm = {
 			var classTypeof = data["@type"];
 			if ( typeof data["@type"] !== "string"  ) {				
 				classTypeof = data["@type"][0];
-				console.log("!= string,", classTypeof );
 			}
 			env = $(rdform).find('div').filter(function(index) {			
 				return ( $(this).attr("typeof") === classTypeof ) 
@@ -1425,24 +1424,27 @@ RDForm = {
 
 	}, // end of initFormHandler	
 
-	mergeExistingDataWithResult: function( model, result, data ) {
+	mergeExistingDataWithResult: function( model, result ) {
 		var merged = result;
+		var data = RDForm.data;
 
-		$.each( data, function( key1, value1) {
-			if ( ! model[0].hasOwnProperty( RDForm.replaceStrPrefix(key1) ) ) {
-				if ( typeof value1[0] !== 'string') {
-					$.each( value1[0], function( key2, value2 ) {
-						var oldKey = key2;
-						var newKey = RDForm.replaceStrPrefix( key2 );
-						if ( oldKey != newKey ) {
-							value1[0][newKey] = value2;	
-							delete value1[0][oldKey];
-						}
-					});
+		$.each( data, function( key0, value0) {
+			$.each( data[key0], function( key1, value1) {
+				if ( ! model[0].hasOwnProperty( RDForm.replaceStrPrefix(key1) ) ) {
+					if ( typeof value1[0] !== 'string') {
+						$.each( value1[0], function( key2, value2 ) {
+							var oldKey = key2;
+							var newKey = RDForm.replaceStrPrefix( key2 );
+							if ( oldKey != newKey ) {
+								value1[0][newKey] = value2;	
+								delete value1[0][oldKey];
+							}
+						});
+					}
+					result[0][ RDForm.replaceStrPrefix( key1 ) ] = value1;
 				}
-				result[0][ RDForm.replaceStrPrefix( key1 ) ] = value1;
-			}
-		});
+			});
+		});		
 
 		return merged;
 	},
