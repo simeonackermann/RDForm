@@ -767,11 +767,7 @@ RDForm = {
 	addExistingDataFct : function( name, data, env ) {
 		if ( typeof env === 'undefined' ) {
 			var classTypeof = ( typeof data["@type"] === "string" ) ? data["@type"] : data["@type"][0];
-
-			env = $(rdform).find('div').filter(function(index) {			
-				return ( $(this).attr("typeof") === classTypeof ) 
-					|| ( RDForm.replaceStrPrefix( $(this).attr("typeof") ) === classTypeof );
-			});
+			env = RDForm.getElement( $(rdform).find('div'), 'typeof', classTypeof );
 
 			if ( env.length == 0 ) {
 				RDForm.showAlert( "warning", 'Der Datensatz enthält die nicht im Modell vorhandene Klasse { "'+classTypeof+'" }' );
@@ -787,21 +783,21 @@ RDForm = {
 
 				if ( typeof data[i] === "string" ) { // its a literal						
 
-					var literal = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("input,textarea"), curName );
+					var literal = RDForm.getElement( $(env).children("div.rdform-literal-group").find("input,textarea"), 'name', curName );
 
 					if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
-						var addBtn = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("button.add-class-literal"), curName );
+						var addBtn = RDForm.getElement( $(env).children("div.rdform-literal-group").find("button.add-class-literal"), 'name', curName );
 						if ( $(addBtn).length == 0 ) {
 							RDForm.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }', false );
 							continue;
 						}
 						$(addBtn).trigger("click");
-						literal = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("input,textarea"), curName ).last();
+						literal = RDForm.getElement( $(env).children("div.rdform-literal-group").find("input,textarea"), 'name', curName ).last();
 					}
 
 					if ( prevKey == curName ) { // same key -> try to duplicate
 						$(literal).nextAll("button.duplicate-literal").trigger("click");
-						literal = RDForm.getElementInGroupByName( $(env).children("div.rdform-literal-group").find("input,textarea"), curName ).last();
+						literal = RDForm.getElement( $(env).children("div.rdform-literal-group").find("input,textarea"), 'name', curName ).last();
 					}
 
 					$(literal).val( data[i] );
@@ -840,11 +836,11 @@ RDForm = {
 						for ( var di in thisData ) {
 
 							if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
-								var resource = RDForm.getElementInGroupByName( $(env).children("div.rdform-resource-group").find("input"), i );
+								var resource = RDForm.getElement( $(env).children("div.rdform-resource-group").find("input"), 'name', i );
 								if ( $(resource).length != 0 ) {
 									if ( di > 0 ) {
 										$(resource).parent().find( 'button.duplicate-external-resource' ).trigger("click");
-										resource = RDForm.getElementInGroupByName( $(env).children("div.rdform-resource-group").find("input"), i ).last();
+										resource = RDForm.getElement( $(env).children("div.rdform-resource-group").find("input"), 'name', i ).last();
 										$(resource).parentsUntil(".rdform-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 									}
 									$(resource).val( thisData[di]["@id"] );	
@@ -892,23 +888,16 @@ RDForm = {
 	}, // end of addExistingData
 
 	/**
-	 * Search element in DOM group by its name-attribute
-	 * @param DOM env
-	 * @param String name
+	 * Filter DOM group for an element by any attribute
+	 * @param DOM env The DOM-group where to llok for
+	 * @param String attr The attribute you are looking for
+	 * @param String val The value of the attribute
 	 * @return DOM element
 	 */
-	getElementInGroupByName : function( env, name ) {
+	getElement : function( env, attr, val ) {
 		var el = $(env).filter(function(index) {			
-			return ( $(this).attr("name") === name ) 
-				|| ( RDForm.replaceStrPrefix( $(this).attr("name") ) === name );
-		});
-		return el;
-	},
-
-	getElement : function( env, attr, name ) {
-		var el = $(env).filter(function(index) {			
-			return ( $(this).attr(attr) === name ) 
-				|| ( RDForm.replaceStrPrefix( $(this).attr(attr) ) === name );
+			return ( $(this).attr(attr) === val ) 
+				|| ( RDForm.replaceStrPrefix( $(this).attr(attr) ) === val );
 		});
 		return el;
 	},
