@@ -140,7 +140,11 @@ var _ID_ = "rdform",
 		if ( proceed ) {
 			var json_result = RDForm.createResult();
 			jsonld.expand(json_result, function(err, expanded) {
-				
+				if( err != null) {
+					RDForm.showAlert( "error", "Error on creating the expanded result: " + JSON.stringify(err, null, ' ') );
+					return false;
+				}
+
 				if ( RDForm.data != "" ) {
 					expanded = RDForm.mergeExistingDataWithResult( JSON_MODEL, expanded );
 				}
@@ -742,7 +746,11 @@ RDForm = {
 	 * @param array|object data Values to insert
 	 */
 	 addExistingData : function( data ) {
-	 	jsonld.expand(data, function(err, expanded_data) {			
+	 	jsonld.expand(data, function(err, expanded_data) {
+			if ( err != null ) {
+				RDForm.showAlert( "error", "Error on insert existing data: " + JSON.stringify(err, null, ' ') );
+				return false;
+			}
 
 			RDForm.data = expanded_data;
 
