@@ -766,13 +766,18 @@ RDForm = {
 	 */
 	addExistingDataFct : function( name, data, env ) {
 		if ( typeof env === 'undefined' ) {
+			var classTypeof = data["@type"];
+			if ( typeof data["@type"] !== "string"  ) {				
+				classTypeof = data["@type"][0];
+				console.log("!= string,", classTypeof );
+			}
 			env = $(rdform).find('div').filter(function(index) {			
-				return ( $(this).attr("typeof") === data["@type"][0] ) 
-					|| ( RDForm.replaceStrPrefix( $(this).attr("typeof") ) === data["@type"][0] );
+				return ( $(this).attr("typeof") === classTypeof ) 
+					|| ( RDForm.replaceStrPrefix( $(this).attr("typeof") ) === classTypeof );
 			});
 
 			if ( env.length == 0 ) {
-				RDForm.showAlert( "warning", 'Der Datensatz enthält die nicht im Modell vorhandene Klasse { "'+data["@type"]+'" }' );
+				RDForm.showAlert( "warning", 'Der Datensatz enthält die nicht im Modell vorhandene Klasse { "'+classTypeof+'" }' );
 				return;
 			}
 		}		
