@@ -30,9 +30,9 @@ $(document).ready(function(){
 		$(".rdform-filestore-wrapper").hide("slow");	
 		
 		$(rdform).RDForm({
-			model: "form_cpl.html",
+			model: "templates/form_cpl.html",
 			data: data,
-			hooks: "js/hooks_cpl.js",
+			hooks: "js/hooks/hooks_cpl.js",
 			lang: "de",
 			submit: function() {
 

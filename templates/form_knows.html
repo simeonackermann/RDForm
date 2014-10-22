@@ -1,0 +1,55 @@
+<form prefix="bio http://vocab.org/bio/0.1/ cpm ... foaf ... rdfs ... dc ...">
+
+  <legend>Person</legend>
+  <div typeof="foaf:Person" resource="Person-{pid}">
+
+    <!-- hidden vars -->
+    <input type="hidden" name="pid" value="123" />
+    <input type="hidden" name="forenames" />
+
+    <label>Bezeichnung:</label>                                                                            
+    <input type="literal" name="rdfs:label" datatype="xsd:string" value="{forenames} {foaf:name} {pid}" required readonly />
+
+    <label>Name:</label>
+    <input type="literal" name="foaf:name" datatype="xsd:string" required />
+
+    <!-- property resource -->    
+    <input type="resource" name="bio:event" value="bio:Birth" additional
+      argument="pid:{pid}"
+    />
+    
+    <input type="resource" name="bio:has-forename" value="ClassForename" multiple />
+    <input type="resource" name="foaf:knows" value="foaf:Person" title="knows Person"
+      arguments='{"pid":"{pid}" }'
+    />   
+
+  </div> 
+
+  <!-- ### Vornamen ### -->
+  <legend>Vornamen</legend> 
+  <div typeof="cpm:Forename" resource="Forename-{cpm:forename}-{cpm:forenamePosition}-{cpm:isFirstName}" id="ClassForename">
+    <label>Vorname:</label>      
+    <input name="cpm:forename" type="literal" datatype="xsd:string" placeholder="1. Vorname" required />
+
+    <input name="cpm:forenamePosition" type="hidden" datatype="xsd:int" value="1" />
+
+    <label>ist Rufname?</label>
+    <input type="literal" boolean name="cpm:isFirstName" datatype="xsd:boolean" checked />
+  </div>
+
+  <legend>Geburt</legend>
+  <div typeof="bio:Birth" resource="Birth-{pid}">
+    <label>Ort:</label>
+    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" autocomplete 
+      query-endpoint="http://dbpedia.org/sparql"
+      query-apitype="sparql"
+      query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
+    />
+
+    <input name="bid" type="literal" value="{pid}" readonly />
+
+    <label>Datum:</label>
+    <input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+  </div>  
+
+</form> 

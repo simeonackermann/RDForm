@@ -1,125 +1,247 @@
 # RDForm #
 
-generates a fully functionall HTML5 form parsed from a flexible data model and exports the data into RDF (turtle notation). 
-The data model is based on the RDFa notation with flexible possiilities to creating classes, properties, resources, relations and datatypes.
+RDForm is a jQuery plugin for creating and editing RDF data in a clean and modern HTML form.
 
-> This software is currently in a very early state and does not include every HTML or RDF element.
+With templates based on the [RDFa](https://en.wikipedia.org/wiki/RDFa) notation (see template documentation) its easy to create classes, properties with datatypes, resources and class-relations.
 
-## Install ##
+The inserting of existing data and the output is done as a JavaScript object with the [JSON-LD](https://github.com/digitalbazaar/jsonld.js) notation.
 
-* **Requirements:** only JavaScript (JQuery) in a modern browser
+> This software is currently in a very early state. Please be careful when use it in a productive environment.
+
+## Screenshot ##
+
+![](screenshot.png)
+
+## Installation ##
+
 * download the source code
-* edit form.html to your requirements
-* open index.html in your browser
+* open [index.html](index.html) in your browser for a sample form.
+* to create a own form edit [templates/form.html](templates/form.html) to your requirements or create a new
 
-For a more complex example change in index.html the line 68 to:
+If you want to integrate RDForm into an existing project you have to include [jQuery](http://jquery.com/) (> 1.8) (and for a good style [Bootstrap](getbootstrap.com/)). Have a look at [index.html](index.html) for the right structure.
 
-	$(document).ready(function(){
-		$(".rdform").RDForm({
-			model: "form_cpl.html",
-			hooks: "js/hooks_cpl.js"
-		});
+The basic initialization of the plugin with callback function on submit is:
+
+```js
+$(document).ready(function(){
+	$(".rdform").RDForm({
+		model: "templates/form.html",
+
+		submit: function() {
+			console.log( $(this) );
+		},
 	});
+});
+```
 
+# Documentation #
 
-## Documentation ##
+### Content ###
 
-On the base of the data model the HTML5 form is generated. Its stored in form.html and its notation is based on [RDFa](https://en.wikipedia.org/wiki/RDFa) with HTML-form elements and attributes.
+- Template Documentation
+	- Classes
+	- Literal-Properties
+	- Class-Resources
+	- External resources
+	- Hidden-Properties
+	- Wildcards
+	- Translation
+- Data inserting
+- Hooking
+- Data output
 
-The base notation is:
+## Template Documentation ##
 
-	<form>
-		<legend>Title</legend>
-		<div typeof="Person" resource="Person-{label}">
-			<label>Label</label>
-			<input name="label" datatype="string" />
-		</div>
-	</form>
+To visualize a class, its properties and the resources in a form the plugin needs a template. The templates are based on the [RDFa](https://en.wikipedia.org/wiki/RDFa) notation which adds RDF attributes to HTML elements. With that kind of templates its possible to describe RDF-ontologies on the HTML-way and to define the layout like labels, legends, placeholder and so on.
 
-is parsed to (the label value comes from user input):
+Some default templates can by found in the subfolder [templates](templates/). The path of the current template must be given as `model` argument to the plugin (see installation).
 
-	Person-MrUnkown a Person ;
-		label "Mr Unknown"^^string .
+The base structure of an example template is:
 
-
-### Element descriptions and attributes: ###
-
-* `<form>` indicates the data model
-
-	* `prefix`
-
-* `<legend>` title for the next class and form fieldset
-
-* `<div>` introduces a new class
-
-	* `typeof` type of the class
-	* `resources` class identifier
-	* `multiple` if given, class can be duplicated
-	* `select` generates a select list of containung subclasses
-
-* `<label>` label for the following property
-
-* `<input>` class property, resource or global var
-
-	* `name` name of the property
-	* `datatype` datatype of the proprty (eg string, int, date)	
-	* `type` [resource|global|hidden] if given, the input is not a normal property, see above for input types
-	* `value` value of the property or resource pointer to another class 
-	* `placeholder` help text
-	* `required` required field
-	* `readonly` read only field
-
-
-
-## input types ###
-
-Without the type attribute an input is a normal class property. Otherwiese it can be:
-
-* `type="resource"` a resource with the name of another class
-* `type="global"` a global variable without any effects to the class
-* `type="hidden"` a hidden property is only not visible in the form
-
-
-### wildcards {} and global vars ###
-
-With wildcards the class identifier or a property value can point to a specific property value of the same class. Just write the name of the property into {}. eg:
-
-	<div typeof="Person" resource="Person-{label}">
-		<input name="label" />
-		<input name="label_ref" type="hidden" value="{label}" />
+```html
+<form prefix="foaf http://xmlns.com/foaf/0.1/ rdfs http://www.w3.org/2000/01/rdf-schema#">
+	<legend>A person</legend>
+	<div typeof="foaf:Person" resource="Person-{rdfs:label}">
+		<label>The label</label>
+		<input name="rdfs:label" datatype="xsd:string" />
 	</div>
+</form>
+```
 
-Global variables are properties with type="global" which can also referenced with wildcards in other classes.
+The JavaScript output for this template will be:
 
-	<div typeof="Person" resource="Person-ID">
-		<input name="global:my_unique_id" type="global" value="..." />
+```js
+{
+	"@id": "Person-Max_Mustermann",
+	"@type": [
+		"http://xmlns.com/foaf/0.1/Person"
+	],
+	"http://www.w3.org/2000/01/rdf-schema#name": [
+		{
+			"@type": "xsd:string",
+			"@value": "Max Mustermann"
+		}
+	]
+}
+```
+
+### Classes ###
+
+Classes are described by a `<div typeof="...">...</div>` tag.
+
+Attribute  | Description
+------------- | -------------
+`typeof`  	| Type of the class
+`resource`  | Class identifier
+
+Example:
+
+```html
+<div typeof="bio:Birth" resource="Birth-123">
+	...
+</div>
+```
+
+### Literal properties ###
+
+Literals are described by a `<input type="literal" name="..." />`.
+
+Attribute  | Description
+------------- | -------------
+`type="literal"`  	|  Defines an input as an literal property
+`name`  			| Name of the property
+
+Optional Attribute  | Description
+------------- | -------------
+`datatype`  	| Datatype, e.g. xsd:string, xsd:date,
+`value`  		| Prefixed value
+`placeholder`  	| Placeholder
+`multiple`  	| The property can be multipled by clicking an add-button
+`required`  	| Required property, cannot be empty
+`additional`  	| Additional, by default hidden property. Can be added it by clicking an add-button
+`readonly`  	| Cannot be edited
+`help`  		| Short help text for the property
+
+Example:
+
+```html
+<input type="literal" name="foaf:firstName" datatype="xsd:string" required placeholder="Name..." help="The name of the person" />
+```
+
+Special literals are booleans, textareas and select-lists.
+
+#### Booleans
+
+Are described as checkboxes in the form and can be 1|0 or true|false. They are initialized by adding the attribute `boolean` to a literal property.
+
+#### Textareas
+
+Are more line texts and initialized by adding the attribute `textarea` to a literal property.
+
+#### Select lists
+
+To get a select list add the attributes `select` and `select-options='...'`. the value of `select-options` must be a [JSON](https://en.wikipedia.org/wiki/JSON) object with a label and value pair.
+
+Example:
+
+```html
+<input name="foaf:gender" type="literal" select select-options='{"woman":"woman", "man":"man"}'  datatype="xsd:string" />
+```
+
+### Class resources ###
+
+Classes can contain resource properties, which containing a reference to another class.
+
+Example:
+
+```html
+<div typeof="foaf:Person" resource="Person-{pid}">
+	<input name="pid" type="hidden" />
+	<input name="bio:event" type="resource" value="bio:Birth"
+      arguments='{"pid":"{pid}"}' additional
+    />
+</div>
+
+<div typeof="bio:Birth" resource="Birth-{pid}">
+	<input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+</div>
+```
+
+### External resources ###
+
+Example:
+
+```html
+<input type="resource" name="gnd" external />
+```
+
+## Hidden properties ##
+
+Example:
+
+```html
+<input type="hidden" name="id" />
+```
+
+### Wildcards ###
+
+With wildcards the class identifier or a property value can point to another property value of the same class. Just write the name of the property into brackets.
+
+Example:
+
+```html
+	<div typeof="Person" resource="Person-{id}">
+		<input name="id" type="hidden" value="{label}-123" />
+		<input name="label" type="literal" />
 	</div>
-	
-	<div typeof="MyClass" resource="Class-{global:my_unique_id}">
-		...
-	</div>
+```
 
 
-### resource properties ###
+### Translation ###
 
-Classes can contain properties with a refernce to another class. eg:
+Strings in legends, labels and placeholder can translated with `l(My Label)`. The translation files are stored in [lang/](lang/) (currently only english and german) and must be given as `lang` argument to the plugin.
 
-	<div typeof="Person" resource="Person-ID">
-		<input name="hasName" type="resource" value="{Name}" />
-	</div>
+Example:
 
-	<div typeof="Name" resource="Name-ID">
-		...
-	</div>
+```js
+$(".rdform").RDForm({
+	model: "templates/form.html",
+	lang: "de"
+});
+```
 
+## Data inserting ##
 
-### hooks ###
+Example:
 
-With hooks its easier to include own JavaScript functions. Have a look to js/hooks.js for more information.
+```js
+var data = {
+	"@id": "http://json-ld.org/playground/Person-Karl",
+	"@type": [
+      "http://xmlns.com/foaf/0.1/Person"
+    ],
+    "http://xmlns.com/foaf/0.1/name": [
+      {
+        "@type": "xsd:string",
+        "@value": "Karl"
+      }
+    ]
+};
 
+$(".rdform").RDForm({
+	model: "templates/form.html",
+	data: data
+});
+```
 
-## Changelog ##
+## Hooking ##
 
-### 0.1
+With hooks own JavaScript methods can affect the application execution on certain points. Have a look at [js/hooks/hooks.js](js/hooks/hooks.js) for more information.
 
-* initial version
+## Data output ##
+
+TODO
+
+## License ##
+
+OntoWiki is licensed under the [GNU General Public License Version 2, June 1991](http://www.gnu.org/licenses/gpl-2.0.txt).

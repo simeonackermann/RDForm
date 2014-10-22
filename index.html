@@ -19,12 +19,21 @@
 	<link href="css/rdform.css" rel="stylesheet" media="screen">
 
 	<title>Professorenkatalog Formular</title>
-</head>
-<body>
 
-	<style type="text/css">
-
-	.rdform {
+    <style type="text/css">
+    body {
+        background: url("img/noise.png"), -o-linear-gradient(top, #F4F4F4 0px, #EEEEEE 100%) transparent;    
+        background: url("img/noise.png") repeat scroll 0% 0%, -moz-linear-gradient(center top , #F4F4F4 0%, #EEEEEE 100%) repeat scroll 0% 0% transparent;
+    }
+    .container {
+        border: 1px solid lightGray;
+        padding: 2% 8%;
+        border-radius: 10px;
+        margin: 10px auto;
+        background: white;
+        max-width: 960px;
+    }
+    .rdform {
 		display: none;
 	}
 
@@ -57,6 +66,9 @@
     	display: none;	
     }
     </style>
+
+</head>
+<body>
 
 <div class="container">
     <h1>Professorenkatalog Formular</h1>
@@ -104,7 +116,6 @@
     <script src="js/rdform.js"></script>
 
     <script src="js/store.js"></script>
-
 
 </body>
 </html>
