@@ -139,8 +139,12 @@ var _ID_ = "rdform",
 		// proceed
 		if ( proceed ) {
 			var json_result = RDForm.createResult();
-			
 			jsonld.expand(json_result, function(err, expanded) {
+				if( err != null) {
+					RDForm.showAlert( "error", "Error on creating the expanded result: " + JSON.stringify(err, null, ' ') );
+					return false;
+				}
+
 				if ( RDForm.data != "" ) {
 					expanded = RDForm.mergeExistingDataWithResult( JSON_MODEL, expanded );
 				}
@@ -742,19 +746,21 @@ RDForm = {
 	 * @param array|object data Values to insert
 	 */
 	 addExistingData : function( data ) {
+	 	jsonld.expand(data, function(err, expanded_data) {
+			if ( err != null ) {
+				RDForm.showAlert( "error", "Error on insert existing data: " + JSON.stringify(err, null, ' ') );
+				return false;
+			}
 
-	 	if ( typeof(data.length) == "undefined" ) {
-	 		RDForm.data.push(data);
-	 	} else {
-	 		RDForm.data = data;
-	 	}	 	
+			RDForm.data = expanded_data;
 
-		$.each( RDForm.data, function( key, value ) {
-			RDForm.addExistingDataFct( undefined, RDForm.data[key] );
-		})
+			$.each( RDForm.data, function( key, value ) {
+				RDForm.addExistingDataFct( undefined, RDForm.data[key] );
+			})
 
-		if ( typeof __afterInsertData !== "undefined" )
-				__afterInsertData();
+			if ( typeof __afterInsertData !== "undefined" )
+					__afterInsertData();
+		});
 	 },
 
 	 /**
@@ -1421,29 +1427,22 @@ RDForm = {
 
 	}, // end of initFormHandler	
 
+	/**
+	  * Merge existing data with tha data of the form. Add properties to the result which were not in the form.
+	  * @param Array model JSON model of the template
+	  * @param Array result array of the form data
+	  * @return Array result
+	  */
 	mergeExistingDataWithResult: function( model, result ) {
-		var merged = result;
-		var data = RDForm.data;
-
-		$.each( data, function( key0, value0) {
-			$.each( data[key0], function( key1, value1) {
+		$.each( RDForm.data, function( key0, value0 ) {
+			$.each( value0, function( key1, value1) {				
 				if ( ! model[0].hasOwnProperty( RDForm.replaceStrPrefix(key1) ) ) {
-					if ( typeof value1[0] !== 'string') {
-						$.each( value1[0], function( key2, value2 ) {
-							var oldKey = key2;
-							var newKey = RDForm.replaceStrPrefix( key2 );
-							if ( oldKey != newKey ) {
-								value1[0][newKey] = value2;	
-								delete value1[0][oldKey];
-							}
-						});
-					}
 					result[0][ RDForm.replaceStrPrefix( key1 ) ] = value1;
 				}
 			});
 		});		
 
-		return merged;
+		return result;
 	},
 
 	/**
