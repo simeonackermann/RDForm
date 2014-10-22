@@ -1,4 +1,4 @@
-<form base="http://catalogus-professorum.org/cpm/" prefix="cpm ... cpl ... rdfs ... hp ...">
+<form base="http://catalogus-professorum.org/cpm/" prefix="cpm http://catalogus-professorum.org/cpm/ cpl http://catalogus-professorum.org/lipsiensium/ rdfs http://www.w3.org/2000/01/rdf-schema# hp http://purl.org/vok/hp/">
   <legend>Professor</legend>
   <!--  ### Main Class ### -->
   <div typeof="cpm:Professor" resource="cpl:Professor/{puri}">
@@ -21,7 +21,7 @@
     <input name="cpm:surname" type="literal" datatype="xsd:string" required />
 
     <label>Alternativer Name</label>
-    <input name="cpm:alternativeWritingOfSurname" type="literal" datatype="xsd:string" />
+    <input name="cpm:alternativeWritingOfSurname" type="literal" datatype="xsd:string" help="Geburtsname / Pseudonym" />
 
     <input name="cpm:has-forename" type="resource" value="cpm:Forename" multiple />
 
@@ -84,7 +84,7 @@
     <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple help="Z.B. Festschriften, Kürschners Dt. Gelehrtenkalender oder andere biografische Enzyklopädien" />
 
     <label>Literatur / Publikationen</label>
-    <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple />
+    <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple help="Angabe zu Schriftenverzeichnissen sowie Referenzdatenbank PubMed." />
 
     <label>Referenzen und Quellen</label>
     <input name="cpm:references" type="literal" multiple help="Eindeutige Hinweise auf die Personalakten im UAL, Berufungsakten im Bundesarchiv Berlin-Lichterfelde, Kurzbiografien in Dissertationen sowie eigene ergänzende Hinweise bzw. die von Familienangehörigen." />
@@ -122,7 +122,7 @@
     <!-- TODO: add class shv spatialArea -->
 
     <label>Ort</label>
-    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" autocomplete />
+    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" />
 
     <label>Administrative Einheit</label>
     <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string" help="Nur ausfüllen, wenn der Geburts- oder Todesort ein relativ unbekannter kleiner Ort ist."  />
@@ -157,7 +157,7 @@
 
   <legend>Schule / Ausbildung / Studium</legend>
   <div typeof="cpm:Study" resource="cpl:Study/{puri}/{rdfs:label}">
-    <p class="help">Eingabe der schulischen und universitären Ausbildung einschließlich Abschluss.<br />Nutzung auch für berufliche Ausbildung</p>
+    <p class="help">Eingabe der schulischen, beruflichen und universitären Ausbildung.<br />Abschluss mit Urkundendatum unter Qualifikationen.</p>
 
     <label>Ausbildungsabschnitt</label>
     <input name="rdfs:label" textarea type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
@@ -191,7 +191,7 @@
 
   <legend>Karriere</legend>
   <div typeof="cpm:Career" resource="cpl:Career/{puri}/{rdfs:label}">
-    <p class="help">Außeruniversitäre Karriereabschnitte, wie z.B. bei den Psychologen am Zentralinstitut für Jugenforschung (vgl. Udo Ettrich) oder psychologische Beratungsstelle an der Poliklinik Schönebeck (vgl. Jürgen Guthke), wenn es zur Vorbereitung auf die Universitätslaufbahn diente.</p>
+    <p class="help">Incl. außeruniversitäre Karriereabschnitte, wie z.B. bei den Psychologen am Zentralinstitut für Jugenforschung (vgl. Udo Ettrich) oder psychologische Beratungsstelle an der Poliklinik Schönebeck (vgl. Jürgen Guthke), wenn es zur Vorbereitung auf die Universitätslaufbahn diente.</p>
 
     <label>Bezeichnung</label>
     <input type="literal" textarea name="rdfs:label" datatype="xsd:string" />
@@ -208,7 +208,7 @@
 
   <legend>Qualifikation</legend>
   <div typeof="cpm:Qualification" resource="cpl:Qualification/{puri}/{rdfs:label}" multiple>
-    <p class="help">Akademische Karriere (Diplom-Hauptprüfung, Staatsexamen, Dissertation, Habilitation, Facultas docendi) mit Thema, Ort, Jahr Umwidmung Dissertation B in Habilitation</p>
+    <p class="help">Akademische Karriere (Diplom-Hauptprüfung, Staatsexamen, Dissertation, Habilitation, Facultas docendi) mit Thema, Ort, Jahr Umwidmung Dissertation B in Habilitation.<br />Gemeinschaftspromotionen unter Anmerkungen notieren.</p>
 
     <label>Bezeichnung</label>
     <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Qualifikationsbeschreibung / Dissertationsthema" />
@@ -222,10 +222,10 @@
 
   <legend>Universitätsämter</legend>
   <div typeof="cpm:Office" resource="cpl:Office/{puri}/{rdfs:label}" multiple>
-    <p class="help">Lehrstühle, Ämter in den Fakultäten, Direktoren und deren Stellvertreter, Sekretäre der Sektionen u.ä. innerhalb der Universität Leipzig</p>
+    <p class="help">Lehrstuhlinhaber /Ämter in Fakultäten, Sektionen oder Bereichen wie Direktoren und deren Stellvertreter, Sekretäre der Sektionen, WB- oder FB-Leiter, Klinikleiter etc. incl. Vorsitz in gesellschaftlichen Organisationen innerhalb der Universität.</p>
 
     <label>Bezeichnung</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" />
+    <input type="literal" name="rdfs:label" textarea datatype="xsd:string" />
 
     <label>von</label>
     <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM" />
@@ -239,7 +239,7 @@
 
   <legend>Mitgliedschaften / Funktionen</legend>
   <div typeof="cpm:membership" resource="cpl:membership/{puri}/{rdfs:label}" multiple>
-    <p class="help">Mitgliedschaften in Parteien, Organisationen (DTSB, KdT u. ä), Universitätsämter oder Leitungen außerhalb der Universität Leipzig mit Funktionen</p>
+    <p class="help">Universitätsämter oder Leitungsfunktionen außerhalb der Universität Leipzig. <br />Mitgliedschaften in wissenschaftlichen Gesellschaften, Akademien, Beiräten, Herausgeberschaften etc. sowie Parteien u. Organisationen.</p>
 
     <label>Bezeichnung</label>
     <input type="literal" textarea name="rdfs:label" datatype="xsd:string" />
@@ -256,6 +256,8 @@
 
   <legend>Fakultät / Sektion / Institut</legend>
   <div typeof="cpm:Institution" resource="cpl:Institution/{puri}/{rdfs:label}" multiple>
+    <p class="help">Mehrfacherfassung bei Inhabern von Professuren über verschiedene Epochen, d.h. vor 1968/69, 1969-1990, 1990-1993 u. nach 1993.</p>
+
     <label>Fakultät</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" />    
 
@@ -283,7 +285,7 @@
 
   <legend>Ehrungen</legend>
   <div typeof="cpm:Honour" resource="cpl:Honour/{puri}/{rdfs:label}" multiple>
-    <p class="help">Z.B. Ernennung zum Studienrat Oberarzt, Medizinalrat</p>
+    <p class="help">Z. B. Ehrenpromotionen, Ernennungen zum Studienrat, Medizinalrat, Aufnahme in wiss. Akademien  sowie staatliche Auszeichnungen. (Anm.: Oberarzt gilt analog Oberassistent als beruflicher Karriereschritt).</p>
 
     <label>Bezeichnung</label>
     <input type="literal" name="rdfs:label" datatype="xsd:string" />
