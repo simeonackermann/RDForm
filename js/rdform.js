@@ -850,9 +850,11 @@ RDForm = {
 										resource = RDForm.getElement( $(env).children("div.rdform-resource-group").find("input"), 'name', i ).last();
 										$(resource).parentsUntil(".rdform-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 									}
-									$(resource).val( thisData[di]["@id"] );	
-									continue;
+									$(resource).val( thisData[di]["@id"] );										
+								} else {
+									RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData) + '" }', false );
 								}
+								continue;
 							}
 
 							var thisType = ( typeof thisData[di]["@type"] === "string" ) ? thisData[di]["@type"] : thisData[di]["@type"][0];
