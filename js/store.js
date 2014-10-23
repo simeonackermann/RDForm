@@ -110,6 +110,7 @@ $(document).ready(function(){
 	// choose a file from files-list
 	$(document).on("click", "#rdform-filestore a.prof-label", function() {		
 		var filename = $(this).attr("data-file");
+		$(this).append(' <img src="img/loader.gif" alt="loading..." />');		
 		$.post( "store/getFile.php", { name: filename })		
 			.done(function( jsondata ) {
 				if ( jsondata.result && jsondata.content != "" ) {
