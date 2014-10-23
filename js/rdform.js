@@ -807,6 +807,7 @@ RDForm = {
 					}
 
 					$(literal).val( data[i] );
+					$(literal).trigger("keyup");
 					$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
@@ -1273,7 +1274,7 @@ RDForm = {
 						writeWildcardValue( thisInput, wildcards );
 					});
 
-					if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) {
+					if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) { // trigger keyup for wildcards without wildcards
 						$(wildcards[wcd]).trigger( "keyup" );
 					}
 				}
@@ -1287,7 +1288,7 @@ RDForm = {
 
 			var wcdTarget = envClass.find('input[name="'+wcd+'"],textarea[name="'+wcd+'"]');
 
-			if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) {
+			if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) { // if no input exist, may get wilcard vars from resource arguments 
 				var args = $.parseJSON( envClass.attr( "arguments" ) );				
 				for ( var ai in args ) {
 					args[ai] = args[ai].toString();
