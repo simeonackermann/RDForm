@@ -222,6 +222,23 @@ $(document).ready(function(){
 		$(".feedback p").hide();
 	});
 
+	// store serach
+	$(".store-search").keyup(function() {
+		var search = $(this).val();
+		window.setTimeout(function(){searchStore(search)}, 300);
+	})
+	searchStore = function( search ) {
+		$("#rdform-filestore li").each(function() {
+			var thisItemName = $(this).find("a").text();
+			var re = new RegExp( search, "gi");
+			if ( thisItemName.search(re)  == -1) {
+				$(this).hide();
+			} else {
+				$(this).show();
+			}
+		});
+	}
+
 	/*
 	THIS IS ONLY A BUGFIX - remove it later then i can call the initFormHandler in rdform.js here!
 	*/
