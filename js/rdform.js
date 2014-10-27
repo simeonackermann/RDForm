@@ -1610,7 +1610,7 @@ RDForm = {
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
 
-			if ( ! $.isEmptyObject( property ) ) { // dont add empty proprty
+			if ( ! $.isEmptyObject( property ) ) { // dont add empty property
 					properties.push( property );
 			}
 
@@ -2068,6 +2068,9 @@ RDForm = {
 				value = value.replace(/[^\d]/g, '');
 			}
 		}
+
+		if ( typeof __userInputValidation !== "undefined" )
+			valid = __userInputValidation( $(property) );
 		
 		if ( ! valid ) {
 			$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
