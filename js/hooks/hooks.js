@@ -43,7 +43,7 @@ __afterDuplicateExternalResource = function ( thisResource ) {
 
 // validate form-input on change value or on submit the form
 __userInputValidation = function ( property ) {
-	return true;
+	// return false if property value is not valid
 }
 
 
