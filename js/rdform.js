@@ -585,7 +585,10 @@ RDForm = {
 		if ( literal['datatype'] !== undefined ) {
 			if (  literal['datatype'].search(/.*date/) != -1 || literal['name'].search(/.*date/) != -1 ) {
 				thisInputContainer.removeClass( "col-xs-9" );
-				thisInputContainer.addClass( "col-xs-3" );
+				thisInputContainer.addClass( "col-xs-2" );
+
+				thisInput.addClass(_ID_ + "-datepicker");
+				thisInput.attr("data-date-format", "yyyy-mm-dd");
 			}
 		}
 
@@ -918,18 +921,18 @@ RDForm = {
 	 *******************************************************/
 	initFormHandler: function() {
 		RDForm.initFormHandler.called = true;
-		/*
-		$('body').on('focus',".date", function(){
-			//$(".datepicker").datepicker('hide'); // if enabled resets the format
-			$(this).datepicker({
-				format :"yyyy-mm-dd",
-				weekStart: 1
-			});
-		});​
-		*/	
+		
 		if ( typeof __initFormHandlers !== "undefined" )
-			__initFormHandlers();		
+			__initFormHandlers();
 
+		if ( $.datepicker ) {
+			rdform.on("focus", ".rdform-datepicker", function() {
+				$(this).datepicker({
+					weekStart: 1
+				});
+			});
+		}
+		
 		// validate input values on change
 		rdform.on("change", "input", function() {
 			RDForm.userInputValidation( $(this) );
