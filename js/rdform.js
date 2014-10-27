@@ -552,7 +552,7 @@ RDForm = {
 		// TODO: cleanup the following spaghettic code....!
 
 		if ( literal['additional'] !==  undefined ) {			
-			thisInputContainer.append ('<button type="button" class="btn btn-default btn-sm add-class-literal" name="'+ literal['name'] +'" title="Add literal '+literal['label']+'" label="'+literal['label']+'">' + 
+			thisInputContainer.append ('<button type="button" class="btn btn-default btn-sm add-class-literal" name="'+ literal['name'] +'" title="' + RDForm.l('Add literal %s',  literal['label']) +'" label="'+literal['label']+'">' + 
 											'<span class="glyphicon glyphicon-plus"></span> '+ literal['label'] +
 										'</button>' );
 			thisFormGroup.append( thisInputContainer );
