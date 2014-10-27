@@ -39,7 +39,37 @@ __initFormHandlers = function () {
 	});
 
 	// big publication literal highlighting
-	rdform.find('label:contains("Veröffentlichungen / Publikationen")').first().parent().before("<div class='rdform-hidden-group'><legend>Veröffentlichungen, Literatur, Sonstiges</legend></div>");
+	rdform.find('label:contains("Veröffentlichungen / Publikationen")').first().parent().before("<div class='rdform-hidden-group'><legend>Veröffentlichungen, Literatur, Sonstiges</legend></div>");	
+}
+
+// validate form-input on change value or on submit the form
+__userInputValidation = function( property ) {
+
+	// validate if cpm:from is a smaller date than cpm:to
+	if ( $(property).attr("name") == "cpm:from" ) {
+		var from = Date.parse( $(property).val() );
+		var toEl = $(property).parentsUntil(".rdform-literal-group").parent().next().find('input[name="cpm:to"]');
+		var to = Date.parse( toEl.val() );		
+		if ( from >= to ) {
+			return false;
+		} else {
+			if ( $(property).parentsUntil(".rdform-literal-group").parent().next().hasClass("has-error") ) {
+				RDForm.userInputValidation( toEl );
+			}
+		}
+	}
+	else if ( $(property).attr("name") == "cpm:to" ) {
+		var to = Date.parse( $(property).val() );
+		var fromEl = $(property).parentsUntil(".rdform-literal-group").parent().prev().find('input[name="cpm:from"]');
+		var from = Date.parse( fromEl.val() );		
+		if ( from >= to ) {
+			return false;
+		} else {
+			if ( $(property).parentsUntil(".rdform-literal-group").parent().prev().hasClass("has-error") ) {
+				RDForm.userInputValidation( fromEl );
+			}
+		}
+	}	
 
 }
 
