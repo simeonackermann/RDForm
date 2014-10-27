@@ -2069,8 +2069,10 @@ RDForm = {
 			}
 		}
 
-		if ( typeof __userInputValidation !== "undefined" )
-			valid = __userInputValidation( $(property) );
+		if ( typeof __userInputValidation !== "undefined" ) {
+			if ( __userInputValidation( $(property) ) == false )
+				valid = false;
+		}
 		
 		if ( ! valid ) {
 			$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
