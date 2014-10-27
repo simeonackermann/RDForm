@@ -41,6 +41,11 @@ __afterDuplicateClass = function ( thisClass ) {
 __afterDuplicateExternalResource = function ( thisResource ) {
 }
 
+// validate form-input on change value or on submit the form
+__userInputValidation = function ( property ) {
+	return true;
+}
+
 
 // before creating the result object from the html form
 _createResult = function() {

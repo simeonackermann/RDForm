@@ -807,6 +807,7 @@ RDForm = {
 					}
 
 					$(literal).val( data[i] );
+					$(literal).trigger("keyup");
 					$(literal).parentsUntil(".rdform-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 					if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
@@ -849,9 +850,11 @@ RDForm = {
 										resource = RDForm.getElement( $(env).children("div.rdform-resource-group").find("input"), 'name', i ).last();
 										$(resource).parentsUntil(".rdform-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 									}
-									$(resource).val( thisData[di]["@id"] );	
-									continue;
+									$(resource).val( thisData[di]["@id"] );										
+								} else {
+									RDForm.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData) + '" }', false );
 								}
+								continue;
 							}
 
 							var thisType = ( typeof thisData[di]["@type"] === "string" ) ? thisData[di]["@type"] : thisData[di]["@type"][0];
@@ -1273,7 +1276,7 @@ RDForm = {
 						writeWildcardValue( thisInput, wildcards );
 					});
 
-					if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) {
+					if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) { // trigger keyup for wildcards without wildcards
 						$(wildcards[wcd]).trigger( "keyup" );
 					}
 				}
@@ -1287,7 +1290,7 @@ RDForm = {
 
 			var wcdTarget = envClass.find('input[name="'+wcd+'"],textarea[name="'+wcd+'"]');
 
-			if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) {
+			if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) { // if no input exist, may get wilcard vars from resource arguments 
 				var args = $.parseJSON( envClass.attr( "arguments" ) );				
 				for ( var ai in args ) {
 					args[ai] = args[ai].toString();
@@ -1607,7 +1610,7 @@ RDForm = {
 				console.log("Unknown div-group in RDForm. Class = " + $(this).attr("class") );
 			}
 
-			if ( ! $.isEmptyObject( property ) ) { // dont add empty proprty
+			if ( ! $.isEmptyObject( property ) ) { // dont add empty property
 					properties.push( property );
 			}
 
@@ -2065,6 +2068,9 @@ RDForm = {
 				value = value.replace(/[^\d]/g, '');
 			}
 		}
+
+		if ( typeof __userInputValidation !== "undefined" )
+			valid = __userInputValidation( $(property) );
 		
 		if ( ! valid ) {
 			$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
