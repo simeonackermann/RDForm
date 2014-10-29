@@ -585,7 +585,7 @@ RDForm = {
 		if ( literal['datatype'] !== undefined ) {
 			if (  literal['datatype'].search(/.*date/) != -1 || literal['name'].search(/.*date/) != -1 ) {
 				thisInputContainer.removeClass( "col-xs-9" );
-				thisInputContainer.addClass( "col-xs-2" );
+				thisInputContainer.addClass( "col-xs-3" );
 
 				thisInput.addClass(_ID_ + "-datepicker");
 				thisInput.attr("data-date-format", "yyyy-mm-dd");
@@ -1388,7 +1388,7 @@ RDForm = {
 										query: query,
 										format: "json"
 									},									
-									success: function( data ) {						
+									success: function( data ) {
 										response( $.map( data.results.bindings, function( item ) {
 											return {
 												label: item.label.value, // wird angezeigt
