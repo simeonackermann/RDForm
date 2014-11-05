@@ -67,12 +67,6 @@ RDForm_Hooks.prototype = {
 	// before creating the class properties from input values
 	__createResultClassProperty : function( propertyContainer ) {
 		var _this = this;
-
-		// create the hidden pid field
-		if ( $(propertyContainer).children("input").attr("name") == "pid" ) {
-			$(propertyContainer).children("input").val( Math.floor( Math.random() * 10 ) );
-		}
-
 	},
 
 	// before generating the class object from input values and properties
