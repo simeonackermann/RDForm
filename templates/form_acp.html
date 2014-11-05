@@ -1,0 +1,38 @@
+<form base="" prefix="bio http://vocab.org/bio/0.1/ hp http://purl.org/vok/hp/ foaf http://xmlns.com/foaf/0.1/">
+    <legend>Person</legend>
+    <div typeof="foaf:Person" resource="{pid}">
+        <!-- hidden person name -->
+        <input name="pid" type="hidden" value="{foaf:name}" />
+
+        <label>Name:</label>
+        <input name="foaf:name" value="" type="literal" />
+
+
+        <label>l(Geschlecht) (select):</label>
+        <input type="literal" select name="foaf:gender" datatype="xsd:string"
+            select-options='["k.A.", "Frau", "Mann"]'
+        />
+
+        <label>l(Geschlecht) (autocomplete):</label>
+        <input type="literal" name="foaf:gender" datatype="xsd:string" autocomplete
+            query-apitype="local"
+            query-values='["k.A.", "Frau", "Mann"]'
+        />        
+
+        <label>l(Ort) (automcplemete dbpedia):</label>
+        <input type="literal" name="hp:birthPlace" datatype="xsd:string" autocomplete
+            query-apitype="sparql"
+            query-endpoint="http://dbpedia.org/sparql"
+            query-datatype="jsonp"            
+            query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;rdfs:label ?item;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
+        />
+
+        <label>Ort (autocomplete pfarrerbuch)</label>
+        <input type="resource" external name="hp:saxonyPlace" autocomplete
+            query-endpoint="http://pfarrerbuch.comiles.eu/sparql"
+            query-apitype="sparql"
+            query-datatype="json"
+            query="SELECT DISTINCT * WHERE {?item <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/voc/hp/Place>;<http://www.w3.org/2000/01/rdf-schema#label> ?label. FILTER regex(?label,%s,'i')}LIMIT 20"
+        />
+
+</form> 
