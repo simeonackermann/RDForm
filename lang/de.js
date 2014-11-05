@@ -1,6 +1,7 @@
-
-
-var TRANSLATIONS = {
+/*
+ Translations file for RDForm
+*/
+var rdform_translations = {
 	'create': 'Datensatz anlegen',
 	'update': 'Datensatz aktualisieren',
 	'reset': 'zurücksetzen',

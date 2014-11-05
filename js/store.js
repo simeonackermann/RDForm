@@ -30,10 +30,11 @@ $(document).ready(function(){
 		$(".rdform-filestore-wrapper").hide("slow");	
 		
 		$(rdform).RDForm({
-			model: "templates/form_cpl.html",
+			template: "templates/form_cpl.html",
 			data: data,
 			hooks: "js/hooks/hooks_cpl.js",
-			lang: "de",
+			lang: "lang/de.js",
+			debug : true,
 			submit: function() {
 
 				submitRDForm( $(this)[0] );
@@ -41,11 +42,12 @@ $(document).ready(function(){
 			}
 		});
 		rdform.show("fast");
+		window.scrollTo(0,0);
 		//$(".show-list").show();		
 		$(rdform).before('<p><button type="button" class="btn btn-link btn-xs show-list">zurück zur Liste</button></p>');
 
 		$(".rdform-submit-btn-group div").prepend('<button type="reset" class="btn btn-default show-list">Abbrechen</button>  ');
-		$(rdform).find("button:submit").text("Datensatz anlegen");
+		//$(rdform).find("button:submit").text("Datensatz anlegen");
 
 	}
 
@@ -116,7 +118,7 @@ $(document).ready(function(){
 				if ( jsondata.result && jsondata.content != "" ) {
 					var data = $.parseJSON( jsondata.content );					
 					myShowForm(data);
-					$(rdform).find("button:submit").text("Datensatz aktualisieren");
+					//$(rdform).find("button:submit").text("Datensatz aktualisieren");
 					$("#rdform-org-filename").val(filename);
 				}
 		});
