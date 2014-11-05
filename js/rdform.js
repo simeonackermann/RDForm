@@ -51,11 +51,11 @@
 						try {
 							_this.Hooks = new RDForm_Hooks( _this );
 						} catch (e) {
-							_this.showAlert( "error", 'Couldnt init hooks file "'+ _this.settings.hooks +'": '+e );
+							_this.showAlert( "error", 'Cannot init hooks file "'+ _this.settings.hooks +'": '+e );
 						}
 					},
 					error: function( jqxhr, type, e ) {
-						_this.showAlert( "error", 'Error in loading hooks file "'+ _this.settings.hooks +'": '+e );
+						_this.showAlert( "error", 'Cannot load hooks file "'+ _this.settings.hooks +'": '+e );
 					}
 				});
 			}
@@ -64,7 +64,7 @@
 			if ( typeof jsonld === 'undefined' ) {
 				$.ajax({ url: "js/jsonld.js", dataType: "script", async: false,
 					error: function( jqxhr, type, e ) {
-						_this.showAlert( "error", 'Error on loading JSON-LD plugin "js/jsonld.js": '+e );
+						_this.showAlert( "error", 'Cannot load JSON-LD plugin "js/jsonld.js": '+e );
 					}
 				});
 			}
@@ -77,7 +77,7 @@
 					template = m;
 				},
 				error: function( jqxhr, type, e ) {
-					_this.showAlert( "error", 'Error on loading template "'+ _this.settings.template +'": '+e);
+					_this.showAlert( "error", 'Cannot load template "'+ _this.settings.template +'": '+e);
 				}
 			});
 			this.template = template;
@@ -88,10 +88,12 @@
 
 			// parsing model
 			if ( this.template ) {
-				this.parseTemplate();
-				//console.log( "RDForm Model = ", this.MODEL );
+				this.parseTemplate();				
 				this.parseTemplateToJSON();
-				console.log( "RDFormJSON Model = ", this.JSON_MODEL );
+				if ( this.settings.debug ) {
+					//console.log( "RDForm Model = ", this.MODEL );
+					console.log( "RDFormJSON Model = ", this.JSON_MODEL );
+				}
 			}
 
 			if ( this.MODEL.length > 0 ) {
@@ -1305,7 +1307,7 @@
 							            	}));
 							            },
 							            error: function(e) {
-							            	_this.showAlert( "error", 'Error on autocomplete: ', e );
+							            	_this.showAlert( "error", 'Error on autocomplete: ' + e );
 							            }
 									});
 						      	},
@@ -1354,7 +1356,9 @@
 					}
 
 					_this.JSON_RESULT = expanded;
-					console.log( "RDForm Result = ", _this.JSON_RESULT );
+					if ( _this.settings.debug ) {
+						console.log( "RDForm Result = ", _this.JSON_RESULT );
+					}
 					
 					// this calls the callback function
 					_this.settings.submit.call( _this.JSON_RESULT );
@@ -1879,10 +1883,17 @@
 				default :
 					cls = "alert-info";
 			}
-			console.log( "RDForm ("+type+"): " + msg );
 			if ( this.settings.verbose ) {
 				this.alertArea.append('<p class="alert '+cls+'" role="alert">' + msg + '</p>').show();
 			}
+			else if ( this.settings.debug ) {
+				console.log( "RDForm ("+type+"): " + msg );
+			}
+			else if ( type == "error" ) {
+				alert( "RDForm ("+type+"): " + msg );
+			}
+			
+			
 		},		
 	}; // end of rdform.prototype
 
@@ -1943,7 +1954,8 @@
 		hooks 		: null,		
 		lang 		: null,
 		cache 		: false,
-		verbose 	: false,	
+		verbose 	: false,
+		debug 		: false,
 		submit 		: function() {},
 	};
 
