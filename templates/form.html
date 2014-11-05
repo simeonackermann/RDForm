@@ -4,23 +4,25 @@
   <legend>Person</legend>
   <div typeof="foaf:Person" resource="Person-{pid}">
     <!-- hidden property for wildcard replacements. The value comes from hooks.js -->
-    <input name="pid" type="hidden" />
+    <input name="pid" type="hidden" value="123" />
 
     <!-- literal property -->
-    <label>Name:</label>                                                                           
+    <label>Name</label>
     <input name="foaf:name" type="literal" datatype="xsd:string" required />
+
+    <input name="foaf:gender" type="literal" select select-options='{"woman":"woman", "man":"man"}'  datatype="xsd:string" />
 
     <!-- resource property -->
     <input name="bio:event" type="resource" value="bio:Birth"
-      arguments='{"pid":"{pid}"}' additional
+      arguments='{"pid":"{pid}"}' multiple
     />
 
     <!-- literal property -->
-    <label>E-Mail:</label>    
-    <input name="foaf:mbox" type="literal" placeholder="name@example.org" multiple />    
+    <label>E-Mail</label>    
+    <input name="foaf:mbox" type="literal" placeholder="name@example.org" additional multiple />
 
     <!-- literal property as textarea -->
-    <label>Comment:</label>
+    <label>Comment</label>
     <input name="rdfs:comment" type="literal" textarea />
   </div> 
 
@@ -29,10 +31,10 @@
   <div typeof="bio:Birth" resource="Birth-{pid}">
     <p class="help">Adds the resource Birth to the Person.</p>
 
-    <label>Ort:</label>
+    <label>Ort</label>
     <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Birthplace" />
 
-    <label>Datum:</label>
+    <label>Datum</label>
     <input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
   </div> 
 </form> 
