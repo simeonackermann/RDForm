@@ -25,11 +25,11 @@ The basic initialization of the plugin with callback function on submit is:
 ```js
 $(document).ready(function(){
 	$(".rdform").RDForm({
-		model: "templates/form.html",
+		template: "templates/form.html",
 
-		submit: function() {
-			console.log( $(this) );
-		},
+        submit: function() {
+            console.log( JSON.stringify(this, null, '\t') );
+        }
 	});
 });
 ```
@@ -38,6 +38,7 @@ $(document).ready(function(){
 
 ### Content ###
 
+- Parameter
 - Template Documentation
 	- Classes
 	- Literal-Properties
@@ -48,7 +49,22 @@ $(document).ready(function(){
 	- Translation
 - Data inserting
 - Hooking
-- Data output
+
+## Paramter ##
+
+The following parameters can given to the plugin:
+
+Parameter  | Description
+------------- | -------------
+template  	| Path to the template file
+data  		| Array or Object of existing data to insert
+hooks 		| Path to the hooks file
+lang 		| Path to the language file
+cache 		| true or false, loads template from cache
+verbose 	| true or false, output messages before the form 
+debug 		| log error, warnings and infos into the console
+submit 		| Submit callback function
+
 
 ## Template Documentation ##
 
@@ -205,7 +221,7 @@ Example:
 
 ```js
 $(".rdform").RDForm({
-	model: "templates/form.html",
+	template: "templates/form.html",
 	lang: "de"
 });
 ```
@@ -229,7 +245,7 @@ var data = {
 };
 
 $(".rdform").RDForm({
-	model: "templates/form.html",
+	template: "templates/form.html",
 	data: data
 });
 ```
@@ -238,9 +254,6 @@ $(".rdform").RDForm({
 
 With hooks own JavaScript methods can affect the application execution on certain points. Have a look at [js/hooks/hooks.js](js/hooks/hooks.js) for more information.
 
-## Data output ##
-
-TODO
 
 ## License ##
 
