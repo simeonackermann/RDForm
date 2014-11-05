@@ -32,21 +32,20 @@
 			var _this = this;
 
 			// loading language file
-			if ( this.settings.lang ) {
-				var langFile = "lang/" + this.settings.lang + ".js";
-				$.ajax({ url: langFile, dataType: "script", async: false,
+			if ( _this.settings.lang ) {
+				$.ajax({ url: _this.settings.lang, dataType: "script", async: false,
 					success: function() {
 						_this.translations = rdform_translations;
 					},
 					error: function( jqxhr, type, e ) {
-						_this.showAlert( "error", 'Error on loading language file "'+ langFile +'": '+e );
+						_this.showAlert( "error", 'Error on loading language file "'+ _this.settings.lang +'": '+e );
 					}
 				});
 			}
 
 			//loading hooks file
-			if ( this.settings.hooks ) {
-				$.ajax({ url: this.settings.hooks, dataType: "script", async: false,
+			if ( _this.settings.hooks ) {
+				$.ajax({ url: _this.settings.hooks, dataType: "script", async: false,
 					success: function() {
 						try {
 							_this.Hooks = new RDForm_Hooks( _this );
@@ -70,7 +69,7 @@
 			}
 
 			// loading template file			
-			var templateFile = this.settings.cache ? this.settings.template : this.settings.template + "?" + (new Date()).getTime();
+			var templateFile = _this.settings.cache ? _this.settings.template : _this.settings.template + "?" + (new Date()).getTime();
 			var template = null;
 			$.ajax({ url: templateFile, type: "GET", dataType: "text", async: false,
 				success: function( m ) {
@@ -80,7 +79,7 @@
 					_this.showAlert( "error", 'Cannot load template "'+ _this.settings.template +'": '+e);
 				}
 			});
-			this.template = template;
+			_this.template = template;
 		},
 
 		init: function() {
