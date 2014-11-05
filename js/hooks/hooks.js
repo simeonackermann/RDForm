@@ -60,7 +60,7 @@ RDForm_Hooks.prototype = {
 
 
 	// before creating the result object from the html form
-	_createResult : function() {
+	__createResult : function() {
 		var _this = this;
 	},
 
