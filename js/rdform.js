@@ -4,7 +4,6 @@
 	* RDForm class
 	************************************************************************/
 	function RDForm( elem, settings ) {
-		//this.$elem = elem;
 		this.$elem = $(elem);
 		this.settings = settings;
 		this._ID_ = "rdform";
@@ -19,11 +18,9 @@
 
 		this.MODEL = new Array(),
 		this.JSON_MODEL = new Array(),
-		this.RESULT = new Array(),
 		this.JSON_RESULT = new Object(),
 		this.CONTEXT = new Object();
 		
-		//this.init();
 		return this;
 	}
 
@@ -1425,7 +1422,7 @@
 				var property = new Object();
 				//var curPropName = "";
 
-				if ( _this.Hooks && typeof _this.Hooks__createResultClassProperty !== "undefined" )
+				if ( _this.Hooks && typeof _this.Hooks.__createResultClassProperty !== "undefined" )
 					_this.Hooks.__createResultClassProperty( $(this) ); // TODO: give input or resource class
 
 				// decide if its a literal or resource property
