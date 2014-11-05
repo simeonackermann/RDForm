@@ -7,7 +7,7 @@
     <meta name="author" content="">	
 
 	<!-- Datepicker -->
-	<!--<link href="css/datepicker.css" rel="stylesheet" media="screen">-->
+    <link href="css/datepicker.css" rel="stylesheet" media="screen">
 	
 	<!-- JQueryUI Style -->
 	<link href="css/smoothness/jquery-ui.custom.min.css" rel="stylesheet">
@@ -41,8 +41,7 @@
     <h1>Wellcome to RDForm!</h1>
 
     <!-- the form container -->
-	<form action="#" class="form-horizontal rdform" role="form"></form>	
-
+    <form action="#" class="form-horizontal rdform" role="form"></form>    
 </div>
 
 
@@ -59,33 +58,16 @@
     <!-- own stuff -->
     <script src="js/rdform.js"></script>
 
-    <script type="text/javascript">    
-
-    var data = 
-    {
-    "@id": "http://json-ld.org/playground/Person-Karl",
-    "@type": [
-      "http://xmlns.com/foaf/0.1/Person"
-    ],
-    "http://xmlns.com/foaf/0.1/name": [
-      {
-        "@type": "xsd:string",
-        "@value": "Karl"
-      }
-    ]
-}
-    ;
-
+    <script type="text/javascript">        
 	$(document).ready(function(){
-		$(".rdform").RDForm({
-			//model: "templates/form.html",
-			hooks: "js/hooks/hooks.js",
-			data: data,
+        $('.rdform').RDForm({
+            template: "templates/form.html",
+            hooks: "js/hooks/hooks.js",
 
-			submit: function() {
-				RDForm.outputResult();
-			},
-		});
+            submit: function() {
+                console.log( JSON.stringify(this, null, '\t') );
+            }
+        });
 	});
 	</script>
 
