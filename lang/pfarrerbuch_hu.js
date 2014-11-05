@@ -1,7 +1,7 @@
-
-
-
-var TRANSLATIONS = {
+/*
+ Translations file for RDForm
+*/
+var rdform_translations = {
 	'Pfarrer': 'klerikus',
 	'Schule': 'iskola',
 	'Nachname': 'vezetéknév',
