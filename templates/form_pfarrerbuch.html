@@ -1,168 +1,78 @@
-<form base="http://pfarrerbuch.de/" prefix="bio http://vocab.org/bio/0.1/ hp: http://purl.org/vok/hp/ foaf ... hp ... rdfs ... rdf ...">
-    <legend>l(Pfarrer)</legend>
-    <div typeof="foaf:Person" resource="{pid}">
-        <!-- hidden person name -->
-        <input name="pid" type="hidden" value="{foaf:name}" />
+<form prefix="rdf http://www.w3.org/1999/02/22-rdf-syntax-ns# xsd http://www.w3.org/2001/XMLSchema#">
+    <legend>Person/Pfarrer</legend>
+    <div typeof="http://xmlns.com/foaf/0.1/Person" resource="http://pfarrerbuch.comiles.eu/sachsen/person/-{id}">
+        <input name="id" type="hidden" />
+        <input name="birthDate" type="hidden" value="{http://purl.org/voc/hp/birthDate}" />
+        <input name="deathDate" type="hidden" value="{http://purl.org/voc/hp/dateOfDeath}" />
 
-        <label>l(ist Pfarrer)</label>
-        <input type="literal" boolean name="hp:isPastor" datatype="xsd:boolean" />
+        <label>ist Pfarrer</label>
+        <input type="literal" boolean name="http://purl.org/voc/hp/isPastor" datatype="xsd:boolean" />
 
-        <label>l(Label):</label>
-        <input type="literal" name="rdfs:label" value="{foaf:name} (*{hp:birthDate} †{hp:dateOfDeath})" datatype="xsd:string" readonly required />
+        <label>Label</label>
+        <input name="http://www.w3.org/2000/01/rdf-schema#label" value="{http://xmlns.com/foaf/0.1/name} (*{birthDate} †{deathDate})" type="literal" readonly="" />
 
-        <label>l(Nachname):</label>
-        <input type="literal" name="foaf:name" value="{foaf:firstName} {foaf:lastName}" datatype="xsd:string" required />
+        <label>Name</label>
+        <input name="http://xmlns.com/foaf/0.1/name" value="{http://xmlns.com/foaf/0.1/firstName} {http://xmlns.com/foaf/0.1/lastName}" type="literal" readonly="" />
 
-        <label>l(Vorname):</label>
-        <input type="literal" name="foaf:firstName" datatype="xsd:string" required />
+        <label>Vorname</label>
+        <input name="http://xmlns.com/foaf/0.1/firstName" type="literal" />
 
-        <label>Alternativer Vorname:</label>
-        <input type="literal" name="foaf:firstNameAlt" datatype="xsd:string" />
+        <label>Nachname</label>
+        <input name="http://xmlns.com/foaf/0.1/lastName" type="literal" />
 
-        <label>l(Nachname):</label>
-        <input type="literal" name="foaf:lastName" datatype="xsd:string" required />
+        <label>Geburtsdatum</label>
+        <input name="http://purl.org/voc/hp/birthDate" type="literal" datatype="xsd:date" />
 
-        <label>Alternativer Nachname:</label>
-        <input type="literal" name="foaf:lastNameAlt" datatype="xsd:string" />
-
-        <!--<select type="literal" name="foaf:gender" datatype="xsd:string">
-            <option value="undefined">K.a.</option>
-            <option value="man">Mann</option>
-            <option value="woman">Frau</option>            
-        </select>-->
-
-        <label>l(Geschlecht) (select):</label>
-        <input type="literal" select name="foaf:gender" datatype="xsd:string"
-            select-options='["k.A.", "Frau", "Mann"]'
-        />
-
-        <label>l(Geschlecht) (autocomplete):</label>
-        <input type="literal" name="foaf:gender" datatype="xsd:string" autocomplete
-            query-apitype="local"
-            query-values='["k.A.", "Frau", "Mann"]'
-        />        
-
-        <label>l(Geburtsdatum):</label>
-        <input type="literal" name="hp:birthDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-
-        <label>l(Geburtsort):</label>
-        <input type="literal" name="hp:birthPlace" datatype="xsd:string" autocomplete
+        <label>Geburtsort</label>
+        <input type="resource" external name="http://purl.org/voc/hp/birthPlace" autocomplete
+            query-endpoint="http://pfarrerbuch.comiles.eu/sparql"
             query-apitype="sparql"
-            query-endpoint="http://dbpedia.org/sparql"            
-            query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
+            query-datatype="json"
+            query="SELECT DISTINCT * WHERE {?item <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/voc/hp/Place>;<http://www.w3.org/2000/01/rdf-schema#label> ?label. FILTER regex(?label,%s,'i')}LIMIT 20"
         />
 
-        <label>l(Taufdatum):</label>
-        <input type="literal" name="hp:babtismDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+        <label>Sterbedatum</label>
+        <input name="http://purl.org/voc/hp/dateOfDeath" type="literal" datatype="xsd:date" />
 
-        <label>l(Taufort):</label>
-        <input type="literal" name="hp:babtismPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
+        <label>Sterbeort</label>
+        <input name="http://purl.org/voc/hp/placeOfDeath" type="resource" external />
 
-        <label>l(Ordinationsdatum):</label>
-        <input type="literal" name="hp:ordinationDate" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+        <label>Vater</label>
+        <input type="resource" external name="http://purl.org/voc/hp/father" />
 
-        <label>l(Ordinationsort):</label>
-        <input type="literal" name="hp:ordinationPlace" datatype="xsd:string" /> <!-- type="resource" autocomplete-ort /--> <!-- select places -->
+        <label>Mutter</label>
+        <input type="resource" external name="http://purl.org/voc/hp/mother" />
 
-        <label>l(Vater):</label>
-        <input type="resource" name="hp:father" external />
+        <label>Ehepartner</label>
+        <input type="resource" external name="http://purl.org/voc/hp/spouse" />
 
-        <label>l(Mutter):</label>
-        <input type="literal" name="hp:mother" datatype="xsd:string" /> <!-- resource type person --> <!-- auswahl xsd:date, xsd:gYear, … -->
+        <label>Kinder</label>
+        <input type="resource" external name="http://purl.org/voc/hp/child" multiple />
 
-        <label>l(Kinder):</label>
-        <input type="literal" name="hp:child" datatype="xsd:string" /> <!-- resource type person --> <!-- auswahl xsd:date, xsd:gYear, … -->
+        <label>Schule</label>
+        <input type="resource" external name="http://purl.org/voc/hp/attendedSchool" multiple />
 
-        <label>l(Sterbedatum):</label>
-        <input type="literal" name="hp:dateOfDeath" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+        <label>Ordinationsdatum</label>
+        <input name="http://purl.org/voc/hp/dateOfOrdination" type="literal" datatype="xsd:date" />
 
-        <label>l(Sterbeort):</label>
-        <input type="literal" name="hp:placeOfDeath" datatype="xsd:string" autocomplete
-            query-endpoint="http://dbpedia.org/sparql"
-            query-apitype="sparql"
-            query="SELECT DISTINCT * WHERE{?city rdf:type dbpedia-owl:Settlement;rdfs:label ?label;dbpedia-owl:country <http://dbpedia.org/resource/Germany>.FILTER(regex(?label,%s,'i')&&lang(?label)='de')}LIMIT 20"
-        />
+        <label>Ordinationsort</label>
+        <input name="http://purl.org/voc/hp/placeOfOrdination" type="resource" external />
 
-        <!--
-        <input type="resource" name="hp:attendedSchool" value="SchuleQuery" title="Schule" additional multiple
-            argument="pid:{pid}"            
-        />  
-        -->              
+        <label>Ordinator</label>
+        <input name="http://purl.org/voc/hp/ordinator" type="resource" external />
 
-        <input type="resource" name="hp:attendedSchool" value="EventAusbildung"
-            arguments='{"pid":"{pid}" }' multiple additional            
-        />
-        <!--arguments='[{"pid":"{pid}"}]'-->
+        <label>Pfarrstelle</label>
+        <input type="resource" external name="http://purl.org/voc/hp/hasPosition" multiple />
 
-        <input type="resource" name="hp:hasPosition" value="EventPfarrstelle"
-            arguments='{"pid":"{pid}" }' multiple additional
-        />
-        <!--
-        <fieldset type="resource" name="hp:hasPosition" value="EventPfarrstelle" multiple>
-            <pid="{pid}" />
-        </fieldset>
-        -->
+        <label>Emeritierungsdatum</label>
+        <input name="http://purl.org/voc/hp/dateOfRetirement" type="literal" datatype="xsd:date" />
 
-        <label>l(Bemerkung):</label>
-        <input type="literal" textarea name="rdfs:comment" datatype="xsd:string" multiple />
-    </div>
-        
-    
-    <!--
-    <legend>Schule</legend>
-    <div typeof="SchuleQuery" resource="{sid}" id="SchuleQuery"  >
+        <label>Bemerkungen</label>
+        <input name="http://www.w3.org/2000/01/rdf-schema#comment" textarea type="literal" additional />
 
-        <label>Schule:</label>
-        <input type="literal" name="sid" />  
+        <label>Quellen/Literatur</label>
+        <input name="http://purl.org/voc/hp/sources" textarea type="literal" additional />
 
-        <input name="" type="resource" value="EventAusbildung"
-            argument="pid:{pid} sid:{sid}"
-        />        
-    </div>
-    -->
-    <!-- tmp klasse mittels hook vor result ausgabe entfernen -->
-
-    <legend>l(Schule)</legend>
-    <div typeof="hp:Event" resource="hp:attendingSchool-{i}-{pid}" return-resource="{rdf:object}" id="EventAusbildung">
-
-        <label>l(Label):</label>
-        <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
-
-        <label>Person</label>
-        <input type="resource" external name="rdf:subject" value="{pid}" readonly />
-
-        <label>Beziehung</label>
-        <input type="resource" external name="rdf:predicate" value="hp:attendedSchool" readonly />
-
-        <label>l(Schule):</label>
-        <input type="resource" external name="rdf:object" /> 
-
-        <label>l(Begin):</label>
-        <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-
-        <label>l(Ende):</label>
-        <input type="literal" name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />        
-    </div>    
-
-    <legend>l(Pfarrstelle)</legend>
-    <div typeof="hp:Event" resource="hp:hasPosition-{i}-{pid}" return-resource="{rdf:object}" id="EventPfarrstelle">
-        <label>l(Label):</label>
-        <input type="literal" name="rdfs:label" datatype="xsd:string" value="{rdf:object} ({hp:start} – {hp:end})" /> <!-- select places -->
-
-        <label>Person</label>
-        <input type="resource" name="rdf:subject" value="{pid}" external readonly />
-
-        <label>Beziehung</label>
-        <input type="resource" external name="rdf:predicate" value="hp:hasPosition" readonly />
-
-        <label>l(Pfarrstelle):</label>
-        <input type="resource" name="rdf:object" external />
-
-        <label>l(Begin):</label>
-        <input type="literal" name="hp:start" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
-
-        <label>l(Ende):</label>
-        <input type="literal" name="hp:end" datatype="xsd:date" placeholder="JJJJ-MM-TT" />        
     </div>
 
-</form> 
+</form>
