@@ -1,4 +1,4 @@
-<form base="http://catalogus-professorum.org/cpm/" prefix="cpm ... cpl ... rdfs ... hp ...">
+<form base="http://catalogus-professorum.org/cpm/" prefix="cpm http://catalogus-professorum.org/cpm/ cpl http://catalogus-professorum.org/lipsiensium/ rdfs http://www.w3.org/2000/01/rdf-schema# hp http://purl.org/vok/hp/">
   <legend>Professor</legend>
   <!--  ### Main Class ### -->
   <div typeof="cpm:Professor" resource="cpl:Professor/{puri}">
@@ -8,20 +8,20 @@
     <input name="pid" type="hidden" />
     <input name="puri" type="hidden" value="{cpm:surname}_{pid}" />    
 
-    <label>Bezeichnung:</label>                                                                            
+    <label>Bezeichnung</label>                                                                            
     <input name="rdfs:label" type="literal" datatype="xsd:string" value="{cpm:fullAcademicalTitle} {forenames} {cpm:surname}" required readonly />
 
     <label>öffentlich</label>
     <input type="literal" boolean name="hp:isPublic" datatype="xsd:boolean" checked />
 
-    <label>Akademischer Titel:</label>
+    <label>Akademischer Titel</label>
     <input name="cpm:fullAcademicalTitle" type="literal" datatype="xsd:string" placeholder="Bsp: Prof. Dr." />
 
-    <label>Nachname:</label>
+    <label>Nachname</label>
     <input name="cpm:surname" type="literal" datatype="xsd:string" required />
 
-    <label>Alternativer Name:</label>
-    <input name="cpm:alternativeWritingOfSurname" type="literal" datatype="xsd:string" />
+    <label>Alternativer Name</label>
+    <input name="cpm:alternativeWritingOfSurname" type="literal" datatype="xsd:string" help="Geburtsname / Pseudonym" />
 
     <input name="cpm:has-forename" type="resource" value="cpm:Forename" multiple />
 
@@ -36,15 +36,20 @@
     <label>Religion</label>
     <input name="cpm:religion" type="literal" datatype="xsd:string" placeholder="Religion" />
 
-    <label>Vater:</label>
+    <label>Vater</label>
     <input name="cpm:father" type="literal" datatype="xsd:string"  />
 
-    <label>Mutter:</label>
+    <label>Mutter</label>
     <input name="cpm:mother" type="literal" datatype="xsd:string" />
     
     <input name="cpm:has-period" type="resource" value="cpm:Study"
       arguments='{"puri":"{puri}"}' multiple additional 
     />    
+
+    <input name="cpm:has-period" type="resource" value="cpm:GeneralPeriod"
+      arguments='{"puri":"{puri}"}' multiple additional 
+    />  
+
     <input name="cpm:has-period" type="resource" value="cpm:Career"
       arguments='{"puri":"{puri}"}' multiple additional 
     />
@@ -61,7 +66,7 @@
       arguments='{"puri":"{puri}"}' multiple additional 
     />
 
-    <input name="cpm:has-period" type="resource" value="cpm:Faculty" title="Fakultät" 
+    <input name="cpm:has-period" type="resource" value="cpm:Institution" title="Institution" 
       arguments='{"puri":"{puri}"}' additional multiple
     />
     
@@ -69,36 +74,24 @@
       arguments='{"puri":"{puri}"}' additional multiple
     />
 
-    <!--
-    <input name="cpm:Publication" type="resource" value="cpm:Publication" title="Veröffentlichungen" 
-      arguments='{"puri":"{puri}"}' additional multiple
-    />
-    -->
-
     <label>Veröffentlichungen / Publikationen</label>
-    <!--<input type="literal" name="cpm:publication" multiple />-->
     <input name="cpm:publication" textarea type="literal" datatype="xsd:string" multiple />
 
+    <label>DNB-Link</label>
+    <input name="cpm:gnd" type="resource" external datatype="xsd:string" placeholder="http://d-nb.info/gnd/..." />
 
-    <label>DNB-Link:</label>
-    <!-- TODO: link http://dn-b ... generieren -->
-    <input type="resource" external name="cpm:gnd" datatype="xsd:string" />
+    <label>Biografische / autobiografische Literatur</label>
+    <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple help="Z.B. Festschriften, Kürschners Dt. Gelehrtenkalender oder andere biografische Enzyklopädien" />
 
-    <label>Literatur</label>
-    <!--<input type="literal" name="cpm:literature" multiple />-->
-    <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple />
-
-    <!--
-    <input name="cpm:Literatur" type="resource" value="cpm:Literatur" title="Literatur" 
-      arguments='{"puri":"{puri}"}' additional multiple
-    />  
-    -->
+    <label>Literatur / Publikationen</label>
+    <input name="cpm:literature" textarea type="literal" datatype="xsd:string" multiple help="Angabe zu Schriftenverzeichnissen sowie Referenzdatenbank PubMed." />
 
     <label>Referenzen und Quellen</label>
-    <input name="cpm:references" type="literal" multiple />
+    <input name="cpm:references" type="literal" multiple help="Eindeutige Hinweise auf die Personalakten im UAL, Berufungsakten im Bundesarchiv Berlin-Lichterfelde, Kurzbiografien in Dissertationen sowie eigene ergänzende Hinweise bzw. die von Familienangehörigen." />
 
-    <label>Links:</label>
-    <input type="literal" name="cpm:weblinks" datatype="xsd:string" multiple />
+    <label>Links</label>
+    <input name="cpm:weblinks" type="literal" datatype="xsd:string" multiple help="Links zu Biografien im Wikipedia oder zu 
+  biografischen Angaben auf Institutswebseiten" />
 
     <label>Weitere Informationen</label>
     <input name="cpm:furtherInformation" textarea type="literal" datatype="xsd:string" multiple />
@@ -111,7 +104,7 @@
   <!-- ### Vornamen ### -->
   <legend>Vornamen</legend>                                                                              
   <div typeof="cpm:Forename" resource="cpl:Forename/{cpm:forename}-{cpm:forenamePosition}-{cpm:isFirstName}">
-    <label>Vorname:</label>      
+    <label>Vorname</label>      
     <input name="cpm:forename" type="literal" datatype="xsd:string" placeholder="1. Vorname" required />
 
     <input name="rdfs:label" type="hidden" value="{cpm:forename}" />
@@ -123,16 +116,16 @@
 
   <legend>Geburt</legend>
   <div typeof="cpm:Birth" resource="cpl:Birth/{puri}">
-    <label>Datum:</label>
+    <label>Datum</label>
     <input name="cpm:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
     <!-- TODO: add class shv spatialArea -->
 
-    <label>Ort:</label>
-    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" autocomplete />
+    <label>Ort</label>
+    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" />
 
-    <label>Administrative Einheit:</label>
-    <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string"  />
+    <label>Administrative Einheit</label>
+    <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string" help="Nur ausfüllen, wenn der Geburts- oder Todesort ein relativ unbekannter kleiner Ort ist."  />
 
     <label>Land</label>
     <input name="cpm:country" type="literal" datatype="xsd:string"  />   
@@ -143,18 +136,19 @@
 
   <legend>Tod</legend>
   <div typeof="cpm:Death" resource="cpl:Death/{puri}">
-    <label>Datum:</label>
+
+    <label>Datum</label>
     <input name="cpm:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
     <!-- TODO: add class shv spatialArea -->
 
-    <label>Ort:</label>
-    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Geburtsort" autocomplete />
+    <label>Ort</label>
+    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Sterbeort" autocomplete />
 
-    <label>Administrative Einheit:</label>
-    <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string"  />
+    <label>Administrative Einheit</label>
+    <input name="cpm:administrationDestrict" type="literal" datatype="xsd:string" help="Nur ausfüllen, wenn der Geburts- oder Todesort ein relativ unbekannter kleiner Ort ist."  />
 
-    <label>Land:</label>
+    <label>Land</label>
     <input name="cpm:country" type="literal" datatype="xsd:string"  />    
 
     <label>Anmerkung</label>
@@ -163,15 +157,32 @@
 
   <legend>Schule / Ausbildung / Studium</legend>
   <div typeof="cpm:Study" resource="cpl:Study/{puri}/{rdfs:label}">
-    <p class="help">Eingabe der schulischen und universitären Ausbildung einschließlich Abschluss.<br />Nutzung auch für berufliche Ausbildung</p>
+    <p class="help">Eingabe der schulischen, beruflichen und universitären Ausbildung.<br />Abschluss mit Urkundendatum unter Qualifikationen.</p>
 
     <label>Ausbildungsabschnitt</label>
-    <input name="rdfs:label" type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
+    <input name="rdfs:label" textarea type="literal" datatype="xsd:string" placeholder="Bezeichnung" />
 
-    <label>von:</label>
+    <label>von</label>
     <input name="cpm:from" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
 
-    <label>bis:</label>
+    <label>bis</label>
+    <input name="cpm:to" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
+
+    <label>Anmerkung</label>
+    <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
+  </div>
+
+  <legend>Weiterer Lebensabschnitt</legend>
+  <div typeof="cpm:GeneralPeriod" resource="cpl:GeneralPeriod/{puri}/{rdfs:label}">
+    <p class="help">Weitere Lebensabschnitte die weder zu Schule/Ausbildung/Studium oder als Karriereschritt zur Professur zu bezeichnen sind, wie z.B. Militärdienst, Reichsarbeitsdienst, Gefangenschaft</p>
+
+    <label>Bezeichnung</label>
+    <input name="rdfs:label" textarea type="literal" datatype="xsd:string" />
+
+    <label>von</label>
+    <input name="cpm:from" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
+
+    <label>bis</label>
     <input name="cpm:to" type="literal" datatype="xsd:date" placeholder="JJJJ-MM" />
 
     <label>Anmerkung</label>
@@ -180,15 +191,15 @@
 
   <legend>Karriere</legend>
   <div typeof="cpm:Career" resource="cpl:Career/{puri}/{rdfs:label}">
-    <p class="help">Außeruniversitäre Karriereabschnitte z. B. in der Industrie</p>
+    <p class="help">Incl. außeruniversitäre Karriereabschnitte, wie z.B. bei den Psychologen am Zentralinstitut für Jugenforschung (vgl. Udo Ettrich) oder psychologische Beratungsstelle an der Poliklinik Schönebeck (vgl. Jürgen Guthke), wenn es zur Vorbereitung auf die Universitätslaufbahn diente.</p>
 
     <label>Bezeichnung</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" />
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" />
 
-    <label>von:</label>
+    <label>von</label>
     <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM" />
 
-    <label>bis:</label>
+    <label>bis</label>
     <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM" />
 
     <label>Anmerkung</label>
@@ -197,12 +208,12 @@
 
   <legend>Qualifikation</legend>
   <div typeof="cpm:Qualification" resource="cpl:Qualification/{puri}/{rdfs:label}" multiple>
-    <p class="help">Akademische Karriere (Dissertation, Habilitation, Facultas docendi) mit Thema, Ort, Jahr Umwidmung Dissertation B in Habilitation</p>
+    <p class="help">Akademische Karriere (Diplom-Hauptprüfung, Staatsexamen, Dissertation, Habilitation, Facultas docendi) mit Thema, Ort, Jahr Umwidmung Dissertation B in Habilitation.<br />Gemeinschaftspromotionen unter Anmerkungen notieren.</p>
 
     <label>Bezeichnung</label>
-    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Qualifikationsbeschreibung" />
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" placeholder="Qualifikationsbeschreibung / Dissertationsthema" />
 
-    <label>Jahr:</label>
+    <label>Jahr</label>
     <input type="literal" name="cpm:date" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
     <label>Anmerkung</label>
@@ -211,15 +222,15 @@
 
   <legend>Universitätsämter</legend>
   <div typeof="cpm:Office" resource="cpl:Office/{puri}/{rdfs:label}" multiple>
-    <p class="help">Lehrstühle, Ämter in den Fakultäten, Sektionen u.ä.  innerhalb der Universität Leipzig</p>
+    <p class="help">Lehrstuhlinhaber /Ämter in Fakultäten, Sektionen oder Bereichen wie Direktoren und deren Stellvertreter, Sekretäre der Sektionen, WB- oder FB-Leiter, Klinikleiter etc. incl. Vorsitz in gesellschaftlichen Organisationen innerhalb der Universität.</p>
 
     <label>Bezeichnung</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
+    <input type="literal" name="rdfs:label" textarea datatype="xsd:string" />
 
-    <label>von:</label>
+    <label>von</label>
     <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM" />
 
-    <label>bis:</label>
+    <label>bis</label>
     <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM" />
 
     <label>Anmerkung</label>
@@ -228,15 +239,15 @@
 
   <legend>Mitgliedschaften / Funktionen</legend>
   <div typeof="cpm:membership" resource="cpl:membership/{puri}/{rdfs:label}" multiple>
-    <p class="help">Mitgliedschaften in Parteien, Organisationen (DTSB, KdT u. ä) oder Universitätsämter außerhalb der Universität Leipzig mit Funktionen</p>
+    <p class="help">Universitätsämter oder Leitungsfunktionen außerhalb der Universität Leipzig. <br />Mitgliedschaften in wissenschaftlichen Gesellschaften, Akademien, Beiräten, Herausgeberschaften etc. sowie Parteien u. Organisationen.</p>
 
     <label>Bezeichnung</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" />
 
-    <label>von:</label>
+    <label>von</label>
     <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
-    <label>bis:</label>
+    <label>bis</label>
     <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
     <label>Anmerkung</label>
@@ -244,20 +255,28 @@
   </div>
 
   <legend>Fakultät / Sektion / Institut</legend>
-  <div typeof="cpm:Faculty" resource="cpl:Faculty/{puri}/{rdfs:label}" multiple>
-    <label>Fakultät</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="" />
+  <div typeof="cpm:Institution" resource="cpl:Institution/{puri}/{rdfs:label}" multiple>
+    <p class="help">Mehrfacherfassung bei Inhabern von Professuren über verschiedene Epochen, d.h. vor 1968/69, 1969-1990, 1990-1993 u. nach 1993.</p>
 
-    <label>Sektion</label>
-    <input type="literal" name="rdfs:section" datatype="xsd:string" />
+    <label>Fakultät</label>
+    <input type="literal" name="rdfs:label" datatype="xsd:string" />    
 
     <label>Institut</label>
-    <input type="literal" name="rdfs:institute" datatype="xsd:string" />
+    <input type="literal" name="cpm:institute" datatype="xsd:string" />
 
-    <label>von:</label>
+    <label>Lehrstuhl</label>
+    <input type="literal" name="cpm:chair" datatype="xsd:string" />
+
+    <label>Sektion (69-90)</label>
+    <input type="literal" name="cpm:section" datatype="xsd:string" help="Nur für die Epoche von 1969 bis 1990 anzugeben." />
+
+    <label>FB/WG/WB (69-90)</label>
+    <input type="literal" name="cpm:studyField" datatype="xsd:string" help="Nur für die Epoche von 1969 bis 1990 anzugeben. WB - Wissenschaftsbereich, WG - Wissenschaftsgebiet, FB - Forschungsbereich" />
+
+    <label>von</label>
     <input type="literal" name="cpm:from" datatype="xsd:date" placeholder="JJJJ" />
 
-    <label>bis:</label>
+    <label>bis</label>
     <input type="literal" name="cpm:to" datatype="xsd:date" placeholder="JJJJ" />
 
     <label>Anmerkung</label>
@@ -266,14 +285,16 @@
 
   <legend>Ehrungen</legend>
   <div typeof="cpm:Honour" resource="cpl:Honour/{puri}/{rdfs:label}" multiple>
-    <label>Bezeichnung</label>
-    <input type="literal" name="rdfs:label" datatype="xsd:string" placeholder="Bezeichnung" />
+    <p class="help">Z. B. Ehrenpromotionen, Ernennungen zum Studienrat, Medizinalrat, Aufnahme in wiss. Akademien  sowie staatliche Auszeichnungen. (Anm.: Oberarzt gilt analog Oberassistent als beruflicher Karriereschritt).</p>
 
-    <label>Jahr:</label>
+    <label>Bezeichnung</label>
+    <input type="literal" name="rdfs:label" datatype="xsd:string" />
+
+    <label>Jahr</label>
     <input type="literal" name="cpm:date" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 
     <label>Anmerkung</label>
     <input name="rdfs:comment" textarea type="literal" datatype="xsd:string" additional />
   </div>
-  
+
 </form> 
