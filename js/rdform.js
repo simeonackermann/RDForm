@@ -84,11 +84,11 @@
 
 			// parsing model
 			if ( this.template ) {
-				this.parseTemplate();				
+				this.parseTemplate();
 				this.parseTemplateToJSON();
 				if ( this.settings.debug ) {
 					//console.log( "RDForm Model = ", this.MODEL );
-					console.log( "RDFormJSON Model = ", this.JSON_MODEL );
+					console.log( "RDForm JSON Model = ", this.JSON_MODEL );
 				}
 			}
 
@@ -108,7 +108,10 @@
 				}
 
 				// maybe add existing data
-				if ( this.data ) {			
+				if ( this.data && this.data.length > 0 ) {
+					if ( this.settings.debug ) {
+						console.log( "RDForm Inset Data = ", this.data );
+					}
 					this.addExistingData();
 				}
 
