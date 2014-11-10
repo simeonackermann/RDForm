@@ -93,27 +93,28 @@
 			}
 
 			if ( this.MODEL.length > 0 ) {
-				this.$elem.append( this.createHTMLForm() );
+				this.$elem.append( this.createHTMLForm() );				
+								
+				if ( ! this.initFormHandler.called ) {
+					this.initFormHandler();
+				}
 
-				var sbm_text = this.data ? "update" : "create";
+				var sbm_text = "create";
+
+				// maybe add existing data
+				if ( this.data && this.data.length > 0 ) {
+					sbm_text = "update";
+					if ( this.settings.debug ) {
+						console.log( "RDForm Inset Data = ", this.data );
+					}
+					this.addExistingData();
+				}
 
 				// append submit button
 				this.$elem.append('<div class="form-group '+this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' + 
 									//'<button type="reset" class="btn btn-default">'+ _this.l("reset") +'</button> ' + 
 									'<button type="submit" class="btn btn-lg btn-primary">'+ this.l(sbm_text) +'</button>' + 
 								'</div></div>' );
-				
-				if ( ! this.initFormHandler.called ) {
-					this.initFormHandler();
-				}
-
-				// maybe add existing data
-				if ( this.data && this.data.length > 0 ) {
-					if ( this.settings.debug ) {
-						console.log( "RDForm Inset Data = ", this.data );
-					}
-					this.addExistingData();
-				}
 
 			}
 
