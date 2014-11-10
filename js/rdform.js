@@ -610,6 +610,7 @@
 				'additional': resource['additional'],
 				'multiple': resource['multiple'],
 				'arguments': resource['arguments'],
+				'typeof': resource['typeof'],
 			});
 
 			//if ( resource['resource'] ) {
