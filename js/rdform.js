@@ -190,23 +190,23 @@
 					
 					// do some property-type specific things
 					switch ( curProperty['type'] ) {
-						case "resource":
-							curProperty['typeof'] = curClass['typeof'];
-							
+						case "resource":													
 							// test if the resource class exists (if not external)
 							if ( curProperty['external'] === undefined ) {
+								curProperty['typeof'] = curClass['typeof'];
 								if ( $(template).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
 									_this.showAlert( "warning", "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
 									success = false;
 								}
 							}
+
 							// add arguments-index for multiple resources
 							if ( curProperty['multiple'] !== undefined ) {
 								var arguments = ( curProperty['arguments'] === undefined ) ? new Object() : $.parseJSON( curProperty['arguments'] );
 								arguments['i'] = 1;
 								curProperty['arguments'] = JSON.stringify( arguments );
 							}
-							break;		
+							break;
 
 						case "literal":
 							break;									
@@ -610,8 +610,7 @@
 				'name': resource['name'],
 				'additional': resource['additional'],
 				'multiple': resource['multiple'],
-				'arguments': resource['arguments'],
-				'typeof': resource['typeof'],
+				'arguments': resource['arguments']				
 			});
 
 			//if ( resource['resource'] ) {
@@ -622,7 +621,8 @@
 			if ( resource['external'] !== undefined ) {						
 				resourceClass.prop("type", "text"); // bugfix for jquery < 1.8 
 				resourceClass.attr({
-					'external': 'external',
+					'external': resource['external'],
+					'typeof': resource['typeof'],
 					'class': 'form-control input-sm',
 					'value': resource['value'],
 					'readonly': resource['readonly'],
