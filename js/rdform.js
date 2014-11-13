@@ -1301,6 +1301,8 @@
 										},									
 										success: function( data ) {
 											response( $.map( data.results.bindings, function( item ) {
+												if ( _this.Hooks && typeof _this.Hooks.__autocompleteGetItem !== "undefined" )
+													item = _this.Hooks.__autocompleteGetItem( item );
 												return {
 													label: item.label.value, // wird angezeigt
 													value: item.item.value
