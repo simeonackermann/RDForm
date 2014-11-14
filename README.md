@@ -136,6 +136,7 @@ Optional Attribute  | Description
 `required`  	| Required property, cannot be empty
 `additional`  	| Additional, by default hidden property. Can be added it by clicking an add-button
 `readonly`  	| Cannot be edited
+'hidden'		| Hide this literal in the form
 `help`  		| Short help text for the property
 
 Example:

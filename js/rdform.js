@@ -550,6 +550,9 @@
 			if ( literal['required'] !== undefined ) {	
 				thisLabel.append( ' <abbr title="'+_this.l("Required field")+'">*</abbr>' );
 			}
+			if ( literal['hidden'] !== undefined ) {
+				thisFormGroup.hide();
+			}
 
 			if ( literal['help'] !== undefined ) {
 				thisLabel.prepend( '<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-literal-help"></span>' );
