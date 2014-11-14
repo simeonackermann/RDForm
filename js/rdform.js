@@ -551,7 +551,6 @@
 				thisLabel.append( ' <abbr title="'+_this.l("Required field")+'">*</abbr>' );
 			}
 			if ( literal['hidden'] !== undefined ) {
-				//thisFormGroup.hide();
 				thisFormGroup.addClass("hidden");
 			}
 
@@ -658,6 +657,10 @@
 	            		'query-datatype' : resource['query-datatype'],
 	            		'query' : resource['query']
 					});
+				}
+
+				if ( resource['hidden'] !== undefined ) {
+					curFormGroup.addClass("hidden");
 				}
 			}
 
