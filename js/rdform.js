@@ -551,7 +551,8 @@
 				thisLabel.append( ' <abbr title="'+_this.l("Required field")+'">*</abbr>' );
 			}
 			if ( literal['hidden'] !== undefined ) {
-				thisFormGroup.hide();
+				//thisFormGroup.hide();
+				thisFormGroup.addClass("hidden");
 			}
 
 			if ( literal['help'] !== undefined ) {
