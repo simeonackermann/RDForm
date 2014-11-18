@@ -1142,7 +1142,7 @@
 			// BUTTON: remove external ressource
 			_this.$elem.on("click", "button.remove-external-resource", function() {
 				var literalContainer = $(this).parentsUntil("div."+_this._ID_+"-resource-group").parent();
-				var literalName = $(this).prev().attr("name");
+				var literalName = $(literalContainer).find("input").attr("name");
 				var prevLiteral = literalContainer.prev("div."+_this._ID_+"-resource-group").find('*[name="'+literalName+'"]');
 				var nextLiteral = literalContainer.next("div."+_this._ID_+"-resource-group").find('*[name="'+literalName+'"]');
 				
