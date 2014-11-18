@@ -105,7 +105,7 @@
 				if ( this.data && this.data.length > 0 ) {
 					sbm_text = "update";
 					if ( this.settings.debug ) {
-						console.log( "RDForm Inset Data = ", this.data );
+						console.log( "RDForm Insert Data = ", this.data );
 					}
 					this.addExistingData();
 				}
@@ -725,7 +725,7 @@
 
 					if ( typeof data[i] === "string" ) { // its a literal						
 
-						var literal = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("input,textarea"), 'name', curName );
+						var literal = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("input,select,textarea"), 'name', curName );
 
 						if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
 							var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("button.add-class-literal"), 'name', curName );
