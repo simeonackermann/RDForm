@@ -75,7 +75,11 @@
     />
 
     <label>Veröffentlichungen / Publikationen</label>
-    <input name="cpm:publication" textarea type="literal" datatype="xsd:string" multiple />
+    <!--<input name="cpm:publication" textarea type="literal" datatype="xsd:string" additional multiple />-->
+
+    <input name="cpm:published" type="resource" value="cpm:Publication"
+      arguments='{"puri":"{puri}"}' multiple
+    /> 
 
     <label>DNB-Link</label>
     <input name="cpm:gnd" type="resource" external datatype="xsd:string" placeholder="http://d-nb.info/gnd/..." />
@@ -295,6 +299,14 @@
 
     <label>Anmerkung</label>
     <input name="cpm:periodNote" textarea type="literal" datatype="xsd:string" additional />
+  </div>
+
+  <legend>Publikationen</legend>
+  <div typeof="cpm:Publication" resource="cpl:Publication/{puri}/{rdfs:label}" multiple>    
+
+    <label>Bezeichnung</label>
+    <input type="literal" textarea name="rdfs:label" datatype="xsd:string" />
+
   </div>
 
 </form> 
