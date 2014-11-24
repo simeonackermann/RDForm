@@ -102,7 +102,7 @@
 				var sbm_text = "create";
 
 				// maybe add existing data
-				if ( this.data && this.data.length > 0 ) {
+				if ( this.data ) {
 					sbm_text = "update";
 					if ( this.settings.debug ) {
 						console.log( "RDForm Insert Data = ", this.data );
