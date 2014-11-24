@@ -1089,10 +1089,10 @@
 				++arguments['i'];
 				$(thisClass).attr("arguments", JSON.stringify( arguments ) );
 
+				$(classContainer).removeAttr("style"); // remove style (BUGIF in addExistingDate, on duplicate multiple resource the classConainer is hidden...)
 				$(classContainer).hide();			
 				$(this).parentsUntil("div."+_this._ID_+"-resource-group").parent().after( classContainer );
-				$(classContainer).show("slow");
-				$(classContainer).removeAttr("style"); // remove style (BUGIF in addExistingDate, on duplicate multiple resource the classConainer is hidden...)
+				$(classContainer).show("slow");				
 				$(this).remove(); // remove duplicate btn
 
 				if ( _this.Hooks && typeof _this.Hooks.__afterDuplicateClass !== "undefined" )
