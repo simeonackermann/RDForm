@@ -69,7 +69,7 @@ RDForm_Hooks.prototype = {
 		var thisProperty = thisPropertyContainer.find("."+_this.rdform._ID_+"-property").first();
 
 		// set forename placeholder to index
-		if ( $(thisProperty).attr("typeof").search(/cpm:Forename/) != -1 ) {
+		if ( $(thisProperty).attr("typeof") !== undefined &&  $(thisProperty).attr("typeof").search(/cpm:Forename/) != -1 ) {
 			var arguments = $(thisProperty).attr("arguments");
 			var index = $.parseJSON( arguments )['i'];
 			$(thisProperty).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");

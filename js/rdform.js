@@ -454,6 +454,7 @@
 									'<span class="glyphicon glyphicon-plus"></span> '+ literal['@rdform']['label'] +
 								'</button>' );
 				addBtn.data( _this._ID_ + "-model", literal);
+				addBtn.attr( literal["@rdform"] );
 				thisFormGroup.append ( addBtn );
 				return thisFormGroup;
 			}
@@ -560,7 +561,7 @@
 
 				// return create button
 				if ( resource['@rdform']['additional'] !==  undefined && resource['@rdform']['additionalIntermit'] === undefined ) {
-					var addBtn = $(	'<button type="button" class="btn btn-default btn-sm '+_this._ID_+'-add-property" title="' + _this.l('Add resource %s',  resource['@rdform']['label']) +'" label="'+resource['@rdform']['label']+'">' + 
+					var addBtn = $(	'<button type="button" class="btn btn-default btn-sm '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l('Add resource %s',  resource['@rdform']['label']) +'" label="'+resource['@rdform']['label']+'">' + 
 										'<span class="glyphicon glyphicon-plus"></span> '+ resource['@rdform']['label'] +
 									'</button>' );
 					addBtn.data( _this._ID_ + "-model", resource);
@@ -583,7 +584,7 @@
 					else
 						var btnText = resource['@rdform']['title'] ? resource['@rdform']['title'] : resource['@rdform']['name'] + " - " + resource['@rdform']['value'];
 
-					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' + 
+					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' + 
 												'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 											'</button>' );
 					resourceClass.data( _this._ID_ + "-model", resource);
@@ -685,11 +686,11 @@
 
 				if ( i[0] != "@" ) { // we dont want insert @id, @type, ...
 
-					if ( typeof data[i] === "string" ) { // its a literal						
+					if ( typeof data[i] === "string" ) { // its a literal	
 
-						var literal = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("input,select,textarea"), 'name', curName );
+						var literal = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("input,select,textarea"), 'name', curName ).last();
 
-						if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
+						if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button							
 							var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find('button.'+_this._ID_+'-add-property'), 'name', curName );
 							if ( $(addBtn).length == 0 ) {
 								_this.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }', false );
