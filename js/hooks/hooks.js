@@ -27,35 +27,34 @@ RDForm_Hooks.prototype = {
 		var _this = this;
 	},
 
-	// after the addLiteral button was clicked
-	__afterAddLiteral : function ( thisLiteral ) {
+	// after adding a property
+	__afterAddProperty : function ( thisProperty ) {
 		var _this = this;
+		console.log( thisProperty );
 	},
 
-	// after the duplicateLiteral button was clicked
-	__afterDuplicateLiteral : function ( thisLiteral ) {
+	// after adding a property
+	__afterDuplicateProperty : function ( thisProperty ) {
 		var _this = this;
+		console.log( thisProperty );
 	},
 
-	// after the addClass button was clicked
-	__afterAddClass : function ( thisResource ) {
+	// after adding a property
+	__beforeRemoveProperty : function ( thisProperty ) {
 		var _this = this;
-	},
-
-	// after the duplicateClass button was clicked
-	__afterDuplicateClass : function ( thisClass ) {
-		var _this = this;
-	},
-
-	// after the duplicateExternalResource button was pressed
-	__afterDuplicateExternalResource : function ( thisResource ) {
-		var _this = this;
+		console.log( thisProperty );
 	},
 
 	// validate form-input on change value or on submit the form
 	__userInputValidation : function ( property ) {
 		var _this = this;
 		// return false if property value is not valid
+	},
+
+	// get the the item for the result-search list on autocomplete
+	__autocompleteGetItem : function( item ) {
+		// e.g. change the label as: item.label.value = "My val: " + item.label.value;
+		return item;
 	},
 
 
