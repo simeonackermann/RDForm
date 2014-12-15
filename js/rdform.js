@@ -84,37 +84,33 @@
 
 			// parsing model
 			if ( this.template ) {
-				this.parseTemplate();
+				this.parseTemplate();				
 				this.parseTemplateToJSON();
 				if ( this.settings.debug ) {
 					//console.log( "RDForm Model = ", this.MODEL );
-					console.log( "RDForm JSON Model = ", this.JSON_MODEL );
+					console.log( "RDFormJSON Model = ", this.JSON_MODEL );
 				}
 			}
 
 			if ( this.MODEL.length > 0 ) {
-				this.$elem.append( this.createHTMLForm() );				
-								
-				if ( ! this.initFormHandler.called ) {
-					this.initFormHandler();
-				}
+				this.$elem.append( this.createHTMLForm() );
 
-				var sbm_text = "create";
-
-				// maybe add existing data
-				if ( this.data ) {
-					sbm_text = "update";
-					if ( this.settings.debug ) {
-						console.log( "RDForm Insert Data = ", this.data );
-					}
-					this.addExistingData();
-				}
+				var sbm_text = this.data ? "update" : "create";
 
 				// append submit button
 				this.$elem.append('<div class="form-group '+this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' + 
 									//'<button type="reset" class="btn btn-default">'+ _this.l("reset") +'</button> ' + 
 									'<button type="submit" class="btn btn-lg btn-primary">'+ this.l(sbm_text) +'</button>' + 
 								'</div></div>' );
+				
+				if ( ! this.initFormHandler.called ) {
+					this.initFormHandler();
+				}
+
+				// maybe add existing data
+				if ( this.data ) {			
+					this.addExistingData();
+				}
 
 			}
 
@@ -190,23 +186,23 @@
 					
 					// do some property-type specific things
 					switch ( curProperty['type'] ) {
-						case "resource":													
+						case "resource":
+							curProperty['typeof'] = curClass['typeof'];
+							
 							// test if the resource class exists (if not external)
 							if ( curProperty['external'] === undefined ) {
-								curProperty['typeof'] = curClass['typeof'];
 								if ( $(template).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
 									_this.showAlert( "warning", "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['typeof'] + "\"." );
 									success = false;
 								}
 							}
-
 							// add arguments-index for multiple resources
 							if ( curProperty['multiple'] !== undefined ) {
 								var arguments = ( curProperty['arguments'] === undefined ) ? new Object() : $.parseJSON( curProperty['arguments'] );
 								arguments['i'] = 1;
 								curProperty['arguments'] = JSON.stringify( arguments );
 							}
-							break;
+							break;		
 
 						case "literal":
 							break;									
@@ -550,9 +546,6 @@
 			if ( literal['required'] !== undefined ) {	
 				thisLabel.append( ' <abbr title="'+_this.l("Required field")+'">*</abbr>' );
 			}
-			if ( literal['hidden'] !== undefined ) {
-				thisFormGroup.addClass("hidden");
-			}
 
 			if ( literal['help'] !== undefined ) {
 				thisLabel.prepend( '<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-literal-help"></span>' );
@@ -613,7 +606,7 @@
 				'name': resource['name'],
 				'additional': resource['additional'],
 				'multiple': resource['multiple'],
-				'arguments': resource['arguments']				
+				'arguments': resource['arguments'],
 			});
 
 			//if ( resource['resource'] ) {
@@ -624,8 +617,7 @@
 			if ( resource['external'] !== undefined ) {						
 				resourceClass.prop("type", "text"); // bugfix for jquery < 1.8 
 				resourceClass.attr({
-					'external': resource['external'],
-					'typeof': resource['typeof'],
+					'external': 'external',
 					'class': 'form-control input-sm',
 					'value': resource['value'],
 					'readonly': resource['readonly'],
@@ -657,10 +649,6 @@
 	            		'query-datatype' : resource['query-datatype'],
 	            		'query' : resource['query']
 					});
-				}
-
-				if ( resource['hidden'] !== undefined ) {
-					curFormGroup.addClass("hidden");
 				}
 			}
 
@@ -725,7 +713,7 @@
 
 					if ( typeof data[i] === "string" ) { // its a literal						
 
-						var literal = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("input,select,textarea"), 'name', curName );
+						var literal = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("input,textarea"), 'name', curName );
 
 						if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
 							var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("button.add-class-literal"), 'name', curName );
@@ -1089,10 +1077,10 @@
 				++arguments['i'];
 				$(thisClass).attr("arguments", JSON.stringify( arguments ) );
 
-				$(classContainer).removeAttr("style"); // remove style (BUGIF in addExistingDate, on duplicate multiple resource the classConainer is hidden...)
 				$(classContainer).hide();			
 				$(this).parentsUntil("div."+_this._ID_+"-resource-group").parent().after( classContainer );
-				$(classContainer).show("slow");				
+				$(classContainer).show("slow");
+				$(classContainer).removeAttr("style"); // remove style (BUGIF in addExistingDate, on duplicate multiple resource the classConainer is hidden...)
 				$(this).remove(); // remove duplicate btn
 
 				if ( _this.Hooks && typeof _this.Hooks.__afterDuplicateClass !== "undefined" )
@@ -1142,7 +1130,7 @@
 			// BUTTON: remove external ressource
 			_this.$elem.on("click", "button.remove-external-resource", function() {
 				var literalContainer = $(this).parentsUntil("div."+_this._ID_+"-resource-group").parent();
-				var literalName = $(literalContainer).find("input").attr("name");
+				var literalName = $(this).prev().attr("name");
 				var prevLiteral = literalContainer.prev("div."+_this._ID_+"-resource-group").find('*[name="'+literalName+'"]');
 				var nextLiteral = literalContainer.next("div."+_this._ID_+"-resource-group").find('*[name="'+literalName+'"]');
 				
@@ -1308,8 +1296,6 @@
 										},									
 										success: function( data ) {
 											response( $.map( data.results.bindings, function( item ) {
-												if ( _this.Hooks && typeof _this.Hooks.__autocompleteGetItem !== "undefined" )
-													item = _this.Hooks.__autocompleteGetItem( item );
 												return {
 													label: item.label.value, // wird angezeigt
 													value: item.item.value
