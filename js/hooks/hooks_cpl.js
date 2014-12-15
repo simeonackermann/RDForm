@@ -49,7 +49,7 @@ RDForm_Hooks.prototype = {
 		});
 
 		// big publication literal highlighting
-		_this.$elem.find('label:contains("Veröffentlichungen / Publikationen")').first().parent().before("<div class='rdform-hidden-group'><legend>Veröffentlichungen, Literatur, Sonstiges</legend></div>");	
+		//_this.$elem.find('label:contains("Veröffentlichungen / Publikationen")').first().parent().before("<div class='rdform-hidden-group'><legend>Veröffentlichungen, Literatur, Sonstiges</legend></div>");	
 
 	},
 
@@ -58,37 +58,28 @@ RDForm_Hooks.prototype = {
 		var _this = this;
 	},
 
-	// after the addLiteral button was clicked
-	__afterAddLiteral : function ( thisLiteral ) {
+	// after adding a property
+	__afterAddProperty : function ( thisPropertyContainer ) {
 		var _this = this;
 	},
 
-	// after the duplicateLiteral button was clicked
-	__afterDuplicateLiteral : function ( thisLiteral ) {
+	// after adding a property
+	__afterDuplicateProperty : function ( thisPropertyContainer ) {
 		var _this = this;
-	},
-
-
-	// after the addClass button was clicked
-	__afterAddClass : function ( thisResource ) {
-		var _this = this;
-	},
-
-	// after the duplicateClass button was clicked
-	__afterDuplicateClass : function ( thisClass ) {
-		var _this = this;
+		var thisProperty = thisPropertyContainer.find("."+_this.rdform._ID_+"-property").first();
 
 		// set forename placeholder to index
-		if ( $(thisClass).attr("typeof").search(/cpm:Forename/) != -1 ) {
-			var arguments = $(thisClass).attr("arguments");
+		if ( $(thisProperty).attr("typeof").search(/cpm:Forename/) != -1 ) {
+			var arguments = $(thisProperty).attr("arguments");
 			var index = $.parseJSON( arguments )['i'];
-			$(thisClass).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
+			$(thisProperty).find('input[name="cpm:forename"]').attr( "placeholder" , index + ". Vorname");
 		}
 	},
 
-	// after the duplicateExternalResource button was pressed
-	__afterDuplicateExternalResource : function ( thisResource ) {
+	// after adding a property
+	__beforeRemoveProperty : function ( thisPropertyContainer ) {
 		var _this = this;
+		var thisProperty = thisPropertyContainer.find("."+_this.rdform._ID_+"-property").first();
 	},
 
 	// validate form-input on change value or on submit the form
