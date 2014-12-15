@@ -36,7 +36,7 @@ $(document).ready(function(){
 			lang: "lang/de.js",
 			debug : true,
 			submit: function() {
-
+				
 				submitRDForm( $(this)[0] );
 
 			}
@@ -82,6 +82,7 @@ $(document).ready(function(){
 	$(document).on("click", ".show-list", function() {		
 		showForm = false;
 		window.location.reload();
+		window.scrollTo(0,0);
 	});	
 
 	/*
