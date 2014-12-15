@@ -28,21 +28,21 @@ RDForm_Hooks.prototype = {
 	},
 
 	// after adding a property
-	__afterAddProperty : function ( thisProperty ) {
+	__afterAddProperty : function ( thisPropertyContainer) {
 		var _this = this;
-		console.log( thisProperty );
+		var thisProperty = thisPropertyContainer.find("."+_this.rdform._ID_+"-property").first();
 	},
 
 	// after adding a property
-	__afterDuplicateProperty : function ( thisProperty ) {
+	__afterDuplicateProperty : function ( thisPropertyContainer ) {
 		var _this = this;
-		console.log( thisProperty );
+		var thisProperty = thisPropertyContainer.find("."+_this.rdform._ID_+"-property").first();
 	},
 
 	// after adding a property
-	__beforeRemoveProperty : function ( thisProperty ) {
+	__beforeRemoveProperty : function ( thisPropertyContainer ) {
 		var _this = this;
-		console.log( thisProperty );
+		var thisProperty = thisPropertyContainer.find("."+_this.rdform._ID_+"-property").first();
 	},
 
 	// validate form-input on change value or on submit the form
