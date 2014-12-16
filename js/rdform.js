@@ -126,11 +126,12 @@
 			var template = $.parseHTML( _this.template );
 			var curClassIndex = 0;
 
-			_this.MODEL[0] = new Object();
+			_this.MODEL[0] = { "@context" : {} };
 
 			// get baseuri
 			if ( $(template).attr("base") ) {
 				_this.MODEL[0]["@base"] = $(template).attr("base");
+				_this.MODEL[0]["@context"]["@base"] = _this.MODEL[0]["@base"];
 			}		
 
 			// get prefixes
@@ -139,9 +140,7 @@
 				if ( prefixesArr.length % 2 != 0 ) {
 					_this.showAlert( "warning", "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
 				}
-				_this.MODEL[0]["@context"] = new Object();
 				for (var i = 0; i < prefixesArr.length - 1; i += 2) {
-					//_this.MODEL[0]["@context"][ prefixesArr[i] ] = prefixesArr[i+1];
 					_this.MODEL[0]["@context"][ prefixesArr[i] ] = new Object( { "@id" : prefixesArr[i+1] } );
 				}
 			}
@@ -332,14 +331,8 @@
 				'typeof'	: classModel['@type'],
 				'resource'	: classModel['@id']
 			});
-			thisClass.data( _this._ID_ + "-model", classModel);
-			/*
-			var attrs = $.extend( true, {}, classModel );
-			delete attrs['properties']; 
-			thisClass.attr( attrs ); // add all attributes except the array properties
-			*/
-
 			thisClass.attr( classModel['@rdform'] ); // add all rdform-attributes
+			thisClass.data( _this._ID_ + "-model", classModel);
 
 			// maybe rewrite arguments index
 			if ( classModel['@rdform']['arguments'] !== undefined ) {
@@ -351,9 +344,11 @@
 				//thisClass.data( _this._ID_ + "-model[@rdform][arguments]", arguments);
 			}
 			
-
+			var thisLegend = $( "<legend></legend>" );
+			if ( classModel["@rdform"]['legend'] !== undefined ) {
+				thisLegend.text( classModel["@rdform"]['legend'] );
+			}
 			
-			var thisLegend = $( "<legend>"+ classModel["@rdform"]['legend'] +"</legend>" );
 			/*
 			// TODO: maybe add baseprefix, name, return-resource...
 			if ( classModel['name'] ) 
@@ -450,20 +445,15 @@
 
 			// return create button
 			if ( literal['@rdform']['additional'] !==  undefined && literal['@rdform']['additionalIntermit'] === undefined ) {
-				var addBtn = $(	'<button type="button" class="btn btn-default btn-sm '+_this._ID_+'-add-property" title="' + _this.l('Add literal %s',  literal['@rdform']['label']) +'" label="'+literal['@rdform']['label']+'">' + 
+				var addBtn = $(	'<button type="button" class="btn btn-default btn-sm '+_this._ID_+'-add-property" name="'+ literal['@rdform']['name'] +'" title="' + _this.l('Add literal %s',  literal['@rdform']['label']) +'" label="'+literal['@rdform']['label']+'">' + 
 									'<span class="glyphicon glyphicon-plus"></span> '+ literal['@rdform']['label'] +
 								'</button>' );
 				addBtn.data( _this._ID_ + "-model", literal);
-				addBtn.attr( literal["@rdform"] );
 				thisFormGroup.append ( addBtn );
 				return thisFormGroup;
 			}
 
-			var thisLabel = $("<label></label>");
-			thisLabel.attr({
-				'class': 'col-xs-3 control-label'
-			});
-			thisLabel.text( literal['@rdform']['label'] );
+			var thisLabel = $("<label class='col-xs-3 control-label'>"+literal['@rdform']['label']+"</label>");
 			thisFormGroup.append( thisLabel );
 			
 			if ( literal['@rdform']['textarea'] !==  undefined ) {
@@ -471,12 +461,25 @@
 			}
 			else if ( literal['@rdform']['select'] !==  undefined ) {
 				var thisInput = $("<select></select>");
+				var selectOptions = $.parseJSON( literal['@rdform']['select-options'] );
+				thisInput.append( '<option value="" disabled selected>'+_this.l("choose")+'...</option>' );
+				for ( var soi in selectOptions ) {
+					thisInput.append( '<option value="'+ selectOptions[soi] +'">'+ selectOptions[soi] +'</option>' );
+				}
+			}
+			else if ( literal['@rdform']['boolean'] !==  undefined ) {
+				var thisInput = $("<input type='checkbox' />");
 			}
 			else {
-				var thisInput = $("<input />");
+				var thisInput = $("<input type='text' />");
 			}	
+
+			thisInput.data( _this._ID_ + "-model", literal);
+			// add attributes (except type)
+			var attr = $.extend( true, {}, literal["@rdform"] );
+			delete attr["type"];
+			thisInput.attr( attr );
 			thisInput.attr('class', 'form-control input-sm '+_this._ID_+'-property');
-			thisInput.attr( literal['@rdform'] );
 
 			if ( literal['@rdform']['datatype'] !== undefined ) {
 				if (  literal['@rdform']['datatype'].search(/.*date/) != -1 || literal['@rdform']['name'].search(/.*date/) != -1 ) {
@@ -489,36 +492,20 @@
 			}
 
 			if ( literal['@rdform']['boolean'] !== undefined ) {
-				thisInput.attr( "type", "checkbox" );
 				thisInputContainer.addClass( "checkbox" );
 				thisInput.removeClass( "form-control input-sm" );
 				thisInput = $("<label></label>").append( thisInput );
 				thisInput.append( literal['@rdform']['label'] );
 				thisLabel.text( "" );
-			}
-			else if ( literal['@rdform']['select'] !== undefined ) {
-				var selectOptions = $.parseJSON( literal['@rdform']['select-options'] );
-				thisInput.append( '<option value="" disabled selected>'+_this.l("choose")+'...</option>' );
-				for ( var soi in selectOptions ) {
-					thisInput.append( '<option value="'+ selectOptions[soi] +'">'+ selectOptions[soi] +'</option>' );
-				}			
-			}
-			else if ( literal['@rdform']['textarea'] !== undefined ) {
+			}	
 
-			}
-			else {
-				thisInput.attr( "type", "text" );
-			}
-
-			thisInput.data( _this._ID_ + "-model", literal);
-			thisInputContainer.append( thisInput );
+			thisInputContainer.append( thisInput );		
 
 			if ( literal['@rdform']['additional'] !==  undefined ) {
 				thisInputContainer.append('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove literal %s", literal['@rdform']['label'] ) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 			}
 
 			if ( literal['@rdform']['multiple'] !== undefined ) {
-				thisInput.attr('index', literal['@rdform']['index']); // add index
 				// add remove button
 				if ( literal['@rdform']['additional'] ===  undefined ) {
 					thisInputContainer.append('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove literal %s", literal['@rdform']['label'] ) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
@@ -554,8 +541,7 @@
 		  */
 		createHTMLResource: function( resource ) {		
 			var _this = this;
-			var curFormGroup = $('<div class="form-group '+_this._ID_+'-property-container '+_this._ID_+'-resource-group resource-group-'+_this.getWebsafeString(resource['@rdform']['name'])+'-'+_this.getWebsafeString(resource['@rdform']['value'])+'"></div>');		
-			var showHelp = false;
+			var curFormGroup = $('<div class="form-group '+_this._ID_+'-property-container '+_this._ID_+'-resource-group resource-group-'+_this.getWebsafeString(resource['@rdform']['name'])+'-'+_this.getWebsafeString(resource['@rdform']['value'])+'"></div>');
 
 			if ( resource['@rdform']['external'] !== undefined ) {	// add simple input for external resources
 
@@ -569,9 +555,8 @@
 					return curFormGroup;
 				}
 
-				var resourceClass = $('<input class="form-control input-sm '+_this._ID_+'-property" />');
+				var resourceClass = $('<input type="text" class="form-control input-sm '+_this._ID_+'-property" />');
 				resourceClass.data( _this._ID_ + "-model", resource);
-				resourceClass.attr( resource["@rdform"] );
 			}
 			else { // add regular resource
 				var resourceClass;
@@ -584,24 +569,23 @@
 					else
 						var btnText = resource['@rdform']['title'] ? resource['@rdform']['title'] : resource['@rdform']['name'] + " - " + resource['@rdform']['value'];
 
-					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' + 
+					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' + 
 												'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 											'</button>' );
 					resourceClass.data( _this._ID_ + "-model", resource);
-
-					if ( resource['@rdform']['help'] ) {
-						showHelp = true;					
-					}
 				} 			
 				else { // create class-model for the resource
 					resourceClass = _this.createHTMLClass( resource );					
 				}
 			}
+			// add attributes (except type)
+			var attr = $.extend( true, {}, resource["@rdform"] );
+			delete attr["type"];
+			resourceClass.attr( attr );
 
-			curFormGroup.append( resourceClass );
+			curFormGroup.append( resourceClass );			
 
-			if ( resource['@rdform']['external'] !== undefined ) {						
-				resourceClass.prop("type", "text"); // bugfix for jquery < 1.8 				
+			if ( resource['@rdform']['external'] !== undefined ) {
 
 				var thisLabel = $('<label class="col-xs-3 control-label"></label>');
 				thisLabel.text( resource['@rdform']['label'] );
@@ -611,7 +595,6 @@
 				resourceClass.wrap( thisInputContainer );				
 
 				if ( resource['@rdform']['multiple'] !== undefined ) {
-					resourceClass.attr('index', resource['@rdform']['index']);					
 					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');
 					if ( resource['@rdform']['additional'] === undefined ) {
 						resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Rempve resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
@@ -627,7 +610,7 @@
 				}				
 			}
 
-			if ( showHelp == true ) {
+			if ( resource["@rdform"]["help"] !== undefined ) {
 				curFormGroup.append('<div class="'+_this._ID_+'-resource-help-container">' +
 										'<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-resource-help"></span>' +
 										'<span class="help-block '+_this._ID_+'-resource-help hidden">' + resource['@rdform']['help'] + '</span>' +
