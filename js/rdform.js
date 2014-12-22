@@ -141,13 +141,13 @@
 					_this.showAlert( "warning", "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
 				}
 				for (var i = 0; i < prefixesArr.length - 1; i += 2) {
-					_this.MODEL[0]["@context"][ prefixesArr[i] ] = new Object( { "@id" : prefixesArr[i+1] } );
+					_this.MODEL[0]["@context"][ prefixesArr[i] ] = { "@id" : prefixesArr[i+1] };
 				}
 			}
 
 			// walk the classes
 			$(template).children('div[typeof]').each(function() {
-				var curClass = new Object({ '@rdform' : new Object() });
+				var curClass = new Object({ '@rdform' : {} });
 				var curPropIndex = 0;
 				var properties = new Object();
 
@@ -167,8 +167,7 @@
 
 				// walk the input-properties
 				$(this).children('input').each(function() {
-					var curProperty = new Object({ '@rdform' : new Object() });
-					var success = true;
+					var curProperty = new Object({ '@rdform' : {} });
 
 					if ( $(this).attr("type") === undefined ) { // check if type exists, set literal as default
 						$(this).attr("type", "literal");
@@ -227,7 +226,7 @@
 
 								if ( $(template).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
 									_this.showAlert( "warning", "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['@id'] + "\"." );
-									success = false;
+									return;
 								}
 
 								var arguments = new Object();
@@ -259,16 +258,14 @@
 
 						default:
 							_this.showAlert( "warning", "Unknown type \"" + $(this).attr("type") + "\" at property \"" + $(this).attr("name") + "\" in \"" + curClass['@type'] + "\" on parsing model found. I will ignore this property..." );
-							success = false;
+							return;
 							break;
 					}
 
 					var propName = $(this).attr("name");
 					_this.validatePrefix( propName );
 					
-					if ( success ) {
-						properties[ "[" + curPropIndex + "] " + propName ] = curProperty;
-					}
+					properties[ "[" + curPropIndex + "] " + propName ] = curProperty;
 					++curPropIndex;
 				}); // end of walking properties
 
