@@ -560,33 +560,33 @@
 
 				var resourceClass = $('<input type="text" class="form-control input-sm '+_this._ID_+'-property" />');
 				resourceClass.data( _this._ID_ + "-model", resource);
+				// add attributes (except type)
+				var attr = $.extend( true, {}, resource["@rdform"] );
+				delete attr["type"];
+				resourceClass.attr( attr );
 			}
 			else { // add regular resource
 				var resourceClass;
 				
-				// add button for additional or same resources (like person knows person)				
-				if ( resource['@rdform']['additional'] !== undefined && resource['@rdform']['additionalIntermit'] === undefined ) {				
+				// add button for additional or same resources (like person knows person)
+				if ( resource['@rdform']['additional'] !== undefined && resource['@rdform']['additionalIntermit'] === undefined ) {	
 					//curFormGroup.addClass("add-resoource-button-group");
 					if ( resource['@rdform']['legend'] )
 						var btnText = resource['@rdform']['legend'];
 					else
 						var btnText = resource['@rdform']['title'] ? resource['@rdform']['title'] : resource['@rdform']['name'] + " - " + resource['@rdform']['value'];
 
-					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' + 
+					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' + 
 												'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 											'</button>' );
 					resourceClass.data( _this._ID_ + "-model", resource);
 				} 			
 				else { // create class-model for the resource
-					resourceClass = _this.createHTMLClass( resource );					
+					resourceClass = _this.createHTMLClass( resource );
 				}
-			}
-			// add attributes (except type)
-			var attr = $.extend( true, {}, resource["@rdform"] );
-			delete attr["type"];
-			resourceClass.attr( attr );
+			}			
 
-			curFormGroup.append( resourceClass );			
+			curFormGroup.append( resourceClass );
 
 			if ( resource['@rdform']['external'] !== undefined ) {
 
@@ -594,8 +594,8 @@
 				thisLabel.text( resource['@rdform']['label'] );
 				curFormGroup.prepend( thisLabel );
 				
-				var thisInputContainer = $('<div class="col-xs-9"></div>');				
-				resourceClass.wrap( thisInputContainer );				
+				var thisInputContainer = $('<div class="col-xs-9"></div>');
+				resourceClass.wrap( thisInputContainer );
 
 				if ( resource['@rdform']['multiple'] !== undefined ) {
 					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');
