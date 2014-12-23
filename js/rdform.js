@@ -728,7 +728,7 @@
 							for ( var di in thisData ) {
 
 								if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
-									var resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i );
+									var resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
 									if ( $(resource).length != 0 ) {
 										if ( di > 0 ) {
 											$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
@@ -1361,7 +1361,6 @@
 					if ( 	! model[0].hasOwnProperty(_this.replaceStrPrefix(key1)) &&
 							! model[0].hasOwnProperty(_this.getUriPrefix(key1))
 					) {
-						console.log( "Merge " + _this.replaceStrPrefix( key1 ) + ", "+_this.getUriPrefix(key1)+" = ", value1 );
 						result[0][ _this.replaceStrPrefix( key1 ) ] = value1;
 					}
 				});
