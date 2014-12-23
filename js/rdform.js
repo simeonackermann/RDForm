@@ -130,8 +130,7 @@
 
 			// get baseuri
 			if ( $(template).attr("base") ) {
-				_this.MODEL[0]["@base"] = $(template).attr("base");
-				_this.MODEL[0]["@context"]["@base"] = _this.MODEL[0]["@base"];
+				_this.MODEL[0]["@context"]["@base"] = $(template).attr("base");
 			}		
 
 			// get prefixes
@@ -148,7 +147,6 @@
 			// walk the classes
 			$(template).children('div[typeof]').each(function() {
 				var curClass = new Object({ '@rdform' : {} });
-				var curPropIndex = 0;
 				var properties = new Object();
 
 				curClass['@id'] = $(this).attr("resource");
@@ -164,10 +162,11 @@
 				if ( $(this).find("p.help") ) {
 					curClass['@rdform']['help'] = $(this).find("p.help").html();
 				}
+				//curClass['@rdform']['properties'] = [];
 
 				// walk the input-properties
 				$(this).children('input').each(function() {
-					var curProperty = new Object({ '@rdform' : {} });
+					var curProperty = { '@rdform' : {} };
 
 					if ( $(this).attr("type") === undefined ) { // check if type exists, set literal as default
 						$(this).attr("type", "literal");
@@ -185,7 +184,7 @@
 						// maybe translate same attributes
 						if ( attr.name == "placeholder" || attr.name == "title" || attr.name == "label" ) {
 							curProperty["@rdform"][ attr.name ] = _this.l( attr.value );
-						}						
+						}
 					});
 					// maybe add the label
 					if ( $(this).prev("label").length > 0 ) {
@@ -201,7 +200,7 @@
 						if ( ! _this.MODEL[0]["@context"].hasOwnProperty($(this).attr("name")) ) {
 							_this.MODEL[0]["@context"][$(this).attr("name")] = new Object();
 						}
-						_this.MODEL[0]["@context"][$(this).attr("name")]["@type"] = $(this).attr("datatype");						
+						_this.MODEL[0]["@context"][$(this).attr("name")]["@type"] = $(this).attr("datatype");
 					}
 					// add value as @value
 					if ( $(this).attr("value") ) {
@@ -211,7 +210,6 @@
 					if ( $(this).attr("multiple") ) {
 						curProperty["@rdform"]["index"] = 1;
 					}
-					
 
 					// do some property-type specific things
 					switch ( curProperty['@rdform']['type'] ) {
@@ -246,7 +244,7 @@
 							} else {
 								curProperty["@id"] = $(this).attr("name");
 								delete curProperty["@type"];	
-							}							
+							}
 							
 							break;
 
@@ -265,8 +263,12 @@
 					var propName = $(this).attr("name");
 					_this.validatePrefix( propName );
 					
-					properties[ "[" + curPropIndex + "] " + propName ] = curProperty;
-					++curPropIndex;
+					if ( properties[ propName ] ) {
+						properties[ propName ].push(curProperty);
+					} else {
+						properties[ propName ] = [ curProperty ];
+					}
+					//curClass['@rdform']['properties'].push(propName); // maybe add this array for the right property index range
 				}); // end of walking properties
 
 				if ( properties.length == 0 ) {
@@ -276,23 +278,25 @@
 				// add properties to the current class
 				$.extend( true, curClass, properties );
 
-				// maybe find inputs which referencing this class
+				// find inputs which referencing this class
 				var thisClassReference = _this.getElement( $(template).find('input'), "value", curClass['@type'] );
 
-				// add current class as child-class for referencing class
+				// add current class as child-class into the referencing class
 				if ( thisClassReference.length > 0 ) {
 					$.each( _this.MODEL, function( key0, value0 ) {
 						$.each( value0, function( key1, value1 ) {
-							if ( 	typeof value1 !== "string" && 
-									value1.hasOwnProperty("@type") && 
-									value1["@type"] == curClass['@type']
-								) {
-									$.extend( true, _this.MODEL[key0][key1], curClass );
+							if ( typeof value1 === "object" ) {
+								$.each( value1, function( key2, value2 ) {
+									if ( 	value2.hasOwnProperty("@type") && 
+											value2["@type"] == curClass['@type'] ) {
+										$.extend( true, _this.MODEL[key0][key1][key2], curClass );
+									}
+								});
 							}
 						});
 					});
-				// add root-class, extend with baseuri and prefixes
-				} else {					
+				// add current class ass root-class, extend with baseuri and prefixes
+				} else {
 					$.extend( true, _this.MODEL[curClassIndex], curClass );
 				}				
 				curClassIndex++;
@@ -376,9 +380,11 @@
 			}
 
 			// add the properties
-			$.each( classModel, function(key, property) {
+			$.each( classModel, function(key, propertyArr) {
 				if ( key[0] != "@" ) {
-					thisClass.append( _this.createHTMLProperty( property ) );
+					$.each( propertyArr, function(i, property) {
+						thisClass.append( _this.createHTMLProperty( property ) );
+					});
 				}
 			});
 			
@@ -1346,13 +1352,16 @@
 		  * @param Array result array of the form data
 		  * @return Array result
 		  */
-		mergeExistingDataWithResult: function( result ) {			
+		mergeExistingDataWithResult: function( result ) {
 			var _this = this;
 			var model = _this.MODEL;
 			$.each( _this.data, function( key0, value0 ) {
 				// TODO: BUG: only literals and external resources of the root classes get merged!
 				$.each( value0, function( key1, value1) {
-					if ( ! model[0].hasOwnProperty( _this.replaceStrPrefix(key1) ) ) {
+					if ( 	! model[0].hasOwnProperty(_this.replaceStrPrefix(key1)) &&
+							! model[0].hasOwnProperty(_this.getUriPrefix(key1))
+					) {
+						console.log( "Merge " + _this.replaceStrPrefix( key1 ) + ", "+_this.getUriPrefix(key1)+" = ", value1 );
 						result[0][ _this.replaceStrPrefix( key1 ) ] = value1;
 					}
 				});
@@ -1586,7 +1595,7 @@
 		},
 
 		/**
-		 * Search und reaplce a prfix in a String if defined in the context
+		 * Search und reaplace a prefix in a String if defined in the context
 		 * 
 		 * @param String str 
 		 * @return String with (maybe) replaced prefix
@@ -1612,6 +1621,30 @@
 		},
 
 		/**
+		  * Return the compact uri (prefix:name)
+		  *
+		  * @param String str The Uri
+		  * @return String Replaced Uri with prefix (if defined in model->@context)
+		*/
+		getUriPrefix: function( str ) {
+			var _this = this;
+			var strShort = str;
+			if ( str === undefined ) return str;
+
+			$.each( _this.MODEL[0]["@context"], function(key,val) {
+				if ( 	val.hasOwnProperty("@id") &&
+						str.search(val["@id"]) != -1
+				 ) {
+				 	var regex = new RegExp(val["@id"], "g");
+					strShort =  str.replace( regex, key + ":" );
+					return false;
+				}
+			} );
+
+			return strShort;
+		},
+
+		/**
 		 * Filter DOM group for an element by any attribute
 		 * @param DOM env The DOM-group where to llok for
 		 * @param String attr The attribute you are looking for
@@ -1620,7 +1653,7 @@
 		 */
 		getElement : function( env, attr, val ) {
 			var _this = this;
-			var el = $(env).filter(function(index) {			
+			var el = $(env).filter(function(index) {
 				return ( $(this).attr(attr) === val ) 
 					|| ( _this.replaceStrPrefix( $(this).attr(attr) ) === val );
 			});
@@ -1635,7 +1668,7 @@
 		  *
 		  * @return String. The translated string
 		  */
-		l: function( str, param ) {		
+		l: function( str, param ) {
 
 			if ( typeof str === "string" && str != "" ) {
 
