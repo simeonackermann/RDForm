@@ -467,7 +467,7 @@
 				var selectOptions = $.parseJSON( literal['@rdform']['select-options'] );
 				thisInput.append( '<option value="" disabled selected>'+_this.l("choose")+'...</option>' );
 				for ( var soi in selectOptions ) {
-					thisInput.append( '<option value="'+ selectOptions[soi] +'">'+ selectOptions[soi] +'</option>' );
+					thisInput.append( '<option value="'+ soi +'">'+ selectOptions[soi] +'</option>' );
 				}
 			}
 			else if ( literal['@rdform']['boolean'] !==  undefined ) {
