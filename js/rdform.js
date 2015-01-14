@@ -189,6 +189,8 @@
 					// maybe add the label
 					if ( $(this).prev("label").length > 0 ) {
 						curProperty["@rdform"]["label"] = _this.l( $(this).prev("label").text() );
+					} else {
+						curProperty["@rdform"]["label"] = $(this).attr("name");
 					}
 					// add datatype as type
 					if ( $(this).attr("datatype") ) {
