@@ -280,18 +280,26 @@
 				// add properties to the current class
 				$.extend( true, curClass, properties );
 
-				// find inputs which referencing this class
+				// find inputs which referencing this class by type or id
 				var thisClassReference = _this.getElement( $(template).find('input'), "value", curClass['@type'] );
+				if ( thisClassReference.length == 0 && curClass["@rdform"]['id-html'] ) {
+					thisClassReference = _this.getElement( $(template).find('input'), "value", curClass["@rdform"]['id-html'] );
+				}
 
 				// add current class as child-class into the referencing class
 				if ( thisClassReference.length > 0 ) {
-					$.each( _this.MODEL, function( key0, value0 ) {
-						$.each( value0, function( key1, value1 ) {
-							if ( typeof value1 === "object" ) {
-								$.each( value1, function( key2, value2 ) {
-									if ( 	value2.hasOwnProperty("@type") && 
-											value2["@type"] == curClass['@type'] ) {
-										$.extend( true, _this.MODEL[key0][key1][key2], curClass );
+					$.each( _this.MODEL, function( rootClsIx, rootCls ) {
+						$.each( rootCls, function( clsIx, thisCls ) {
+							if ( typeof thisCls === "object" ) {
+								$.each( thisCls, function( propIx, thisProp ) {
+									// add currentClass if type==type or type==id, prop[id] must undefined for classes of same types
+									if ( thisProp.hasOwnProperty("@type") 
+										 && thisProp["@id"] == undefined
+										 && ( thisProp["@type"] == curClass['@type']
+										   || thisProp["@type"] == curClass["@rdform"]['id-html'] 
+											)
+										) {
+											$.extend( true, thisProp, curClass );
 									}
 								});
 							}
@@ -828,19 +836,11 @@
 
 			// BUTTON: add property
 			_this.$elem.on("click", "button."+_this._ID_+"-add-property", function() {
-				//var btnContainer = $(this).parent("div."+_this._ID_+"-property-container");
-				//var propertyModel = $.extend( true, {}, btnContainer.data( _this._ID_ + "-model" ) );
 				var btnContainer = $(this).parent("div.form-group");						
 				var propertyModel = $.extend( true, {}, $(this).data( _this._ID_ + "-model" ) );
 				
 				propertyModel["@rdform"]['additionalIntermit'] = true;
-				//propertyModel["@rdform"]['index'] = 1;
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
-				//console.log("Model ", propertyModel);
-				//console.log("HTML ", propertyHTML);
-
-				//add remove button
-				//$(thisLiteralHTML).find("input,textarea").after('<button type="button" class="btn btn-link btn-xs remove-literal" title="'+ _this.l("Remove literal %s", $(this).attr("label") ) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 
 				$(propertyHTML).hide();
 				$(btnContainer).after( propertyHTML );
@@ -857,8 +857,6 @@
 
 			// BUTTON: duplicate property
 			_this.$elem.on("click", "button."+_this._ID_+"-duplicate-property", function() {
-				//var btnContainer = $(this).parentsUntil("div."+_this._ID_+"-property-container").parent();
-				//var propertyModel = $.extend( true, {}, btnContainer.data( _this._ID_ + "-model" ) );
 				var btnContainer = $(this).parentsUntil("div.form-group").parent();
 				var propertyModel = $.extend( true, {}, $(btnContainer).find("."+_this._ID_+"-property").first().data( _this._ID_ + "-model" ) );
 				var index = propertyModel["@rdform"]['index'];
@@ -869,11 +867,8 @@
 					propertyModel["@rdform"]["arguments"]["i"] = index
 				}
 
-				//++propertyModel["@rdform"]['index'];
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
-				//console.log("Model ", propertyModel);
-				//console.log("HTML ", propertyHTML);
-
+				
 				//hide label and help block and legend
 				$(propertyHTML).find("legend").hide(); // hide legend
 				$(propertyHTML).find( "label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
@@ -892,16 +887,12 @@
 
 			//BUTTON: remove property
 			_this.$elem.on("click", "button."+_this._ID_+"-remove-property", function() {
-				//var btnContainer = $(this).parentsUntil("div."+_this._ID_+"-property-container").parent();
-				//var propertyModel = $.extend( true, {}, btnContainer.data( _this._ID_ + "-model" ) );
 				var btnContainer = $(this).parentsUntil("div.form-group").parent();
 				var propertyModel = $.extend( true, {}, $(btnContainer).find("."+_this._ID_+"-property").first().data( _this._ID_ + "-model" ) );
 
 				var prevProperty = btnContainer.prev('div[class="'+btnContainer.attr("class")+'"]');
 				var nextProperty = btnContainer.next('div[class="'+btnContainer.attr("class")+'"]');
-				//console.log( "Prev: ", prevProperty )  ;
-				//console.log( "Next: ", nextProperty )  ;
-
+				
 				if ( _this.Hooks && typeof _this.Hooks.__beforeRemoveProperty !== "undefined" )
 					_this.Hooks.__beforeRemoveProperty( $(btnContainer).find("."+_this._ID_+"-property").first() );
 				
