@@ -108,7 +108,8 @@ Classes are described by a `<div typeof="...">...</div>` tag.
 Attribute  | Description
 ------------- | -------------
 `typeof`  	| Type of the class
-`resource`  | Class identifier
+`resource`  | Class uri
+`id`		| Optional class ID to reference classes with same typeof
 
 Example:
 
