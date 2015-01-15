@@ -130,7 +130,7 @@
 
 			// get baseuri
 			if ( $(template).attr("base") ) {
-				_this.MODEL[0]["@context"]["@base"] = $(template).attr("base");
+				_this.setBaseUri($(template).attr("base"));
 			}		
 
 			// get prefixes
@@ -610,12 +610,12 @@
 				if ( resource['@rdform']['multiple'] !== undefined ) {
 					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');
 					if ( resource['@rdform']['additional'] === undefined ) {
-						resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Rempve resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
+						resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 					}
 				}
 
 				if ( resource['@rdform']['additional'] !== undefined ) {
-					resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Rempve resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
+					resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 				}
 
 				if ( resource['@rdform']['hidden'] !== undefined ) {
@@ -623,7 +623,7 @@
 				}				
 			}
 
-			if ( resource["@rdform"]["help"] !== undefined ) {
+			if ( resource["@rdform"]["help"] !== undefined && resource['@rdform']['additionalIntermit'] === undefined ) {
 				curFormGroup.append('<div class="'+_this._ID_+'-resource-help-container">' +
 										'<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-resource-help"></span>' +
 										'<span class="help-block '+_this._ID_+'-resource-help hidden">' + resource['@rdform']['help'] + '</span>' +
@@ -846,6 +846,7 @@
 				$(btnContainer).after( propertyHTML );
 				$(propertyHTML).show("slow");
 				$(btnContainer).remove();
+				//$(propertyHTML).find("div.rdform-resource-help-container").remove();
 
 				if ( _this.Hooks && typeof _this.Hooks.__afterAddProperty !== "undefined" )
 					_this.Hooks.__afterAddProperty( propertyHTML );
@@ -1552,6 +1553,15 @@
 
 			this.showAlert( "warning", "Prefix \"" + str + "\" not defined in the form model (see attribute 'prefix')" );
 			return false;
+		},
+
+		/**
+		  * Set Base Uri for the model
+		  * 
+		  * @str URI String
+		  */
+		setBaseUri : function( uri ) {
+			this.MODEL[0]["@context"]["@base"] = uri;
 		},
 
 		/** 
