@@ -761,15 +761,36 @@
 
 								var thisType = ( typeof thisData[di]["@type"] === "string" ) ? thisData[di]["@type"] : thisData[di]["@type"][0];
 								var subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
+								var hasIDHTML = false;
 
-								if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
+								if ( $(subEnv).attr("id-html") != undefined ) { // subEnv has id-html -> may find the right id-html resource
+									if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
+										thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
+									}
+									subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
+									hasIDHTML = true;
+								}
+
+								if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button									
 									var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
 									if ( $(addBtn).length == 0 ) {
+										// add btn not found, may data has rdfs:type
+										if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
+											thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
+											addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
+											hasIDHTML = true;
+										}
+									}
+									if ( $(addBtn).length == 0 ) { // data not found
 										_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData) + '" }', false );
 										continue;
 									}
 									$(addBtn).trigger("click");
+
 									subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
+									if ( hasIDHTML ) {
+										subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
+									}
 								}
 
 								if ( i != $(subEnv).attr("name") && i != _this.replaceStrPrefix($(subEnv).attr("name")) ) {
@@ -780,9 +801,15 @@
 								if ( di > 0 ) {
 									for (var ri = di-1; ri >= 0; ri--) {
 										var thisRType = ( typeof thisData[ri]["@type"] === "string" ) ? thisData[ri]["@type"] : thisData[ri]["@type"][0];
-										if( thisData[di]["@type"] == thisRType ) {
+										if ( hasIDHTML && thisData[ri].hasOwnProperty("http://www.w3.org/2000/01/rdf-schema#type") ) {
+											thisRType = thisData[ri]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
+										}
+										if( thisType == thisRType ) {
 											$(subEnv).find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
 											subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
+											if ( hasIDHTML ) {
+												subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
+											}
 											$(subEnv).removeAttr("style"); // bugfix: some classes have hidden inline style
 											break;
 										}
