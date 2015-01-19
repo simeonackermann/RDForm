@@ -285,32 +285,39 @@
 				if ( thisClassReference.length == 0 && curClass["@rdform"]['id-html'] ) {
 					thisClassReference = _this.getElement( $(template).find('input'), "value", curClass["@rdform"]['id-html'] );
 				}
-
-				// add current class as child-class into the referencing class
+				// add current class as child resource if it was referenced
 				if ( thisClassReference.length > 0 ) {
-					$.each( _this.MODEL, function( rootClsIx, rootCls ) {
-						$.each( rootCls, function( clsIx, thisCls ) {
-							if ( typeof thisCls === "object" ) {
-								$.each( thisCls, function( propIx, thisProp ) {
-									// add currentClass if type==type or type==id, prop[id] must undefined for classes of same types
-									if ( thisProp.hasOwnProperty("@type") 
-										 && thisProp["@id"] == undefined
-										 && ( thisProp["@type"] == curClass['@type']
-										   || thisProp["@type"] == curClass["@rdform"]['id-html'] 
-											)
-										) {
-											$.extend( true, thisProp, curClass );
-									}
-								});
-							}
-						});
-					});
+					addToModel( _this.MODEL, curClass );
 				// add current class ass root-class, extend with baseuri and prefixes
 				} else {
 					$.extend( true, _this.MODEL[curClassIndex], curClass );
 				}				
 				curClassIndex++;
 			}); // end of walking class
+
+			// add a class as child-class into a referencing class
+			function addToModel( model, curClass ) {
+				//console.log( "Add ", curClass, " to ", model );
+				$.each( model, function( rootClsIx, rootCls ) {
+					$.each( rootCls, function( clsIx, thisCls ) {
+						if ( typeof thisCls === "object" ) {
+							$.each( thisCls, function( propIx, thisProp ) {
+								// add currentClass if type==type or type==id, prop[id] must undefined for classes of same types
+								if ( thisProp.hasOwnProperty("@type") 
+									 && thisProp["@id"] == undefined
+									 && ( thisProp["@type"] == curClass['@type']
+									   || thisProp["@type"] == curClass["@rdform"]['id-html'] 
+										)
+									) {
+										console.log("Add ", curClass);
+										$.extend( true, thisProp, curClass );
+								}
+							});
+						}
+					});
+				});
+			}
+
 		},
 
 		/**
