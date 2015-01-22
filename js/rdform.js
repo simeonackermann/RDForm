@@ -381,7 +381,7 @@
 			thisLegend.append(	'<div class="'+_this._ID_+'-edit-class-resource">' +
 									'<small>'+ classModel['@id'] +'</small>' +
 									'<span class="glyphicon glyphicon-pencil"></span>' +
-									'<input type="text" value="'+ classModel['@id'] +'" class="form-control input-sm" />' +
+									'<input type="text" name="'+_this._ID_+'-classUri" value="'+ classModel['@id'] +'" class="form-control input-sm" />' +
 								'</div>' );	
 
 			thisLegend.append( '<small>a '+ classModel['@type'] +'</small>' );	
@@ -683,7 +683,14 @@
 			var prevKey = "";
 
 			for ( var i in data ) {
-				var curName = ( name === undefined ) ? i : name;	
+				var curName = ( name === undefined ) ? i : name;
+
+				if ( i == "@id" ) {
+					var uriInput = $(env).find('input[name="'+_this._ID_+'-classUri"]').first();
+					$(uriInput).val( _this.getUriPrefix(data[i]) );
+					$(uriInput).trigger("keyup").trigger("blur");
+					$(uriInput).removeAttr("modvalue"); // remove wildcard updating
+				}
 
 				if ( i[0] != "@" ) { // we dont want insert @id, @type, ...
 
@@ -916,7 +923,7 @@
 				
 				//hide label and help block and legend
 				$(propertyHTML).find("legend").hide(); // hide legend
-				$(propertyHTML).find( "label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
+				$(propertyHTML).find( ".control-label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
 				$(propertyHTML).find(".help-block").hide();
 
 				$(propertyHTML).hide();
@@ -1065,16 +1072,21 @@
 			// write a wildcard value to the input
 			function writeWildcardValue( src, wildcards ) {
 				var val = $(src).attr("modvalue");
+				if ( val == undefined ) return false;
 
 				for ( wcd in wildcards ) {
 					if ( wildcards[wcd].val() != "" ) {
 						var regex = new RegExp( '\{' + wcd + '\}', "g");
-						val = val.replace( regex, wildcards[wcd].val() );
+						var wldVal = wildcards[wcd].val();
+
+						if ( $(src).attr("name") == _this._ID_+"-classUri" ) { // get webSafeString if its the resourceUri							
+							wldVal = _this.getWebsafeString(wldVal);
+						}
+						val = val.replace( regex, wldVal );
 					}
 
 				}
 				$(src).val( val.trim() );
-
 				$(src).trigger( "keyup" );
 			}
 
@@ -1084,19 +1096,6 @@
 
 				$(this).prev("small").hide();
 				$(this).hide();
-
-			});
-
-			/*_this.$elem.on("focus", "div."+_this._ID_+"-edit-class-resource input", function() {
-				$(this).val( getWebsafeString( $(this).val() ) ); // this is ugly, because it deletes the wildcarcd-brakes...
-			});*/
-
-			// leave a class-resource edit input
-			_this.$elem.on("change blur", "div."+_this._ID_+"-edit-class-resource input", function() {
-				$(this).prev().prev("small").show();
-				$(this).prev("span").show();
-				$(this).trigger( "keyup" );
-				$(this).hide();
 			});
 			
 			// live auto-update class-resource text
@@ -1104,11 +1103,17 @@
 				var val = $(this).val();
 
 				if ( val != "" ) {
-					//$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
-					//$(this).prev().prev("small").text( getWebsafeString( val ) );
-					// TODO: maybe websafe string but with {wildcard}
+					$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
 					$(this).prev().prev("small").text( val );
 				}
+			});
+
+			// leave a class-resource edit input
+			_this.$elem.on("change blur", "div."+_this._ID_+"-edit-class-resource input", function() {
+				$(this).prev().prev("small").show();
+				$(this).prev("span").show();
+				$(this).trigger( "keyup" );
+				$(this).hide();
 			});
 
 			//autocomplete input
