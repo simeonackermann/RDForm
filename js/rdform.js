@@ -362,7 +362,7 @@
 			
 			var thisLegend = $( "<legend></legend>" );
 			if ( classModel["@rdform"]['legend'] !== undefined ) {
-				thisLegend.text( classModel["@rdform"]['legend'] );
+				thisLegend.html( '<span class="rdform-legend-text">' + classModel["@rdform"]['legend'] + "</span>" );
 			}
 			
 			/*
@@ -612,11 +612,21 @@
 				var thisInputContainer = $('<div class="col-xs-9"></div>');
 				resourceClass.wrap( thisInputContainer );
 
+				if ( resource['@rdform']['subform'] !== undefined ) {
+					curFormGroup.removeClass('resource-group-'+_this.getWebsafeString(resource['@rdform']['name'])+'-');
+					curFormGroup.addClass('resource-group-'+_this.getWebsafeString(resource['@rdform']['name'])+'-'+resource['@rdform']['subform']);
+					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-new-subform" title="'+ _this.l("New resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus-sign"></span> '+ _this.l("new") +'</button>');
+				}
+
 				if ( resource['@rdform']['multiple'] !== undefined ) {
 					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');
 					if ( resource['@rdform']['additional'] === undefined ) {
 						resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 					}
+				}
+
+				if ( resource['@rdform']['subform'] !== undefined ) {
+					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-edit-subform" title="'+ _this.l("Edit resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-pencil"></span> '+ _this.l("edit") +'</button>');
 				}
 
 				if ( resource['@rdform']['additional'] !== undefined ) {
@@ -625,14 +635,14 @@
 
 				if ( resource['@rdform']['hidden'] !== undefined ) {
 					curFormGroup.addClass("hidden");
-				}				
+				}
 			}
 
 			if ( resource["@rdform"]["help"] !== undefined && resource['@rdform']['additionalIntermit'] === undefined ) {
 				curFormGroup.append('<div class="'+_this._ID_+'-resource-help-container">' +
 										'<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-resource-help"></span>' +
 										'<span class="help-block '+_this._ID_+'-resource-help hidden">' + resource['@rdform']['help'] + '</span>' +
-									'</div>' );			
+									'</div>' );
 			}
 			return curFormGroup;
 		},
@@ -689,7 +699,11 @@
 					var uriInput = $(env).find('input[name="'+_this._ID_+'-classUri"]').first();
 					$(uriInput).val( _this.getUriPrefix(data[i]) );
 					$(uriInput).trigger("keyup").trigger("blur");
-					$(uriInput).removeAttr("modvalue"); // remove wildcard updating
+					if ( data[i].search(/\{.*\}/) != -1 ) { // add new modvalue if uri contains wildcards
+						$(uriInput).attr("modvalue", _this.getUriPrefix(data[i]));
+					} else {
+						$(uriInput).removeAttr("modvalue"); // remove wildcard updating
+					}
 				}
 
 				if ( i[0] != "@" ) { // we dont want insert @id, @type, ...
@@ -770,7 +784,7 @@
 										} else {
 											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData) + '" }', false );
 										}
-										return false;
+										return true;
 									}
 
 									var thisType = ( typeof thisData[di]["@type"] === "string" ) ? thisData[di]["@type"] : thisData[di]["@type"][0];
@@ -785,6 +799,25 @@
 										hasIDHTML = true;
 									}
 
+									if ( $(subEnv).length == 0 ) { // resource not found -> try to find external resource with typeof
+										var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+										if ( $(resource).length != 0 ) {
+											if ( $(resource).last().val() != "" ) {
+												$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
+											}
+											resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+											var resourceLabel = thisData[di]["@id"];
+											if ( thisData[di].hasOwnProperty('http://www.w3.org/2000/01/rdf-schema#label') ) {
+												resourceLabel = thisData[di]['http://www.w3.org/2000/01/rdf-schema#label'][0]['@value'];
+											}
+
+											$(resource).val( thisData[di]["@id"] ).hide();
+											$(resource).after('<p class="'+_this._ID_+'-resource-uri-container"><a href="'+thisData[di]["@id"]+'" class="'+_this._ID_+'-resource-uri">'+resourceLabel+'</a></p>');
+											$(resource).data(_this._ID_ + "-subFormModel", thisData[di] );
+										}
+										return true;
+									}
+
 									if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
 										var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
 										if ( $(addBtn).length == 0 ) {
@@ -796,7 +829,7 @@
 											}
 										}
 										if ( $(addBtn).length == 0 ) { // data not found
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData) + '" }', false );
+											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData[di]) + '" }', false );
 											return false;
 										}
 										$(addBtn).trigger("click");
@@ -885,6 +918,33 @@
 				return false;
 			});
 
+			// BUTTON: edit subform
+			_this.$elem.on("click", "button."+_this._ID_+"-edit-subform", function() {
+				var resContainer = $(this).parentsUntil("div.form-group").parent();
+
+				if ( _this.Hooks && typeof _this.Hooks.__editSubform !== "undefined" )
+					_this.Hooks.__editSubform( resContainer );
+
+				// todo: native edit subform
+			});
+
+			// BUTTON: new subform
+			_this.$elem.on("click", "button."+_this._ID_+"-new-subform", function() {
+
+				if ( $(this).parent().find("input."+_this._ID_+"-property").val() == "" ) {
+					var resContainer = $(this).parentsUntil("div.form-group").parent(); // add in same container
+				} else {
+					$(this).parent().find("button."+_this._ID_+"-duplicate-property").trigger("click");
+					var resContainer = $(this).parentsUntil("div.form-group").parent().next(); // add in new container
+				}
+
+				if ( _this.Hooks && typeof _this.Hooks.__newSubform !== "undefined" )
+					_this.Hooks.__newSubform( resContainer );
+
+				// todo: native new subform
+				
+			});
+
 			// BUTTON: add property
 			_this.$elem.on("click", "button."+_this._ID_+"-add-property", function() {
 				var btnContainer = $(this).parent("div.form-group");						
@@ -921,10 +981,10 @@
 
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
 				
-				//hide label and help block and legend
-				$(propertyHTML).find("legend").hide(); // hide legend
-				$(propertyHTML).find( ".control-label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
-				$(propertyHTML).find(".help-block").hide();
+				// hide legend text, help and label
+				$(propertyHTML).find(".help-block, ."+_this._ID_+"-show-class-help, ."+_this._ID_+"-legend-text").hide();
+				$(propertyHTML).find( ".control-label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );				
+				$(btnContainer).find("."+_this._ID_+"-new-subform").hide();
 
 				$(propertyHTML).hide();
 				$(btnContainer).after( propertyHTML );
@@ -963,13 +1023,13 @@
 				else if ( prevProperty.length > 0 && nextProperty.length == 0 ) {
 					// show duplicate btn in the prev
 					prevProperty.find("button."+_this._ID_+"-duplicate-property").show();
+					prevProperty.find("button."+_this._ID_+"-new-subform").show();
 				}
 				// the first property
 				else if ( prevProperty.length == 0 && nextProperty.length > 0 ) {
 					// show label/legend in the next
-					$(nextProperty).find("legend").show();
+					$(nextProperty).find("legend,.help-block").show();
 					$(nextProperty).find( "label" ).css( "textIndent", "0px" ).css( "textAlign", "right" );
-					$(nextProperty).find(".help-block").show();
 				}
 				// middle property, nothing todo
 				else {
@@ -1025,13 +1085,15 @@
 
 						wildcards[wcd] = getWildcardTarget( wcd, envClass );	
 
-						// TODO: if wildcard not found no keyup event exists!
-						$(wildcards[wcd]).keyup(function() {
-							writeWildcardValue( thisInput, wildcards );
-						});
+						if ( wildcards[wcd].length > 0 ) {
+							// TODO: if wildcard not found no keyup event exists!
+							$(wildcards[wcd]).keyup(function() {
+								writeWildcardValue( thisInput, wildcards );
+							});
 
-						if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) { // trigger keyup for wildcards without wildcards
-							$(wildcards[wcd]).trigger( "keyup" );
+							if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) { // trigger keyup for wildcards without wildcards
+								$(wildcards[wcd]).trigger( "keyup" );
+							}
 						}
 					}
 				});
