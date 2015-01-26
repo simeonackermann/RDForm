@@ -108,7 +108,7 @@
 
 				// append submit button
 				_this.$elem.append('<div class="form-group '+_this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' + 
-									//'<button type="reset" class="btn btn-default">'+ _this.l("reset") +'</button> ' + 
+									'<button type="reset" class="btn btn-default '+_this._ID_+'-abort">'+ _this.l("reset") +'</button> ' + 
 									'<button type="submit" class="btn btn-lg btn-primary">'+ _this.l(sbm_text) +'</button>' + 
 								'</div></div>' );
 			}
@@ -626,7 +626,7 @@
 				}
 
 				if ( resource['@rdform']['subform'] !== undefined ) {
-					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-edit-subform" title="'+ _this.l("Edit resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-pencil"></span> '+ _this.l("edit") +'</button>');
+					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-edit-subform hide" title="'+ _this.l("Edit resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-pencil"></span> '+ _this.l("edit") +'</button>');
 				}
 
 				if ( resource['@rdform']['additional'] !== undefined ) {
@@ -811,7 +811,7 @@
 												resourceLabel = thisData[di]['http://www.w3.org/2000/01/rdf-schema#label'][0]['@value'];
 											}
 
-											$(resource).val( thisData[di]["@id"] ).hide();
+											$(resource).val( thisData[di]["@id"] ).hide().trigger("blur");
 											$(resource).after('<p class="'+_this._ID_+'-resource-uri-container"><a href="'+thisData[di]["@id"]+'" class="'+_this._ID_+'-resource-uri">'+resourceLabel+'</a></p>');
 											$(resource).data(_this._ID_ + "-subFormModel", thisData[di] );
 										}
@@ -1178,6 +1178,11 @@
 				$(this).hide();
 			});
 
+			_this.$elem.on("change blur", "input[external]", function() {
+				$(this).parent().find("."+_this._ID_+"-edit-subform").removeClass("hide");
+				//$(this).after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-edit-subform" title="'+ _this.l("Edit resource %s", $(this).attr("label") ) +'"><span class="glyphicon glyphicon-pencil"></span> '+ _this.l("edit") +'</button>');
+			});
+
 			//autocomplete input
 			_this.$elem.on("focus", "input[autocomplete]", function() {			
 				// TODO: check if attrs query-endpoint etc exists
@@ -1267,6 +1272,11 @@
 					_this.settings.submit.call( _this.RESULT );
 				});
 			}
+		},
+
+		// Abort form
+		abort : function() {
+			this.settings.abort.call();
 		},
 
 		/**
@@ -1881,6 +1891,11 @@
 			// store settings at element
 			elem.data("_rdform_settings", settings);
 
+			elem.find(".rdform-abort").click(function() {
+				rdform.abort();
+				return false;
+			});
+
 			// callback submit function
 			elem.submit(function() {
 				rdform.submit();
@@ -1901,6 +1916,7 @@
 		verbose 	: false,
 		debug 		: false,
 		submit 		: function() {},
+		abort 		: function() {},
 	};
 
 	
