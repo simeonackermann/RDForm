@@ -49,7 +49,7 @@
 }
 .rdform-edit-class-resource input {
 	display: none;
-	width: auto;
+	width: auto !important;
 	font-size: 0.6em !important;
 }
 
@@ -103,6 +103,10 @@ input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:fo
 /*.rdform .rdform-resource-group + .rdform-resource-group div {
 	padding-top: 4px;
 }*/
+
+.rdform-resource-uri-container {
+	margin-bottom: 0px;
+}
 
 .rdform .rdform-resource-group button {
 	margin: 5px 5px 5px;
