@@ -569,6 +569,9 @@
 										'<span class="glyphicon glyphicon-plus"></span> '+ resource['@rdform']['label'] +
 									'</button>' );
 					addBtn.data( _this._ID_ + "-model", resource);
+					if ( resource['@rdform']['subform'] !==  undefined ) {
+						$(addBtn).attr("typeof", resource['@rdform']['typeof']);
+					}
 					curFormGroup.append ( addBtn );
 					return curFormGroup;
 				}
@@ -619,19 +622,14 @@
 				}
 
 				if ( resource['@rdform']['multiple'] !== undefined ) {
-					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');
-					if ( resource['@rdform']['additional'] === undefined ) {
-						resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
-					}
+					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');					
 				}
 
 				if ( resource['@rdform']['subform'] !== undefined ) {
 					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-edit-subform hide" title="'+ _this.l("Edit resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-pencil"></span> '+ _this.l("edit") +'</button>');
 				}
 
-				if ( resource['@rdform']['additional'] !== undefined ) {
-					resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
-				}
+				resourceClass.after('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 
 				if ( resource['@rdform']['hidden'] !== undefined ) {
 					curFormGroup.addClass("hidden");
@@ -782,7 +780,7 @@
 											}
 											$(resource).val( thisData[di]["@id"] );
 										} else {
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData) + '" }', false );
+											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
 										}
 										return true;
 									}
@@ -801,12 +799,19 @@
 
 									if ( $(subEnv).length == 0 ) { // resource not found -> try to find external resource with typeof
 										var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+										if ( $(resource).length == 0 ) {
+											var addBtn = _this.getElement( _this.getElement( $(env).find("button"), 'name', i ), 'typeof', thisType );
+											if ( $(addBtn).length != 0 ) {
+												$(addBtn).trigger("click");
+												resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+											}
+										}
 										if ( $(resource).length != 0 ) {
 											if ( $(resource).last().val() != "" ) {
 												$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
 											}
 											resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
-											var resourceLabel = thisData[di]["@id"];
+											var resourceLabel = thisData[di]["@id"].split("/").reverse()[0];
 											if ( thisData[di].hasOwnProperty('http://www.w3.org/2000/01/rdf-schema#label') ) {
 												resourceLabel = thisData[di]['http://www.w3.org/2000/01/rdf-schema#label'][0]['@value'];
 											}
@@ -814,6 +819,8 @@
 											$(resource).val( thisData[di]["@id"] ).hide().trigger("blur");
 											$(resource).after('<p class="'+_this._ID_+'-resource-uri-container"><a href="'+thisData[di]["@id"]+'" class="'+_this._ID_+'-resource-uri">'+resourceLabel+'</a></p>');
 											$(resource).data(_this._ID_ + "-subFormModel", thisData[di] );
+										} else {
+											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
 										}
 										return true;
 									}
@@ -1178,9 +1185,13 @@
 				$(this).hide();
 			});
 
+			// leave external input
 			_this.$elem.on("change blur", "input[external]", function() {
 				$(this).parent().find("."+_this._ID_+"-edit-subform").removeClass("hide");
-				//$(this).after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-edit-subform" title="'+ _this.l("Edit resource %s", $(this).attr("label") ) +'"><span class="glyphicon glyphicon-pencil"></span> '+ _this.l("edit") +'</button>');
+				$(this).parent().find("."+_this._ID_+"-remove-property").removeClass("hide");
+				if ( $(this).attr("multiple") === undefined ) {
+					$(this).parent().find("."+_this._ID_+"-new-subform").hide();
+				}
 			});
 
 			//autocomplete input
@@ -1215,8 +1226,8 @@
 												}
 							            	}));
 							            },
-							            error: function(e) {
-							            	_this.showAlert( "error", 'Error on autocomplete: ' + e );
+							            error: function(err) {
+							            	_this.showAlert( "error", 'Error on autocomplete: ' + JSON.stringify(err, null, ' ') );
 							            }
 									});
 						      	},
