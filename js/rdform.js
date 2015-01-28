@@ -807,7 +807,7 @@
 											}
 										}
 										if ( $(resource).length != 0 ) {
-											if ( $(resource).last().val() != "" ) {
+											if ( $(resource).val() != "" ) {
 												$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
 											}
 											resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
@@ -818,7 +818,6 @@
 
 											$(resource).val( thisData[di]["@id"] ).hide().trigger("blur");
 											$(resource).after('<p class="'+_this._ID_+'-resource-uri-container"><a href="'+thisData[di]["@id"]+'" class="'+_this._ID_+'-resource-uri">'+resourceLabel+'</a></p>');
-											$(resource).data(_this._ID_ + "-subFormModel", thisData[di] );
 										} else {
 											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
 										}
@@ -890,8 +889,12 @@
 			var _this = this;
 			this.initFormHandler.called = false;
 
-			if ( _this.Hooks && typeof _this.Hooks.__initFormHandlers !== "undefined" )
-				_this.Hooks.__initFormHandlers();
+			if ( _this.Hooks && typeof _this.Hooks.__initFormHandlers !== "undefined" ) {
+				var initFormHandlersHook = _this.Hooks.__initFormHandlers();
+				if ( ! initFormHandlersHook ) { // may break this initHandlers (i.e. for subforms)
+					return false;
+				}
+			}
 
 			if ( $.datepicker ) {
 				_this.$elem.on("focus", "."+_this._ID_+"-datepicker", function() {
@@ -1082,20 +1085,33 @@
 				// text inputs with wildcard values -> bind handlers to dynamically change the value
 				$(env).find('input[value*="{"]').each(function() {
 					var wildcards = new Object();
+					var wildcardFcts = new Object();
 					var thisInput = $(this);
 					var envClass = $(this).parentsUntil("div[typeof]").parent();
 					$(this).attr("modvalue",  $(this).val() );
 
 					var strWcds = $(this).val().match(/\{[^\}]*/gi);
-					for ( var i in strWcds ) {				
+					for ( var i in strWcds ) {
 						var wcd = strWcds[i].substring( 1 );	
+
+						// may get and remove wildcard-function
+						if ( wcd.search(/\(/) != -1 ) {
+							var wcdFcts = wcd.match(/\([^\)]*/gi);
+							wcd = wcd.replace( /\(.*\)/g, '' );
+							for ( var i in wcdFcts ) {
+								var wcdFct = wcdFcts[i].substring( 1 );	
+								wildcardFcts[wcd] = wcdFct;
+								var regex = new RegExp( '\\(' + wcdFct + '\\)', "g");
+								$(this).attr("modvalue", $(this).attr("modvalue").replace( regex, '' ) );
+							}
+						}
 
 						wildcards[wcd] = getWildcardTarget( wcd, envClass );	
 
 						if ( wildcards[wcd].length > 0 ) {
 							// TODO: if wildcard not found no keyup event exists!
 							$(wildcards[wcd]).keyup(function() {
-								writeWildcardValue( thisInput, wildcards );
+								writeWildcardValue( thisInput, wildcards, wildcardFcts );
 							});
 
 							if ( wildcards[wcd].val().search(/\{.*\}/) == -1 ) { // trigger keyup for wildcards without wildcards
@@ -1139,7 +1155,7 @@
 			}
 
 			// write a wildcard value to the input
-			function writeWildcardValue( src, wildcards ) {
+			function writeWildcardValue( src, wildcards, wildcardFcts ) {
 				var val = $(src).attr("modvalue");
 				if ( val == undefined ) return false;
 
@@ -1148,12 +1164,18 @@
 						var regex = new RegExp( '\{' + wcd + '\}', "g");
 						var wldVal = wildcards[wcd].val();
 
+						// may apply wildcard-function
+						if ( wildcardFcts.hasOwnProperty(wcd) ) {
+							if ( wildcardFcts[wcd] == "BASE" ) {
+								wldVal = wldVal.split("/").reverse()[0];
+							}
+						}
+
 						if ( $(src).attr("name") == _this._ID_+"-classUri" ) { // get webSafeString if its the resourceUri							
 							wldVal = _this.getWebsafeString(wldVal);
 						}
 						val = val.replace( regex, wldVal );
 					}
-
 				}
 				$(src).val( val.trim() );
 				$(src).trigger( "keyup" );
@@ -1195,7 +1217,7 @@
 			});
 
 			//autocomplete input
-			_this.$elem.on("focus", "input[autocomplete]", function() {			
+			_this.$elem.on("focus", "input[autocomplete]", function() {
 				// TODO: check if attrs query-endpoint etc exists
 				var queryEndpoint = $(this).attr( "query-endpoint" );
 				var queryStr = $(this).attr("query");
@@ -1211,11 +1233,11 @@
 									var query = queryStr.replace(/%s/g, "'" + request.term + "'");
 									$.ajax({
 										url: queryEndpoint,
-										dataType: queryDataType,									
+										dataType: queryDataType,
 										data: {
 											query: query,
 											format: "json"
-										},									
+										},
 										success: function( data ) {
 											response( $.map( data.results.bindings, function( item ) {
 												if ( _this.Hooks && typeof _this.Hooks.__autocompleteGetItem !== "undefined" )
@@ -1243,7 +1265,12 @@
 
 						default :
 							_this.showAlert( "error", "Unknown autocomplete apitype " + apitype );
-					}			
+					}
+			});
+
+			// trigger keyup on change autocomplete input
+			_this.$elem.on("change", "input[autocomplete]", function() {
+				$(this).trigger("keyup");
 			});
 		},// end of initFormHandler	
 
