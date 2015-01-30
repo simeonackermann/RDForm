@@ -977,8 +977,9 @@
 				return false;
 			});
 
-			// BUTTON: duplicate property
-			_this.$elem.on("click", "button."+_this._ID_+"-duplicate-property", function() {
+			// BUTTON: duplicate property			
+			this.$elem.on("click", "button."+_this._ID_+"-duplicate-property", function() {
+			//$("button."+_this._ID_+"-duplicate-property").on("click", function() {
 				var btnContainer = $(this).parentsUntil("div.form-group").parent();
 				var propertyModel = $.extend( true, {}, $(btnContainer).find("."+_this._ID_+"-property").first().data( _this._ID_ + "-model" ) );
 				var index = propertyModel["@rdform"]['index'];
@@ -988,7 +989,6 @@
 				if ( propertyModel["@rdform"]["arguments"] !== undefined ) {
 					propertyModel["@rdform"]["arguments"]["i"] = index
 				}
-
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
 				
 				// hide legend text, help and label
@@ -1005,7 +1005,7 @@
 					_this.Hooks.__afterDuplicateProperty( propertyHTML );
 				
 				findWildcardInputs( propertyHTML );
-			});
+			} );		
 
 			//BUTTON: remove property
 			_this.$elem.on("click", "button."+_this._ID_+"-remove-property", function() {
@@ -1928,6 +1928,9 @@
 
 			// store settings at element
 			elem.data("_rdform_settings", settings);
+
+			// store this class at element
+			elem.data("_rdform_class", rdform);
 
 			elem.find(".rdform-abort").click(function() {
 				rdform.abort();
