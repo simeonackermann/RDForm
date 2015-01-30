@@ -889,12 +889,8 @@
 			var _this = this;
 			this.initFormHandler.called = false;
 
-			if ( _this.Hooks && typeof _this.Hooks.__initFormHandlers !== "undefined" ) {
-				var initFormHandlersHook = _this.Hooks.__initFormHandlers();
-				if ( ! initFormHandlersHook ) { // may break this initHandlers (i.e. for subforms)
-					return false;
-				}
-			}
+			if ( _this.Hooks && typeof _this.Hooks.__initFormHandlers !== "undefined" )
+				_this.Hooks.__initFormHandlers();
 
 			if ( $.datepicker ) {
 				_this.$elem.on("focus", "."+_this._ID_+"-datepicker", function() {
