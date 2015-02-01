@@ -1204,11 +1204,16 @@
 			});
 
 			// leave external input
-			_this.$elem.on("change blur", "input[external]", function() {
-				$(this).parent().find("."+_this._ID_+"-edit-subform").removeClass("hide");
-				$(this).parent().find("."+_this._ID_+"-remove-property").removeClass("hide");
-				if ( $(this).attr("multiple") === undefined ) {
-					$(this).parent().find("."+_this._ID_+"-new-subform").hide();
+			_this.$elem.on("blur", "input[external]", function() {
+				if ( $(this).val() != "" ) {
+					$(this).parent().find("."+_this._ID_+"-edit-subform").removeClass("hide");
+					$(this).parent().find("."+_this._ID_+"-remove-property").removeClass("hide");
+					if ( $(this).attr("multiple") === undefined ) {
+						$(this).parent().find("."+_this._ID_+"-new-subform").hide();
+					}
+
+					if ( _this.Hooks && typeof _this.Hooks.__afterBlurExternalResource !== "undefined" )
+						_this.Hooks.__afterBlurExternalResource( $(this) );
 				}
 			});
 
