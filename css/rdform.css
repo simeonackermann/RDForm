@@ -47,7 +47,7 @@
 	opacity: 1;	
 	cursor: pointer;
 }
-.rdform-edit-class-resource input {
+.rdform-edit-class-resource input.input-sm {
 	display: none;
 	width: auto !important;
 	font-size: 0.6em !important;
