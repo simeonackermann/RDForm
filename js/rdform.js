@@ -1194,7 +1194,7 @@
 			});
 
 			// leave a class-resource edit input
-			$("div."+_this._ID_+"-edit-class-resource span", $(env)).on("change blur", function() {
+			$("div."+_this._ID_+"-edit-class-resource input", $(env)).on("change blur", function() {
 				$(this).prev().prev("small").show();
 				$(this).prev("span").show();
 				$(this).trigger( "keyup" );
