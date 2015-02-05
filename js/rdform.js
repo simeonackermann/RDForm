@@ -91,9 +91,7 @@
 			if ( _this.MODEL.length > 0 ) {
 				_this.$elem.append( _this.createHTMLForm() );
 								
-				if ( ! _this.initFormHandler.called ) {
-					_this.initFormHandler();
-				}
+				_this.initFormHandler( _this.$elem );
 
 				var sbm_text = "create";
 
@@ -798,7 +796,7 @@
 									}
 
 									if ( $(subEnv).length == 0 ) { // resource not found -> try to find external resource with typeof
-										var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+										var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();										
 										if ( $(resource).length == 0 ) {
 											var addBtn = _this.getElement( _this.getElement( $(env).find("button"), 'name', i ), 'typeof', thisType );
 											if ( $(addBtn).length != 0 ) {
@@ -885,15 +883,15 @@
 		 *	Init form button handlers after building the form
 		 * 
 		 *******************************************************/
-		initFormHandler : function() {
+		initFormHandler : function( env ) {
 			var _this = this;
-			this.initFormHandler.called = false;
 
 			if ( _this.Hooks && typeof _this.Hooks.__initFormHandlers !== "undefined" )
-				_this.Hooks.__initFormHandlers();
+				_this.Hooks.__initFormHandlers( env );
 
 			if ( $.datepicker ) {
-				_this.$elem.on("focus", "."+_this._ID_+"-datepicker", function() {
+				//_this.$elem.on("focus", "."+_this._ID_+"-datepicker", function() {
+				$("."+_this._ID_+"-datepicker", $(env)).on("focus", function() {
 					$(this).datepicker({
 						weekStart: 1
 					});
@@ -901,31 +899,31 @@
 			}
 			
 			// validate input values on change
-			_this.$elem.on("change", "input", function() {
+			$("input", $(env)).on("change", function() {
 				_this.userInputValidation( $(this) );
 			});
 
 			// BUTTON: show help class text
-			_this.$elem.on("click", "."+_this._ID_+"-show-class-help", function() {
+			$("."+_this._ID_+"-show-class-help", $(env)).on("click", function() {
 				var classHelp =  $(this).parentsUntil("div[typeof]").parent().find("div."+_this._ID_+"-class-help").first();
 				$(classHelp).toggleClass("hidden");
 			});
 
 			// BUTTON: show literal help text
-			_this.$elem.on("click", "."+_this._ID_+"-show-literal-help", function() {
+			$("."+_this._ID_+"-show-literal-help", $(env)).on("click", function() {
 				var classHelp =  $(this).parentsUntil("div[typeof]").find("span."+_this._ID_+"-literal-help");
 				$(classHelp).toggleClass("hidden");
 			});
 
 			// BUTTON: show resource help text
-			_this.$elem.on("click", "."+_this._ID_+"-show-resource-help", function() {
+			$("."+_this._ID_+"-show-resource-help", $(env)).on("click", function() {
 				var classHelp =  $(this).parent().find("span."+_this._ID_+"-resource-help");
 				$(classHelp).toggleClass("hidden");
 				return false;
 			});
 
 			// BUTTON: edit subform
-			_this.$elem.on("click", "button."+_this._ID_+"-edit-subform", function() {
+			$("button."+_this._ID_+"-edit-subform", $(env)).on("click", function() {
 				var resContainer = $(this).parentsUntil("div.form-group").parent();
 
 				if ( _this.Hooks && typeof _this.Hooks.__editSubform !== "undefined" )
@@ -935,7 +933,7 @@
 			});
 
 			// BUTTON: new subform
-			_this.$elem.on("click", "button."+_this._ID_+"-new-subform", function() {
+			$("button."+_this._ID_+"-new-subform", $(env)).on("click", function() {
 
 				if ( $(this).parent().find("input."+_this._ID_+"-property").val() == "" ) {
 					var resContainer = $(this).parentsUntil("div.form-group").parent(); // add in same container
@@ -948,11 +946,10 @@
 					_this.Hooks.__newSubform( resContainer );
 
 				// todo: native new subform
-				
 			});
 
 			// BUTTON: add property
-			_this.$elem.on("click", "button."+_this._ID_+"-add-property", function() {
+			$("button."+_this._ID_+"-add-property", $(env)).on("click", function() {
 				var btnContainer = $(this).parent("div.form-group");						
 				var propertyModel = $.extend( true, {}, $(this).data( _this._ID_ + "-model" ) );
 				
@@ -968,14 +965,13 @@
 				if ( _this.Hooks && typeof _this.Hooks.__afterAddProperty !== "undefined" )
 					_this.Hooks.__afterAddProperty( propertyHTML );
 				
-				findWildcardInputs( propertyHTML );
+				_this.initFormHandler( propertyHTML );
 
 				return false;
 			});
 
 			// BUTTON: duplicate property			
-			this.$elem.on("click", "button."+_this._ID_+"-duplicate-property", function() {
-			//$("button."+_this._ID_+"-duplicate-property").on("click", function() {
+			$("button."+_this._ID_+"-duplicate-property", $(env)).on("click", function() {
 				var btnContainer = $(this).parentsUntil("div.form-group").parent();
 				var propertyModel = $.extend( true, {}, $(btnContainer).find("."+_this._ID_+"-property").first().data( _this._ID_ + "-model" ) );
 				var index = propertyModel["@rdform"]['index'];
@@ -1000,11 +996,11 @@
 				if ( _this.Hooks && typeof _this.Hooks.__afterDuplicateProperty !== "undefined" )
 					_this.Hooks.__afterDuplicateProperty( propertyHTML );
 				
-				findWildcardInputs( propertyHTML );
+				_this.initFormHandler( propertyHTML );
 			} );		
 
 			//BUTTON: remove property
-			_this.$elem.on("click", "button."+_this._ID_+"-remove-property", function() {
+			$("button."+_this._ID_+"-remove-property", $(env)).on("click", function() {
 				var btnContainer = $(this).parentsUntil("div.form-group").parent();
 				var propertyModel = $.extend( true, {}, $(btnContainer).find("."+_this._ID_+"-property").first().data( _this._ID_ + "-model" ) );
 
@@ -1023,7 +1019,8 @@
 					$(btnContainer).after( propertyHTML );
 					$(propertyHTML).show("slow");
 
-					findWildcardInputs( propertyHTML );
+					//findWildcardInputs( propertyHTML );
+					_this.initFormHandler( propertyHTML );
 				}
 				// the last property
 				else if ( prevProperty.length > 0 && nextProperty.length == 0 ) {
@@ -1118,7 +1115,8 @@
 				});
 
 			}
-			findWildcardInputs( _this.$elem );
+			//findWildcardInputs( _this.$elem );
+			findWildcardInputs( $(env) );
 			
 			// find the target input of a wildcard wcd in the class envClass
 			function getWildcardTarget( wcd, envClass ) {
@@ -1178,7 +1176,7 @@
 			}
 
 			// edit a class resouce
-			_this.$elem.on("click", "div."+_this._ID_+"-edit-class-resource span", function() {
+			$("div."+_this._ID_+"-edit-class-resource span", $(env)).on("click", function() {
 				$(this).next("input").show().focus();
 
 				$(this).prev("small").hide();
@@ -1186,7 +1184,7 @@
 			});
 			
 			// live auto-update class-resource text
-			_this.$elem.on("keyup", "div."+_this._ID_+"-edit-class-resource input", function() {
+			$("div."+_this._ID_+"-edit-class-resource input", $(env)).on("keyup", function() {
 				var val = $(this).val();
 
 				if ( val != "" ) {
@@ -1196,7 +1194,7 @@
 			});
 
 			// leave a class-resource edit input
-			_this.$elem.on("change blur", "div."+_this._ID_+"-edit-class-resource input", function() {
+			$("div."+_this._ID_+"-edit-class-resource span", $(env)).on("change blur", function() {
 				$(this).prev().prev("small").show();
 				$(this).prev("span").show();
 				$(this).trigger( "keyup" );
@@ -1204,7 +1202,7 @@
 			});
 
 			// leave external input
-			_this.$elem.on("blur", "input[external]", function() {
+			$("input[external]", $(env)).on("blur", function() {
 				if ( $(this).val() != "" ) {
 					$(this).parent().find("."+_this._ID_+"-edit-subform").removeClass("hide");
 					$(this).parent().find("."+_this._ID_+"-remove-property").removeClass("hide");
@@ -1218,7 +1216,7 @@
 			});
 
 			//autocomplete input
-			_this.$elem.on("focus", "input[autocomplete]", function() {
+			$("input[autocomplete]", $(env)).on("focus", function() {
 				// TODO: check if attrs query-endpoint etc exists
 				var queryEndpoint = $(this).attr( "query-endpoint" );
 				var queryStr = $(this).attr("query");
@@ -1270,7 +1268,7 @@
 			});
 
 			// trigger keyup on change autocomplete input
-			_this.$elem.on("change", "input[autocomplete]", function() {
+			$("input[autocomplete]", $(env)).on("change", function() {
 				$(this).trigger("keyup");
 			});
 		},// end of initFormHandler	
