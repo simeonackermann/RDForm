@@ -129,3 +129,11 @@ input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:fo
 .rdform-resource-help-container {
 	display:inline
 }
+
+.ui-menu {
+	padding: 0px !important;
+}
+.ui-state-focus {
+	background: #DDD !important;
+	border: none !important;
+}
