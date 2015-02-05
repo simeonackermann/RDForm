@@ -1271,6 +1271,10 @@
 			$("input[autocomplete]", $(env)).on("change", function() {
 				$(this).trigger("keyup");
 			});
+
+			if ( _this.Hooks && typeof _this.Hooks.__afterInitFormHandler!== "undefined" )
+				_this.Hooks.__afterInitFormHandler( );
+
 		},// end of initFormHandler	
 
 		/**
