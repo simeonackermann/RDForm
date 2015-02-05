@@ -1234,6 +1234,16 @@
 				}
 			});
 
+			// create custom autoconmplete item with resource uri as href
+			$.widget("custom.autocompleteLinkItem", $.ui.autocomplete, {
+				_renderItem: function( ul, item ) {
+					return $( "<li>" )
+					.attr( "data-value", item.value )
+					.append( '<a onclick="return false" href="' + item.value + '">' + item.label + "</a>" )
+					.appendTo( ul );
+					}
+			});
+
 			//autocomplete input
 			$("input[autocomplete]", $(env)).on("focus", function() {
 				// TODO: check if attrs query-endpoint etc exists
@@ -1243,51 +1253,51 @@
 				var queryValues = $(this).attr("query-values");
 				var queryDataType = $(this).attr("query-datatype");
 
-					switch (apitype) {
+				switch (apitype) {
+					case "sparql" :
+						$(this).autocompleteLinkItem().autocompleteLinkItem({
+						//$(this).autocomplete({
+							source: function( request, response ) {		
+								var query = queryStr.replace(/%s/g, "'" + request.term + "'");
+								$.ajax({
+									url: queryEndpoint,
+									dataType: queryDataType,
+									data: {
+										query: query,
+										format: "json"
+									},
+									success: function( data ) {
+										response( $.map( data.results.bindings, function( item ) {
+											if ( _this.Hooks && typeof _this.Hooks.__autocompleteGetItem !== "undefined" )
+												item = _this.Hooks.__autocompleteGetItem( item );
+											return {
+												label: item.label.value, // wird angezeigt
+												value: item.item.value
+											}
+						            	}));
+						            },
+						            error: function(err) {
+						            	_this.showAlert( "error", 'Error on autocomplete: ' + JSON.stringify(err, null, ' ') );
+						            }
+								});
+					      	},
+					      	select : function( event, ui ) {
+					      		if ( _this.Hooks && typeof _this.Hooks.__selectAutocompleteItem !== "undefined" )
+									_this.Hooks.__selectAutocompleteItem( this, ui.item.value );
+					      	},
+							minLength: 2
+						});
+						break;
 
-						case "sparql" :
-							$(this).autocomplete({
-								source: function( request, response ) {		
-									var query = queryStr.replace(/%s/g, "'" + request.term + "'");
-									$.ajax({
-										url: queryEndpoint,
-										dataType: queryDataType,
-										data: {
-											query: query,
-											format: "json"
-										},
-										success: function( data ) {
-											response( $.map( data.results.bindings, function( item ) {
-												if ( _this.Hooks && typeof _this.Hooks.__autocompleteGetItem !== "undefined" )
-													item = _this.Hooks.__autocompleteGetItem( item );
-												return {
-													label: item.label.value, // wird angezeigt
-													value: item.item.value
-												}
-							            	}));
-							            },
-							            error: function(err) {
-							            	_this.showAlert( "error", 'Error on autocomplete: ' + JSON.stringify(err, null, ' ') );
-							            }
-									});
-						      	},
-						      	select : function( event, ui ) {
-						      		if ( _this.Hooks && typeof _this.Hooks.__selectAutocompleteItem !== "undefined" )
-										_this.Hooks.__selectAutocompleteItem( this, ui.item.value );
-						      	},
-								minLength: 2
-							});
-							break;
+					case "local" :
+						$(this).autocomplete({
+							source: $.parseJSON( queryValues )
+						});
+						break;
 
-						case "local" :
-							$(this).autocomplete({
-								source: $.parseJSON( queryValues )
-							});
-							break;
-
-						default :
-							_this.showAlert( "error", "Unknown autocomplete apitype " + apitype );
-					}
+					default :
+						_this.showAlert( "error", "Unknown autocomplete apitype " + apitype );
+				}
 			});
 
 			// trigger keyup on change autocomplete input
