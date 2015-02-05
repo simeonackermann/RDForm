@@ -52,6 +52,11 @@
 	width: auto !important;
 	font-size: 0.6em !important;
 }
+.rdform-class-typeof-select {
+	display: inline;
+	width: auto !important;
+	margin: 0 0 5px 7px;
+}
 
 select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
 	padding: 2px 3px;

@@ -8,6 +8,8 @@ var rdform_translations = {
 	'Result': 'Ergebnis',
 	'add': 'hinzufügen', 
 	'remove': 'entfernen',
+	'choose': 'auswählen',
+	'choose type' : 'Art auswählen',
 	'Add class %s': 'Klasse %s hinzufügen',
 	'Duplicate class %s': 'Klasse %s duplizieren',
 	'Remove class %s': 'Klasse %s entfernen',	

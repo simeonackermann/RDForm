@@ -155,8 +155,10 @@
 					curClass['@rdform']['id-html'] = $(this).attr("id");
 				if ( $(this).attr("return-resource") )
 					curClass['@rdform']['id-return'] = $(this).attr("return-resource");
+				if ( $(this).attr("typeof-select") )
+					curClass['@rdform']['typeof-select'] = $(this).attr("typeof-select");
 				if ( $(this).prev("legend").length > 0 )
-					curClass['@rdform']['legend'] = _this.l( $(this).prev("legend").text() );
+					curClass['@rdform']['legend'] = _this.l( $(this).prev("legend").text() );				
 				if ( $(this).find("p.help") ) {
 					curClass['@rdform']['help'] = $(this).find("p.help").html();
 				}
@@ -382,7 +384,18 @@
 									'<input type="text" name="'+_this._ID_+'-classUri" value="'+ classModel['@id'] +'" class="form-control input-sm" />' +
 								'</div>' );	
 
-			thisLegend.append( '<small>a '+ classModel['@type'] +'</small>' );	
+			thisLegend.append( '<small>a '+ classModel['@type'] +'</small>' );
+
+			if ( classModel["@rdform"]['typeof-select'] !== undefined ) {
+				var typeofSelect = $(' <select class="'+_this._ID_+'-class-typeof-select form-control input-sm"></select>');
+				var selectOptions = $.parseJSON( classModel['@rdform']['typeof-select'] );
+				typeofSelect.append( '<option value="" disabled selected>'+_this.l("choose type")+'...</option>' );
+				for ( var soi in selectOptions ) {
+					typeofSelect.append( '<option value="'+ soi +'">'+ selectOptions[soi] +'</option>' );
+				}
+				thisLegend.append( typeofSelect );
+			}
+
 			thisClass.append( thisLegend );
 
 			if ( classModel['@rdform']['help'] !== undefined ) {
@@ -1199,6 +1212,12 @@
 				$(this).prev("span").show();
 				$(this).trigger( "keyup" );
 				$(this).hide();
+			});
+
+			// select a class typeof selection
+			$("select."+_this._ID_+"-class-typeof-select", $(env)).on("change", function() {
+				$(this).parentsUntil("div[typeof]").parent().attr( "typeof", $(this).val() );
+				$(this).prev("small").text("a " + $(this).val());
 			});
 
 			// leave external input
