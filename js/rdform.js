@@ -1252,6 +1252,10 @@
 							            }
 									});
 						      	},
+						      	select : function( event, ui ) {
+						      		if ( _this.Hooks && typeof _this.Hooks.__selectAutocompleteItem !== "undefined" )
+										_this.Hooks.__selectAutocompleteItem( this, ui.item.value );
+						      	},
 								minLength: 2
 							});
 							break;
