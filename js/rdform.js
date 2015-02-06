@@ -1167,9 +1167,10 @@
 				if ( val == undefined ) return false;
 
 				for ( wcd in wildcards ) {
+					var wldVal = wildcards[wcd].val();
+
 					if ( wildcards[wcd].val() != "" ) {
 						var regex = new RegExp( '\{' + wcd + '\}', "g");
-						var wldVal = wildcards[wcd].val();
 
 						// may apply wildcard-function
 						if ( wildcardFcts.hasOwnProperty(wcd) ) {
@@ -1178,12 +1179,18 @@
 							}
 						}
 
-						if ( $(src).attr("name") == _this._ID_+"-classUri" ) { // get webSafeString if its the resourceUri							
-							wldVal = _this.getWebsafeString(wldVal);
+						if ( $(src).attr("name") == _this._ID_+"-classUri" ) { // make wcdVal as resouce uri
+							wldVal = wldVal.replace(/\{.*\}/, ''); // replace existing wildcard-pointer in wcdVal
+							wldVal = _this.getWebsafeString(wldVal); // make webSafe string
 						}
 						val = val.replace( regex, wldVal );
 					}
 				}
+
+				if ( $(src).attr("name") == _this._ID_+"-classUri" ) { // make val as resouce uri
+					val = val.replace(/\{.*\}/, ''); // remove all wildcard-pointer
+				}
+
 				$(src).val( val.trim() );
 				$(src).trigger( "keyup" );
 			}
