@@ -783,6 +783,13 @@
 
 									if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
 										var resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+										if ( $(resource).length == 0 ) {
+											var addBtn = _this.getElement( $(env).find('button.'+_this._ID_+'-add-property'), 'name', i );
+											if ( $(addBtn).length != 0 ) {
+												$(addBtn).trigger("click");
+												resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+											}
+										}
 										if ( $(resource).length != 0 ) {
 											if ( di > 0 ) {
 												$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
