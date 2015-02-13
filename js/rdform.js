@@ -587,7 +587,7 @@
 					return curFormGroup;
 				}
 
-				var resourceClass = $('<input type="text" class="form-control input-sm '+_this._ID_+'-property" />');
+				var resourceClass = $('<input type="url" class="form-control input-sm '+_this._ID_+'-property" />');
 				resourceClass.data( _this._ID_ + "-model", resource);
 				// add attributes (except type)
 				var attr = $.extend( true, {}, resource["@rdform"] );
@@ -1717,6 +1717,11 @@
 
 				if ( $(property).attr("datatype").indexOf(":int") >= 0 ) {
 					value = value.replace(/[^\d]/g, '');
+				}
+			}
+			else if ( $(property).prop("type") == "url" && $(property).val() != ""  ) {
+				if ( $(property).val().search(/^http/) == -1 ) {
+					valid = false;
 				}
 			}
 
