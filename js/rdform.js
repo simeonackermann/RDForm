@@ -580,7 +580,7 @@
 										'<span class="glyphicon glyphicon-plus"></span> '+ resource['@rdform']['label'] +
 									'</button>' );
 					addBtn.data( _this._ID_ + "-model", resource);
-					if ( resource['@rdform']['subform'] !==  undefined ) {
+					if ( resource['@rdform']['typeof'] !==  undefined ) {
 						$(addBtn).attr("typeof", resource['@rdform']['typeof']);
 					}
 					curFormGroup.append ( addBtn );
