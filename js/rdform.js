@@ -229,23 +229,21 @@
 									return;
 								}
 
-								var arguments = new Object();
-								if ( $(this).attr("arguments") ) {
-									arguments = $.parseJSON( $(this).attr("arguments") );
-								}
-
-								// add arguments-index for multiple resources
-								if ( $(this).attr("multiple") ) {
-									arguments['i'] = 1;
-								}
-
-								if ( $(this).attr("arguments") || $(this).attr("multiple") ) {
-									curProperty["@rdform"]["arguments"] = arguments;
-								}
-
 							} else {
 								curProperty["@id"] = $(this).attr("name");
 								delete curProperty["@type"];	
+							}
+
+							var arguments = new Object();
+							if ( $(this).attr("arguments") ) {
+								arguments = $.parseJSON( $(this).attr("arguments") );
+							}
+							// add arguments-index for multiple resources
+							if ( $(this).attr("multiple") ) {
+								arguments['i'] = 1;
+							}
+							if ( $(this).attr("arguments") || $(this).attr("multiple") ) {
+								curProperty["@rdform"]["arguments"] = JSON.stringify(arguments);
 							}
 							
 							break;
@@ -999,8 +997,12 @@
 
 				propertyModel["@rdform"]['index'] = index;
 				if ( propertyModel["@rdform"]["arguments"] !== undefined ) {
-					propertyModel["@rdform"]["arguments"]["i"] = index
+					var arguments = $.parseJSON( propertyModel["@rdform"]["arguments"] );
+					arguments["i"] = index;
+					arguments = JSON.stringify(arguments);
+					propertyModel["@rdform"]["arguments"] = arguments;
 				}
+
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
 				
 				// hide legend text, help and label
