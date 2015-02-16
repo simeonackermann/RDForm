@@ -1720,6 +1720,7 @@
 				}
 			}
 			else if ( $(property).prop("type") == "url" && $(property).val() != ""  ) {
+				$(property).val( _this.replaceStrPrefix($(property).val()) ); // maybe it contains a prefix
 				if ( $(property).val().search(/^http/) == -1 ) {
 					valid = false;
 				}
