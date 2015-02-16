@@ -1485,6 +1485,9 @@
 			thisClass["@value"] = { "@id" : wildcardsFct['str'], "@type" : $(cls).attr("typeof") };
 			$.extend(true, thisClass["@value"], properties );
 
+			if (_this.Hooks && typeof _this.Hooks.__createdClass !== "undefined" )
+				thisClass = _this.Hooks.__createdClass( thisClass );
+
 			return thisClass;
 		},
 
