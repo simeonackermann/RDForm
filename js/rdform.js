@@ -679,6 +679,9 @@
 
 				_this.data = expanded_data;
 
+				if ( _this.Hooks && typeof _this.Hooks.__beforeInsertData !== "undefined" )
+						_this.Hooks.__beforeInsertData();
+
 				$.each( _this.data, function( key, value ) {
 					_this.addExistingDataFct( undefined, value );
 				})
