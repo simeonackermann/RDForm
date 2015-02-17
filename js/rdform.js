@@ -581,6 +581,10 @@
 					if ( resource['@rdform']['typeof'] !==  undefined ) {
 						$(addBtn).attr("typeof", resource['@rdform']['typeof']);
 					}
+					if ( resource['@rdform']['help'] !== undefined ) {
+						addBtn.after( '<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-literal-help"></span>' );
+						addBtn.after(	'<span class="help-block '+_this._ID_+'-literal-help hidden">' + resource['@rdform']['help'] + '</span>' );
+					}
 					curFormGroup.append ( addBtn );
 					return curFormGroup;
 				}
@@ -624,6 +628,11 @@
 				var thisInputContainer = $('<div class="col-xs-9"></div>');
 				resourceClass.wrap( thisInputContainer );
 
+				if ( resource['@rdform']['help'] !== undefined ) {
+					thisLabel.prepend( '<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-literal-help"></span>' );
+					resourceClass.after(	'<span class="help-block '+_this._ID_+'-literal-help hidden">' + resource['@rdform']['help'] + '</span>' );
+				}
+
 				if ( resource['@rdform']['subform'] !== undefined ) {
 					curFormGroup.removeClass('resource-group-'+_this.getWebsafeString(resource['@rdform']['name'])+'-');
 					curFormGroup.addClass('resource-group-'+_this.getWebsafeString(resource['@rdform']['name'])+'-'+resource['@rdform']['subform']);
@@ -642,15 +651,16 @@
 
 				if ( resource['@rdform']['hidden'] !== undefined ) {
 					curFormGroup.addClass("hidden");
-				}
+				}				
+
 			}
 
-			if ( resource["@rdform"]["help"] !== undefined && resource['@rdform']['additionalIntermit'] === undefined ) {
+			/*if ( resource["@rdform"]["help"] !== undefined && resource['@rdform']['additionalIntermit'] === undefined ) {
 				curFormGroup.append('<div class="'+_this._ID_+'-resource-help-container">' +
 										'<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-resource-help"></span>' +
 										'<span class="help-block '+_this._ID_+'-resource-help hidden">' + resource['@rdform']['help'] + '</span>' +
 									'</div>' );
-			}
+			}*/
 			return curFormGroup;
 		},
 
