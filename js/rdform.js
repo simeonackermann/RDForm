@@ -1691,12 +1691,17 @@
 		 */
 		userInputValidation: function ( property ) {	
 			var _this = this;
-			var valid = true;
-			var value = $(property).val();
-			value = value.trim();
+			var valid = true;			
 
 			$(property).parentsUntil("div.form-group").parent().removeClass("has-error has-feedback");
 			$(property).next("span.glyphicon-warning-sign").remove();
+
+			if ( _this.Hooks && typeof _this.Hooks.__userInputValidation !== "undefined" ) {
+				if ( _this.Hooks.__userInputValidation( $(property) ) == false )
+					valid = false;
+			}
+			var value = $(property).val();
+			value = value.trim();
 
 			if ( $(property).attr("required") ) {
 				if ( $(property).val() == "" ) {
@@ -1739,12 +1744,7 @@
 				if ( $(property).val().search(/^http/) == -1 ) {
 					valid = false;
 				}
-			}
-
-			if ( _this.Hooks && typeof _this.Hooks.__userInputValidation !== "undefined" ) {
-				if ( _this.Hooks.__userInputValidation( $(property) ) == false )
-					valid = false;
-			}
+			}			
 			
 			if ( ! valid ) {
 				$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
