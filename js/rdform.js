@@ -1205,6 +1205,10 @@
 							wldVal = wldVal.replace(/\{.*\}/, ''); // replace existing wildcard-pointer in wcdVal
 							wldVal = _this.getWebsafeString(wldVal); // make webSafe string
 						}
+
+						if ( _this.Hooks && typeof _this.Hooks.__writeWildcardValue !== "undefined" )
+							wldVal = _this.Hooks.__writeWildcardValue( $(src), wldVal );
+
 						val = val.replace( regex, wldVal );
 					}
 				}
