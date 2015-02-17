@@ -1233,6 +1233,8 @@
 			$("div."+_this._ID_+"-edit-class-resource input", $(env)).on("keyup", function() {
 				var val = $(this).val();
 
+				$(this).val( _this.getWebsafeString( $(this).val() ) );				
+
 				if ( val != "" ) {
 					$(this).parentsUntil("div[typeof]").parent().attr( "resource", val );
 					$(this).prev().prev("small").text( val );
