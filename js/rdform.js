@@ -389,7 +389,7 @@
 				var selectOptions = $.parseJSON( classModel['@rdform']['typeof-select'] );
 				typeofSelect.append( '<option value="" disabled selected>'+_this.l("choose type")+'...</option>' );
 				for ( var soi in selectOptions ) {
-					typeofSelect.append( '<option value="'+ soi +'">'+ selectOptions[soi] +'</option>' );
+					typeofSelect.append( '<option value="'+ soi +'">'+ _this.l( selectOptions[soi] ) +'</option>' );
 				}
 				thisLegend.append( typeofSelect );
 			}
@@ -491,7 +491,7 @@
 				var selectOptions = $.parseJSON( literal['@rdform']['select-options'] );
 				thisInput.append( '<option value="" disabled selected>'+_this.l("choose")+'...</option>' );
 				for ( var soi in selectOptions ) {
-					thisInput.append( '<option value="'+ soi +'">'+ selectOptions[soi] +'</option>' );
+					thisInput.append( '<option value="'+ soi +'">'+ _this.l( selectOptions[soi] ) +'</option>' );
 				}
 			}
 			else if ( literal['@rdform']['boolean'] !==  undefined ) {
