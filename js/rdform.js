@@ -1942,10 +1942,10 @@
 			var cls = "";
 			switch ( type ) {
 				case "success" :
-					cls = "alert-success";				
+					cls = "alert-success";
 					break;
 				case "error" :
-					cls = "alert-danger";				
+					cls = "alert-danger";
 					break;
 				case "warning" :
 					cls = "alert-warning";
@@ -1953,17 +1953,12 @@
 				default :
 					cls = "alert-info";
 			}
-			if ( this.settings.verbose ) {
+			if ( this.settings.verbose || type == "error" ) {
 				this.alertArea.append('<p class="alert '+cls+'" role="alert">' + msg + '</p>').show();
 			}
 			else if ( this.settings.debug ) {
 				console.log( "RDForm ("+type+"): " + msg );
 			}
-			else if ( type == "error" ) {
-				alert( "RDForm ("+type+"): " + msg );
-			}
-			
-			
 		},		
 	}; // end of rdform.prototype
 
