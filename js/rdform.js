@@ -90,6 +90,7 @@
 
 			if ( _this.MODEL.length > 0 ) {
 				_this.$elem.append( _this.createHTMLForm() );
+				_this.$elem.attr("autocomplete", "off");
 								
 				_this.initFormHandler( _this.$elem );
 
