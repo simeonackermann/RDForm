@@ -967,7 +967,7 @@
 			// BUTTON: new subform
 			$("button."+_this._ID_+"-new-subform", $(env)).on("click", function() {
 
-				if ( $(this).parent().find("input."+_this._ID_+"-property").val() == "" ) {
+				if ( $(this).parent().find("input."+_this._ID_+"-property").val().search(/^http/) == -1 ) {
 					var resContainer = $(this).parentsUntil("div.form-group").parent(); // add in same container
 				} else {
 					$(this).parent().find("button."+_this._ID_+"-duplicate-property").trigger("click");
@@ -1256,7 +1256,7 @@
 
 			// leave external input
 			$("input[external]", $(env)).on("blur", function() {
-				if ( $(this).val() != "" ) {
+				if ( $(this).val() != "" && _this.userInputValidation( $(this) ) ) {
 					$(this).parent().find("."+_this._ID_+"-edit-subform").removeClass("hide");
 					$(this).parent().find("."+_this._ID_+"-remove-property").removeClass("hide");
 					if ( $(this).attr("multiple") === undefined ) {
