@@ -1355,6 +1355,8 @@
 				var valid = _this.userInputValidation( $(this) );
 				if ( ! valid ) {
 					proceed = false;
+					$('html, body').animate({ scrollTop: $(this).offset().top }, 100);
+					return true;
 				}
 			});
 
@@ -1757,7 +1759,6 @@
 			if ( ! valid ) {
 				$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
 				$(property).after( '<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>' );
-				$('html, body').animate({ scrollTop: $(property).offset().top }, 100);
 				return false;
 			}
 
