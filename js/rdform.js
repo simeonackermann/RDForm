@@ -1044,7 +1044,7 @@
 				var nextProperty = btnContainer.next('div[class="'+btnContainer.attr("class")+'"]');
 				
 				if ( _this.Hooks && typeof _this.Hooks.__beforeRemoveProperty !== "undefined" )
-					_this.Hooks.__beforeRemoveProperty( $(btnContainer).find("."+_this._ID_+"-property").first() );
+					_this.Hooks.__beforeRemoveProperty( btnContainer );
 				
 				// the only property (no prevs or next) - recreate this property
 				if ( prevProperty.length == 0 && nextProperty.length == 0 ) {
