@@ -1955,7 +1955,7 @@
 				default :
 					cls = "alert-info";
 			}
-			if ( this.settings.verbose || type == "error" ) {
+			if ( this.settings.verbose || type == "error" || type == "warning" ) {
 				this.alertArea.append('<p class="alert '+cls+'" role="alert">' + msg + '</p>').show();
 			}
 			else if ( this.settings.debug ) {
