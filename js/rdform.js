@@ -1210,15 +1210,18 @@
 						if ( _this.Hooks && typeof _this.Hooks.__writeWildcardValue !== "undefined" )
 							wldVal = _this.Hooks.__writeWildcardValue( $(src), wldVal );
 
+						wldVal = wldVal.replace(/\{\S*\}/g, ''); // remove wildcards in wildcard-value
+
 						val = val.replace( regex, wldVal );
 					}
 				}
+				val = val.trim();
 
-				if ( $(src).attr("name") == _this._ID_+"-classUri" ) { // make val as resouce uri
-					val = val.replace(/\{.*\}/, ''); // remove all wildcard-pointer
+				if ( val == "" ) { // if wildcard value would empty, set to modvalue
+					val = $(src).attr("modvalue");
 				}
 
-				$(src).val( val.trim() );
+				$(src).val( val );
 				$(src).trigger( "keyup" );
 			}
 
