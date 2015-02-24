@@ -62,6 +62,9 @@ select, textarea, input[type="text"], input[type="password"], input[type="dateti
 	padding: 2px 3px;
 	font-size: 0.9em;
 }
+select {
+	width: auto !important;
+}
 textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, .uneditable-input:focus {
 	border-color: #999999;
 	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.102);
@@ -69,6 +72,10 @@ textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[ty
 input:focus:invalid:focus, textarea:focus:invalid:focus, select:focus:invalid:focus { 
 	/*border-color: #F8B9B7;*/
 	box-shadow: 0px 1px 2px #F8B9B7;
+}
+input[datatype="xsd:int"] {
+	width: 50%;
+	max-width: 150px;
 }
 .rdform .input-sm {
 	height: auto;
