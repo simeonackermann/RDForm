@@ -1293,7 +1293,6 @@
 				switch (apitype) {
 					case "sparql" :
 						$(this).autocompleteLinkItem().autocompleteLinkItem({
-						//$(this).autocomplete({
 							source: function( request, response ) {		
 								var query = queryStr.replace(/%s/g, "'" + request.term + "'");
 								$.ajax({
@@ -1305,10 +1304,16 @@
 									},
 									success: function( data ) {
 										response( $.map( data.results.bindings, function( item ) {
+											var label = [];
 											if ( _this.Hooks && typeof _this.Hooks.__autocompleteGetItem !== "undefined" )
 												item = _this.Hooks.__autocompleteGetItem( item );
+											$.each(item, function(k,v) {
+												if ( k != "item" )
+													label.push(v.value);
+											});
+											label = label.join(" | ");
 											return {
-												label: item.label.value, // wird angezeigt
+												label: label, // wird angezeigt
 												value: item.item.value
 											}
 						            	}));
