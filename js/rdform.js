@@ -1200,6 +1200,9 @@
 							if ( wildcardFcts[wcd] == "BASE" ) {
 								wldVal = wldVal.split("/").reverse()[0];
 							}
+							if ( wildcardFcts[wcd] == "HASH" ) {
+								wldVal = _this.getHash(wldVal);
+							}
 						}
 
 						if ( $(src).attr("name") == _this._ID_+"-classUri" ) { // make wcdVal as resouce uri
@@ -1809,6 +1812,15 @@
 		  */
 		setBaseUri : function( uri ) {
 			this.MODEL[0]["@context"]["@base"] = uri;
+		},
+
+		/**
+		  * Creating random hash of a string (non unique secure!)
+		  *
+		  * @str String
+		  */
+		getHash : function( str ) {
+			return (str.length * Math.random()).toString(36).slice(2);
 		},
 
 		/** 
