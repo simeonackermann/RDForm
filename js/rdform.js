@@ -1977,6 +1977,7 @@
 			}
 			if ( this.settings.verbose || type == "error" || type == "warning" ) {
 				this.alertArea.append('<p class="alert '+cls+'" role="alert">' + msg + '</p>').show();
+				$('html, body').animate({ scrollTop: (this.alertArea.offset().top) }, 100);
 			}
 			else if ( this.settings.debug ) {
 				console.log( "RDForm ("+type+"): " + msg );
