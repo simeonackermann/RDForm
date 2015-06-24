@@ -61,7 +61,7 @@ data  		| Array or Object of existing data to insert
 hooks 		| Path to the hooks file
 lang 		| Path to the language file
 cache 		| true or false, loads template from cache
-verbose 	| true or false, output messages before the form 
+verbose 	| true or false, output all messages and the result
 debug 		| log error, warnings and infos into the console
 submit 		| Submit callback function
 
@@ -181,6 +181,23 @@ Example:
 </div>
 
 <div typeof="bio:Birth" resource="Birth-{pid}">
+	<input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+</div>
+```
+
+If you need to reference classes with same typeof add the id attribute. Example:
+
+```html
+<div typeof="foaf:Person" resource="Person">
+	<input name="bio:event" type="resource" value="BirthEvent" />
+	<input name="bio:event" type="resource" value="DeathEvent" />
+</div>
+
+<div typeof="bio:Event" id="BirthEvent" resource="Birth">
+	<input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
+</div>
+
+<div typeof="bio:Event" id="DeathEvent" resource="Death">
 	<input name="dc:date" type="literal" datatype="xsd:date" placeholder="JJJJ-MM-TT" />
 </div>
 ```
