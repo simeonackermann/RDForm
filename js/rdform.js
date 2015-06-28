@@ -144,9 +144,19 @@
 			}
 
 			// walk the classes
-			$(template).children('div[typeof]').each(function() {
+			$(template).children('div').each(function(i) {
 				var curClass = new Object({ '@rdform' : {} });
 				var properties = new Object();
+
+				if ( $(this).attr("typeof") === undefined ) {
+					_this.showAlert( "error", "Error: Couldnt find the attribute \"typeof\" in div on position " + (i+1) );
+					return;
+				}
+
+				if ( $(this).attr("resource") === undefined ) {
+					_this.showAlert( "error", "Error: Couldnt find the attribute \"resource\" in div on position " + (i+1) );
+					return;
+				}
 
 				curClass['@id'] = $(this).attr("resource");
 				curClass['@type'] = $(this).attr("typeof");
@@ -175,7 +185,7 @@
 					}
 					if ( $(this).attr("name") === undefined ) { // check if name exists
 						_this.showAlert( "error", "Attention: Unnamed Property-" + $(this).attr("type") + " in \"" + curClass['@id'] + "\". Please add any name." );
-						success = false;
+						return;
 					}
 
 					// add all attributes: type, name, value, multiple, additional, readonly, placeholder, datatype, requiere, autocomplete, textare, boolean, checked, select, ...				
