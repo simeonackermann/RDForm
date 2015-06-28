@@ -1390,6 +1390,10 @@
 						console.log( "RDForm Result = ", _this.RESULT );
 					}
 
+					if ( _this.settings.verbose ) {
+						_this.outputResult();
+					}
+
 					// this calls the callback function
 					_this.settings.submit.call( _this.RESULT );
 				});
