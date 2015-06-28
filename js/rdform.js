@@ -244,7 +244,8 @@
 								arguments['i'] = 1;
 							}
 							if ( $(this).attr("arguments") || $(this).attr("multiple") ) {
-								curProperty["@rdform"]["arguments"] = JSON.stringify(arguments);
+								//curProperty["@rdform"]["arguments"] = JSON.stringify(arguments);
+								curProperty["@rdform"]["arguments"] = arguments;
 							}
 							
 							break;
@@ -1388,7 +1389,7 @@
 					if ( _this.settings.debug ) {
 						console.log( "RDForm Result = ", _this.RESULT );
 					}
-					
+
 					// this calls the callback function
 					_this.settings.submit.call( _this.RESULT );
 				});
