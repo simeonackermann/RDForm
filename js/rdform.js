@@ -312,6 +312,10 @@
 								}
 							});
 						}
+						// add recursive for deeper references
+						if ( Array.isArray(thisCls) ) {
+							addToModel( thisCls, curClass );
+						}
 					});
 				});
 			}
