@@ -17,4 +17,7 @@ var rdform_translations = {
 	'Duplicate literal %s': 'Literal %s duplizieren',
 	'Remove literal %s': 'Literal %s entfernen',
 	'Required field': 'Pflichtfeld',
+	'Year' : 'Jahr',
+	'Month': 'Monat',
+	'Day': 'Tag'
 }
