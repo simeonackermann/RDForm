@@ -544,12 +544,13 @@
 
 			thisInputContainer.append( thisInput );		
 
-			if ( literal['@rdform']['boolean'] !== undefined ) {
-				thisInputContainer.addClass( "checkbox" );
-				thisInput.removeClass( "form-control input-sm" );
-				thisInput = $("<label></label>").append( thisInput );
-				thisInput.append( literal['@rdform']['label'] );
-				thisLabel.text( "" );
+			if ( literal['@rdform']['datatype'] == "xsd:date" || literal['@rdform']['datatype'] == "http://www.w3.org/2001/XMLSchema#date" ) {
+				var dateTypeSelect = $('<select name="" class="form-control input-sm '+_this._ID_+'-date-type-select">' +
+							'<option value="xsd:date">'+_this.l("Year")+'-'+_this.l("Month")+'-'+_this.l("Day")+'</option>'+
+							'<option value="xsd:gYearMonth">'+_this.l("Year")+'-'+_this.l("Month")+'</option>'+
+							'<option value="xsd:gYear">'+_this.l("Year")+'</option>'+
+						'</select>');
+				thisInputContainer.after( $('<div class="col-xs-3"></div>').append(dateTypeSelect) );
 			}
 
 			if ( literal['@rdform']['additional'] !==  undefined ) {
@@ -772,7 +773,7 @@
 						}
 
 						$(literal).val( data[i] );
-						$(literal).trigger("keyup");
+						$(literal).trigger("change");
 						$(literal).parentsUntil("."+_this._ID_+"-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 						if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
