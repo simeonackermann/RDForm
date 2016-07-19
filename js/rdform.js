@@ -544,6 +544,14 @@
 
 			thisInputContainer.append( thisInput );		
 
+			if ( literal['@rdform']['boolean'] !== undefined ) {
+				thisInputContainer.addClass( "checkbox" );
+				thisInput.removeClass( "form-control input-sm" );
+				thisInput = $("<label></label>").append( thisInput );
+				thisInput.append( literal['@rdform']['label'] );
+				thisLabel.text( "" );
+			}
+
 			if ( literal['@rdform']['additional'] !==  undefined ) {
 				thisInputContainer.append('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove literal %s", literal['@rdform']['label'] ) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 			}
@@ -967,6 +975,30 @@
 				var classHelp =  $(this).parent().find("span."+_this._ID_+"-resource-help");
 				$(classHelp).toggleClass("hidden");
 				return false;
+			});
+
+			// SELECT: date type
+			$("."+_this._ID_+"-date-type-select", $(env)).on("click", function() {
+				var dateFormat = "";
+				var defaultDate = "1970-01-01";
+				var dateProperty = $(this).parentsUntil("div.form-group").parent().find('input.'+_this._ID_+'-property');
+				var newDate = dateProperty.val();
+				
+				if ( $(this).val() == "xsd:gYear" ) {
+					dateFormat = "JJJJ";
+				} else if ( $(this).val() == "xsd:gYearMonth" ) {
+					dateFormat = "JJJJ-MM";
+				} else {
+					dateFormat = "JJJJ-MM-TT";
+				}
+
+				dateProperty.attr("placeholder", dateFormat);
+				newDate = dateProperty.val().slice(0, dateFormat.length);
+				if ( newDate.length > 0 ) {
+					newDate = newDate + defaultDate.slice(newDate.length, dateFormat.length);
+					dateProperty.val(newDate);
+				}
+				_this.userInputValidation( dateProperty );
 			});
 
 			// BUTTON: edit subform
@@ -1754,8 +1786,10 @@
 					|| $(property).attr("datatype") == "xsd:gYearMonth" 
 					|| $(property).attr("datatype") == "xsd:gYear"
 				) {
-					var datatype = "xsd:date";							
+					var datatype = "xsd:date";
+					$(property).val( value.slice(0, 10) ); // max default date jjjj-mm-tt					
 
+					value = $(property).val();
 					value = value.replace(/\./g, '-');
 					value = value.replace(/[^\d-]/g, '');
 
@@ -1773,6 +1807,11 @@
 						valid = false;
 					}
 					$(property).attr( "datatype", datatype );
+
+					var dateTypeSelect = $(property).parentsUntil("div.form-group").parent().find('select.'+_this._ID_+'-date-type-select');
+					if ( dateTypeSelect !== undefined ) {
+						$("option[value='"+datatype+"']", dateTypeSelect).prop("selected", true);
+					}
 				}
 
 				if ( $(property).attr("datatype").indexOf(":int") >= 0 ) {
