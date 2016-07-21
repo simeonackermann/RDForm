@@ -1059,7 +1059,9 @@
 				++index;
 
 				propertyModel["@rdform"]['index'] = index;
-				propertyModel["@rdform"]["arguments"]["i"] = index;
+				if ( propertyModel["@rdform"]["arguments"] !== undefined ) {
+					propertyModel["@rdform"]["arguments"]["i"] = index;
+				}
 
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
 				
