@@ -619,6 +619,7 @@
 				// add attributes (except type)
 				var attr = $.extend( true, {}, resource["@rdform"] );
 				delete attr["type"];
+				attr["arguments"] = JSON.stringify(attr["arguments"]);
 				resourceClass.attr( attr );
 			}
 			else { // add regular resource
@@ -1058,12 +1059,7 @@
 				++index;
 
 				propertyModel["@rdform"]['index'] = index;
-				if ( propertyModel["@rdform"]["arguments"] !== undefined ) {
-					var arguments = $.parseJSON( propertyModel["@rdform"]["arguments"] );
-					arguments["i"] = index;
-					arguments = JSON.stringify(arguments);
-					propertyModel["@rdform"]["arguments"] = arguments;
-				}
+				propertyModel["@rdform"]["arguments"]["i"] = index;
 
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
 				
