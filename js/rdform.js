@@ -774,7 +774,7 @@
 						}
 
 						$(literal).val( data[i] );
-						$(literal).trigger("change");
+						$(literal).trigger("keyup").trigger('change');
 						$(literal).parentsUntil("."+_this._ID_+"-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 						if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
