@@ -27,10 +27,13 @@
 			var _this = this;
 
 			// loading language file
-			if ( _this.settings.lang ) {
+			if ( _this.settings.lang && _this.settings.lang != "en.js" ) {
 				$.ajax({ url: _this.settings.lang, dataType: "script", async: false,
 					success: function() {
 						_this.translations = rdform_translations;
+						if ( _this.settings.debug ) {
+							console.log( "Loaded language file " + _this.settings.lang );
+						}
 					},
 					error: function( jqxhr, type, e ) {
 						_this.showAlert( "error", 'Error on loading language file "'+ _this.settings.lang +'": '+e );
@@ -44,6 +47,9 @@
 					success: function() {
 						try {
 							_this.Hooks = new RDForm_Hooks( _this );
+							if ( _this.settings.debug ) {
+								console.log( "Loaded hooks file " + _this.settings.hooks );
+							}
 						} catch (e) {
 							_this.showAlert( "error", 'Cannot init hooks file "'+ _this.settings.hooks +'": '+e );
 						}
@@ -79,6 +85,10 @@
 
 		init: function() {
 			var _this = this;
+
+			if ( _this.settings.debug ) {
+				console.log("RDForm settings = ", _this.settings);
+			}
 
 			// parsing model
 			if ( _this.template ) {
