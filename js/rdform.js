@@ -988,7 +988,7 @@
 			});
 
 			// SELECT: date type
-			$("."+_this._ID_+"-date-type-select", $(env)).on("click", function() {
+			$("."+_this._ID_+"-date-type-select", $(env)).on("change", function() {
 				var dateFormat = "";
 				var defaultDate = "1970-01-01";
 				var dateProperty = $(this).parentsUntil("div.form-group").parent().find('input.'+_this._ID_+'-property');
