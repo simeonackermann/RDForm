@@ -16,7 +16,7 @@ RDForm_Hooks.prototype = {
 			$("." + _this.rdform._ID_ + "-alert").html("");
 			var val = $(this).val();
 			if ( /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(val) == false) {
-				_this.rdform.showAlert( "info", "Invalid E-mail Address, please try again.");
+				_this.rdform.showAlert( "warning", "Invalid E-mail Address, please try again.");
 			}
 		});
 
