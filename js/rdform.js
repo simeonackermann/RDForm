@@ -552,7 +552,7 @@
 				thisLabel.text( "" );
 			}	
 
-			thisInputContainer.append( thisInput );		
+			thisFormGroup.append( thisInputContainer.append( thisInput ) );
 
 			if ( literal['@rdform']['datatype'] == "xsd:date" || literal['@rdform']['datatype'] == "http://www.w3.org/2001/XMLSchema#date" ) {
 				var dateTypeSelect = $('<select name="" class="form-control input-sm '+_this._ID_+'-date-type-select">' +
@@ -589,8 +589,6 @@
 				thisLabel.prepend( '<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-literal-help"></span>' );
 				thisInputContainer.append(	'<span class="help-block '+_this._ID_+'-literal-help hidden">' + literal['@rdform']['help'] + '</span>' );			
 			}
-
-			thisFormGroup.append( thisInputContainer );		
 
 			return thisFormGroup;
 		},
