@@ -3,8 +3,7 @@
   <!-- Root Class Person -->
   <legend>Person</legend>
   <div typeof="foaf:Person" resource="Person-{pid}">
-    <!-- hidden property for wildcard replacements. The value comes from hooks.js -->
-    <input name="pid" type="hidden" value="123" />
+    <input name="pid" type="hidden" value="123-{foaf:name}" />
 
     <!-- literal property -->
     <label>Name</label>
