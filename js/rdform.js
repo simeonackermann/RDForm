@@ -818,7 +818,7 @@
 							for ( var di in thisData ) {
 
 								// create dummy __insertHook if not exists
-								if ( ! _this.Hooks && typeof _this.Hooks.__insertResource === "undefined" ) {
+								if ( _this.Hooks && typeof _this.Hooks.__insertResource === "undefined" ) {
 									_this.Hooks.__insertResource = function(i, di, resource, callback){ callback(i, di, resource) };
 								}
 
