@@ -22,6 +22,26 @@ RDForm_Hooks.prototype = {
 
 	},
 
+	__beforeInsertData : function() {
+		var _this = this;
+		//add loading msg on insert data
+		_this.rdform.alertArea.append( $('<div class="alert alert-info loading rdform-loading-msg">Eigenschaften werden geladen. Bitte warten - </div>').hide() );
+	},
+
+	// on insert literal value, return value
+	__insertLiteral : function( uri, input, value ) {
+		var _this = this;
+
+		return value;
+	},
+
+	// on insert a existing resource into the form
+	// get and return i and di for asynchronus call
+	// i=relation, di=index, resource=resourceUri
+	__insertResource : function( i, di, resource, callback ) {
+		callback(i, di, resource);
+	},
+
 	// after instert existing data into the form
 	__afterInsertData : function() {
 		var _this = this;

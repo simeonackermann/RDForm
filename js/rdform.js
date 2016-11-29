@@ -764,12 +764,14 @@
 
 					if ( typeof data[i] === "string" ) { // its a literal
 
+						var literalValue = data[i];
+
 						var literal = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("input,select,textarea"), 'name', curName ).last();
 
 						if ( $(literal).length == 0 ) { // doesnt found -> try to find an additional button
 							var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find('button.'+_this._ID_+'-add-property'), 'name', curName );
 							if ( $(addBtn).length == 0 ) {
-								_this.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + data[i] + '" }', false );
+								_this.showAlert( "info", 'Der Datensatz enthält das nicht im Modell vorhandene Literal { "'+curName+'": "' + literalValue + '" }', false );
 								continue;
 							}
 							$(addBtn).trigger("click");
@@ -781,12 +783,15 @@
 							literal = _this.getElement( $(env).children("div."+_this._ID_+"-literal-group").find("input,textarea"), 'name', curName ).last();
 						}
 
-						$(literal).val( data[i] );
+						if ( _this.Hooks && typeof _this.Hooks.__insertLiteral !== "undefined" )
+							literalValue = _this.Hooks.__insertLiteral( curName, literal, literalValue, data );
+
+						$(literal).val( literalValue );
 						$(literal).trigger("keyup").trigger('change');
 						$(literal).parentsUntil("."+_this._ID_+"-literal-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 
 						if ( $(literal).attr("type") == "checkbox" ) { // checkbox -> check or uncheck
-							if ( data[i] == "0" || data[i] == "false" ) {
+							if ( literalValue == "0" || literalValue == "false" ) {
 								$(literal).removeAttr("checked");
 							} else {
 								$(literal).attr( "checked", "checked" );
