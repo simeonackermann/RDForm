@@ -1,4 +1,4 @@
-# RDForm #
+# RDForm f
 
 RDForm is a jQuery plugin for creating and editing RDF data in a clean and modern HTML form.
 
@@ -47,23 +47,23 @@ $(document).ready(function(){
 	- Hidden-Properties
 	- Wildcards
 	- Translation
-- Data inserting
+- Insert Data
 - Hooking
 
 ## Paramter ##
 
-The following parameters can given to the plugin:
+The following parameters can given to the plugin (see Installation above):
 
-Parameter  | Description
+Parameter (Type and default value)  | Description
 ------------- | -------------
-template  	| Path to the template file
-data  		| Array or Object of existing data to insert
-hooks 		| Path to the hooks file
-lang 		| Path to the language file
-cache 		| true or false, loads template from cache
-verbose 	| true or false, output all messages and the result
-debug 		| log error, warnings and infos into the console
-submit 		| Submit callback function
+`template` (String)  	| Path to the template file
+`data` (Object)  		| Array or Object of existing data to insert
+`hooks` (String) 		| Path to the hooks file
+`lang` (String) 		| Path to the language file
+`cache` (Boolean=false) 		| true or false, loads template from cache
+`verbose` (Boolean=false) 	| true or false, output all messages and the result
+`debug` (Boolean=false)		| log error, warnings and infos into the console
+`submit`  (Function)		| Submit callback function, will be called after submit the form
 
 
 ## Template Documentation ##
@@ -119,7 +119,7 @@ Example:
 </div>
 ```
 
-### Literal properties ###
+### Literal Properties ###
 
 Literals are described by a `<input type="literal" name="..." />`.
 
@@ -137,7 +137,7 @@ Optional Attribute  | Description
 `required`  	| Required property, cannot be empty
 `additional`  	| Additional, by default hidden property. Can be added it by clicking an add-button
 `readonly`  	| Cannot be edited
-'hidden'		| Hide this literal in the form
+`hidden`		| Hide this literal in the form
 `help`  		| Short help text for the property
 
 Example:
@@ -156,7 +156,7 @@ Are described as checkboxes in the form and can be 1|0 or true|false. They are i
 
 Are more line texts and initialized by adding the attribute `textarea` to a literal property.
 
-#### Select lists
+#### Select-Lists
 
 To get a select list add the attributes `select` and `select-options='...'`. the value of `select-options` must be a [JSON](https://en.wikipedia.org/wiki/JSON) object with a label and value pair.
 
@@ -166,7 +166,7 @@ Example:
 <input name="foaf:gender" type="literal" select select-options='{"woman":"woman", "man":"man"}'  datatype="xsd:string" />
 ```
 
-### Class resources ###
+### Class Resources ###
 
 Classes can contain resource properties, which containing a reference to another class.
 
@@ -202,7 +202,7 @@ If you need to reference classes with same typeof add the id attribute. Example:
 </div>
 ```
 
-### External resources ###
+### External Resources ###
 
 Example:
 
@@ -210,7 +210,7 @@ Example:
 <input type="resource" name="gnd" external />
 ```
 
-## Hidden properties ##
+## Hidden Properties ##
 
 Example:
 
@@ -225,11 +225,33 @@ With wildcards the class identifier or a property value can point to another pro
 Example:
 
 ```html
-	<div typeof="Person" resource="Person-{id}">
-		<input name="id" type="hidden" value="{label}-123" />
-		<input name="label" type="literal" />
-	</div>
+<div typeof="Person" resource="Person-{id}">
+	<input name="id" type="hidden" value="{label}-123" />
+	<input name="label" type="literal" />
+</div>
 ```
+
+#### Wildcard Functions
+
+To the returned value of a wildcard a function can applied. Basically you can use the string functions `toUpperCase` and `toLowerCase`, while writing the function name into braces just before the wildcard-identifier:
+
+```html
+<input name="id" type="literal" value="{(toLowerCase)label}" />
+```
+
+Custom functions can written into the return statement of the `__wildcardFcts` method in your hooks file (see `hooks.js` for examples). E.g:
+
+```js
+__wildcardFcts : function() {
+	return {
+		foo: function(str) {
+			return str + "bar";
+		},
+	};
+}
+```
+
+And called just before the wilcard-identifier as above.
 
 
 ### Translation ###
@@ -245,7 +267,9 @@ $(".rdform").RDForm({
 });
 ```
 
-## Data inserting ##
+## Insert Data ##
+
+Existing data can inserted as [json-ld](http://json-ld.org/) javascript object. The form of the data should fit to the loaded template. RDForm will insert the data into the form fields.
 
 Example:
 
@@ -276,4 +300,4 @@ With hooks own JavaScript methods can affect the application execution on certai
 
 ## License ##
 
-OntoWiki is licensed under the [GNU General Public License Version 2, June 1991](http://www.gnu.org/licenses/gpl-2.0.txt).
+RDForm is licensed under the [GNU General Public License Version 2, June 1991](http://www.gnu.org/licenses/gpl-2.0.txt).

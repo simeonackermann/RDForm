@@ -18,7 +18,7 @@
 
 		this.MODEL = new Array();
 		this.RESULT = new Object();
-		
+
 		return this;
 	}
 
@@ -69,7 +69,7 @@
 				});
 			}
 
-			// loading template file			
+			// loading template file
 			var templateFile = _this.settings.cache ? _this.settings.template : _this.settings.template + "?" + (new Date()).getTime();
 			var template = null;
 			$.ajax({ url: templateFile, type: "GET", dataType: "text", async: false,
@@ -101,7 +101,7 @@
 			if ( _this.MODEL.length > 0 ) {
 				_this.$elem.append( _this.createHTMLForm() );
 				_this.$elem.attr("autocomplete", "off");
-								
+
 				_this.initFormHandler( _this.$elem );
 
 				var sbm_text = "create";
@@ -116,9 +116,9 @@
 				}
 
 				// append submit button
-				_this.$elem.append('<div class="form-group '+_this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' + 
-									'<button type="reset" class="btn btn-default '+_this._ID_+'-abort">'+ _this.l("reset") +'</button> ' + 
-									'<button type="submit" class="btn btn-lg btn-primary">'+ _this.l(sbm_text) +'</button>' + 
+				_this.$elem.append('<div class="form-group '+_this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' +
+									'<button type="reset" class="btn btn-default '+_this._ID_+'-abort">'+ _this.l("reset") +'</button> ' +
+									'<button type="submit" class="btn btn-lg btn-primary">'+ _this.l(sbm_text) +'</button>' +
 								'</div></div>' );
 			}
 			return this;
@@ -140,7 +140,7 @@
 			// get baseuri
 			if ( $(template).attr("base") ) {
 				_this.setBaseUri($(template).attr("base"));
-			}		
+			}
 
 			// get prefixes
 			if ( $(template).attr("prefix") ) {
@@ -171,7 +171,7 @@
 				curClass['@id'] = $(this).attr("resource");
 				curClass['@type'] = $(this).attr("typeof");
 				_this.validatePrefix( curClass['@type'] );
-								
+
 				if ( $(this).attr("id") )
 					curClass['@rdform']['id-html'] = $(this).attr("id");
 				if ( $(this).attr("return-resource") )
@@ -179,7 +179,7 @@
 				if ( $(this).attr("typeof-select") )
 					curClass['@rdform']['typeof-select'] = $(this).attr("typeof-select");
 				if ( $(this).prev("legend").length > 0 )
-					curClass['@rdform']['legend'] = _this.l( $(this).prev("legend").text() );				
+					curClass['@rdform']['legend'] = _this.l( $(this).prev("legend").text() );
 				if ( $(this).find("p.help") ) {
 					curClass['@rdform']['help'] = $(this).find("p.help").html();
 				}
@@ -198,7 +198,7 @@
 						return;
 					}
 
-					// add all attributes: type, name, value, multiple, additional, readonly, placeholder, datatype, requiere, autocomplete, textare, boolean, checked, select, ...				
+					// add all attributes: type, name, value, multiple, additional, readonly, placeholder, datatype, requiere, autocomplete, textare, boolean, checked, select, ...
 					$.each ( $(this)[0].attributes, function( ai, attr) {
 						curProperty["@rdform"][ attr.name ] =  attr.value;
 
@@ -228,7 +228,7 @@
 					// add value as @value
 					if ( $(this).attr("value") ) {
 						curProperty["@value"] = $(this).attr("value");
-					}	
+					}
 					// add index
 					if ( $(this).attr("multiple") ) {
 						curProperty["@rdform"]["index"] = 1;
@@ -241,7 +241,7 @@
 								curProperty["@type"] = $(this).attr("value");
 								delete curProperty["@value"];
 							}
-							
+
 							// test if the resource class exists (if not external)
 							if ( $(this).attr("external") === undefined ) {
 
@@ -252,7 +252,7 @@
 
 							} else {
 								curProperty["@id"] = $(this).attr("name");
-								delete curProperty["@type"];	
+								delete curProperty["@type"];
 							}
 
 							var arguments = new Object();
@@ -267,7 +267,7 @@
 								//curProperty["@rdform"]["arguments"] = JSON.stringify(arguments);
 								curProperty["@rdform"]["arguments"] = arguments;
 							}
-							
+
 							break;
 
 						case "literal":
@@ -284,7 +284,7 @@
 
 					var propName = $(this).attr("name");
 					_this.validatePrefix( propName );
-					
+
 					if ( properties[ propName ] ) {
 						properties[ propName ].push(curProperty);
 					} else {
@@ -296,7 +296,7 @@
 				if ( properties.length == 0 ) {
 					_this.showAlert( "warning", "No properties stored in class \"" + curClass['@type'] + "\" on parsing model found..." );
 				}
-				
+
 				// add properties to the current class
 				$.extend( true, curClass, properties );
 
@@ -311,7 +311,7 @@
 				// add current class ass root-class, extend with baseuri and prefixes
 				} else {
 					$.extend( true, _this.MODEL[curClassIndex], curClass );
-				}				
+				}
 				curClassIndex++;
 			}); // end of walking class
 
@@ -322,10 +322,10 @@
 						if ( typeof thisCls === "object" ) {
 							$.each( thisCls, function( propIx, thisProp ) {
 								// add currentClass if type==type or type==id, prop[id] must undefined for classes of same types
-								if ( thisProp.hasOwnProperty("@type") 
+								if ( thisProp.hasOwnProperty("@type")
 									 && thisProp["@id"] == undefined
 									 && ( thisProp["@type"] == curClass['@type']
-									   || thisProp["@type"] == curClass["@rdform"]['id-html'] 
+									   || thisProp["@type"] == curClass["@rdform"]['id-html']
 										)
 									) {
 										$.extend( true, thisProp, curClass );
@@ -361,7 +361,7 @@
 		  *
 		  * @classModel Model-Object of the current class
 		  * @return HTML DOM object of the class
-		  */		
+		  */
 		createHTMLClass: function( classModel ) {
 			var _this = this;
 			var thisClass = $("<div></div>");
@@ -383,30 +383,30 @@
 				$(thisClass).attr("arguments", JSON.stringify( classModel['@rdform']['arguments'] ) );
 				//thisClass.data( _this._ID_ + "-model[@rdform][arguments]", arguments);
 			}
-			
+
 			var thisLegend = $( "<legend></legend>" );
 			if ( classModel["@rdform"]['legend'] !== undefined ) {
 				thisLegend.html( '<span class="rdform-legend-text">' + classModel["@rdform"]['legend'] + "</span>" );
 			}
-			
+
 			/*
 			// TODO: maybe add baseprefix, name, return-resource...
-			if ( classModel['name'] ) 
+			if ( classModel['name'] )
 				thisLegend.prepend( "<small>"+ classModel['name'] +"</small> " );
-			
+
 			if ( classModel['isRootClass'] ) {
 				thisLegend.prepend( "<small class=''+_this._ID_+'-class-baseprefix'>"+ CONTEXT[@base] +"</small> " );
 			}
 
 			if ( classModel['return-resource'] ) {
 				thisLegend.append( "<small>"+ classModel['return-resource'] +"</small> " );
-			} 
+			}
 			*/
 			thisLegend.append(	'<div class="'+_this._ID_+'-edit-class-resource">' +
 									'<small>'+ classModel['@id'] +'</small>' +
 									'<span class="glyphicon glyphicon-pencil"></span>' +
 									'<input type="text" name="'+_this._ID_+'-classUri" value="'+ classModel['@id'] +'" class="form-control input-sm" />' +
-								'</div>' );	
+								'</div>' );
 
 			thisLegend.append( '<small>a '+ classModel['@type'] +'</small>' );
 
@@ -437,7 +437,7 @@
 					});
 				}
 			});
-			
+
 			if ( classModel['@rdform']['additional'] !== undefined ) {
 				thisClass.append('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove class %s", classModel['@rdform']['legend']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 			}
@@ -448,7 +448,7 @@
 					thisClass.append('<button type="button" class="btn btn-link btn-xs '+_this._ID_+'-remove-property" title="'+ _this.l("Remove class %s", classModel['@rdform']['legend']) +'"><span class="glyphicon glyphicon-remove"></span> '+ _this.l("remove") +'</button>');
 				}
 				thisClass.append('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate class %s", classModel['@rdform']['legend']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');
-			}			
+			}
 			return thisClass;
 		},
 
@@ -470,21 +470,21 @@
 					thisProperty = $( '<div class="'+this._ID_+'-hidden-group hidden-group-'+ _this.getWebsafeString(name) +'"><input type="hidden" name="'+ name +'" id="" value="'+ val +'" /></div>' );
 					break;
 				case "literal":
-					thisProperty = this.createHTMLiteral( property );					
+					thisProperty = this.createHTMLiteral( property );
 					break;
 				case "resource":
 					thisProperty = this.createHTMLResource( property );
-					break;			
+					break;
 				default:
 					this.showAlert( "error", "Unknown property type \""+property['@rdform']['type']+"\" detected on creating HTML property.");
 					break;
 			}
-			
+
 			return thisProperty;
 		},
 
 		/**
-		  * Create literal propertie group  
+		  * Create literal propertie group
 		  *
 		  * @literal Object of the current literal propertie
 		  * @return  HTML DOM object of the literal group
@@ -498,7 +498,7 @@
 
 			// return create button
 			if ( literal['@rdform']['additional'] !==  undefined && literal['@rdform']['additionalIntermit'] === undefined ) {
-				var addBtn = $(	'<button type="button" class="btn btn-default btn-sm '+_this._ID_+'-add-property" name="'+ literal['@rdform']['name'] +'" title="' + _this.l('Add literal %s',  literal['@rdform']['label']) +'" label="'+literal['@rdform']['label']+'">' + 
+				var addBtn = $(	'<button type="button" class="btn btn-default btn-sm '+_this._ID_+'-add-property" name="'+ literal['@rdform']['name'] +'" title="' + _this.l('Add literal %s',  literal['@rdform']['label']) +'" label="'+literal['@rdform']['label']+'">' +
 									'<span class="glyphicon glyphicon-plus"></span> '+ literal['@rdform']['label'] +
 								'</button>' );
 				addBtn.data( _this._ID_ + "-model", literal);
@@ -508,7 +508,7 @@
 
 			var thisLabel = $("<label class='col-xs-3 control-label'>"+literal['@rdform']['label']+"</label>");
 			thisFormGroup.append( thisLabel );
-			
+
 			if ( literal['@rdform']['textarea'] !==  undefined ) {
 				var thisInput = $("<textarea></textarea>");
 			}
@@ -525,7 +525,7 @@
 			}
 			else {
 				var thisInput = $("<input type='text' />");
-			}	
+			}
 
 			thisInput.data( _this._ID_ + "-model", literal);
 			// add attributes (except type)
@@ -550,7 +550,7 @@
 				thisInput = $("<label></label>").append( thisInput );
 				thisInput.append( literal['@rdform']['label'] );
 				thisLabel.text( "" );
-			}	
+			}
 
 			thisFormGroup.append( thisInputContainer.append( thisInput ) );
 
@@ -578,7 +578,7 @@
 											'</button>');
 			}
 
-			if ( literal['@rdform']['required'] !== undefined ) {	
+			if ( literal['@rdform']['required'] !== undefined ) {
 				thisLabel.append( ' <abbr title="'+_this.l("Required field")+'">*</abbr>' );
 			}
 			if ( literal['@rdform']['hidden'] !== undefined ) {
@@ -587,7 +587,7 @@
 
 			if ( literal['@rdform']['help'] !== undefined ) {
 				thisLabel.prepend( '<span class="glyphicon glyphicon-question-sign btn '+_this._ID_+'-show-literal-help"></span>' );
-				thisInputContainer.append(	'<span class="help-block '+_this._ID_+'-literal-help hidden">' + literal['@rdform']['help'] + '</span>' );			
+				thisInputContainer.append(	'<span class="help-block '+_this._ID_+'-literal-help hidden">' + literal['@rdform']['help'] + '</span>' );
 			}
 
 			return thisFormGroup;
@@ -599,7 +599,7 @@
 		  * @resource Object of the current resource from MODEL
 		  * @return HTML DOM object of the resource group
 		  */
-		createHTMLResource: function( resource ) {		
+		createHTMLResource: function( resource ) {
 			var _this = this;
 			var curFormGroup = $('<div class="form-group '+_this._ID_+'-property-container '+_this._ID_+'-resource-group resource-group-'+_this.getWebsafeString(resource['@rdform']['name'])+'-'+_this.getWebsafeString(resource['@rdform']['value'])+'"></div>');
 
@@ -607,7 +607,7 @@
 
 				// return create button
 				if ( resource['@rdform']['additional'] !==  undefined && resource['@rdform']['additionalIntermit'] === undefined ) {
-					var addBtn = $(	'<button type="button" class="btn btn-default btn-sm '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l('Add resource %s',  resource['@rdform']['label']) +'" label="'+resource['@rdform']['label']+'">' + 
+					var addBtn = $(	'<button type="button" class="btn btn-default btn-sm '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l('Add resource %s',  resource['@rdform']['label']) +'" label="'+resource['@rdform']['label']+'">' +
 										'<span class="glyphicon glyphicon-plus"></span> '+ resource['@rdform']['label'] +
 									'</button>' );
 					addBtn.data( _this._ID_ + "-model", resource);
@@ -632,24 +632,24 @@
 			}
 			else { // add regular resource
 				var resourceClass;
-				
+
 				// add button for additional or same resources (like person knows person)
-				if ( resource['@rdform']['additional'] !== undefined && resource['@rdform']['additionalIntermit'] === undefined ) {	
+				if ( resource['@rdform']['additional'] !== undefined && resource['@rdform']['additionalIntermit'] === undefined ) {
 					//curFormGroup.addClass("add-resoource-button-group");
 					if ( resource['@rdform']['legend'] )
 						var btnText = resource['@rdform']['legend'];
 					else
 						var btnText = resource['@rdform']['title'] ? resource['@rdform']['title'] : resource['@rdform']['name'] + " - " + resource['@rdform']['value'];
 
-					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' + 
+					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' +
 												'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 											'</button>' );
 					resourceClass.data( _this._ID_ + "-model", resource);
-				} 			
+				}
 				else { // create class-model for the resource
 					resourceClass = _this.createHTMLClass( resource );
 				}
-			}			
+			}
 
 			curFormGroup.append( resourceClass );
 
@@ -658,7 +658,7 @@
 				var thisLabel = $('<label class="col-xs-3 control-label"></label>');
 				thisLabel.text( resource['@rdform']['label'] );
 				curFormGroup.prepend( thisLabel );
-				
+
 				var thisInputContainer = $('<div class="col-xs-9"></div>');
 				resourceClass.wrap( thisInputContainer );
 
@@ -674,7 +674,7 @@
 				}
 
 				if ( resource['@rdform']['multiple'] !== undefined ) {
-					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');					
+					resourceClass.after('<button type="button" class="btn btn-default btn-xs '+_this._ID_+'-duplicate-property" title="'+ _this.l("Duplicate resource %s", resource['@rdform']['label']) +'"><span class="glyphicon glyphicon-plus"></span> '+ _this.l("add") +'</button>');
 				}
 
 				if ( resource['@rdform']['subform'] !== undefined ) {
@@ -685,7 +685,7 @@
 
 				if ( resource['@rdform']['hidden'] !== undefined ) {
 					curFormGroup.addClass("hidden");
-				}				
+				}
 
 			}
 
@@ -722,7 +722,7 @@
 
 				if ( _this.Hooks && typeof _this.Hooks.__afterInsertData !== "undefined" )
 						_this.Hooks.__afterInsertData();
-				
+
 			});
 		 },
 
@@ -743,7 +743,7 @@
 					_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Klasse { "'+classTypeof+'" }' );
 					return;
 				}
-			}		
+			}
 			var prevKey = "";
 
 			for ( var i in data ) {
@@ -811,13 +811,13 @@
 						if ( typeof thisData[0] === "string" ) { // its multiple literal
 							_this.addExistingDataFct( i, thisData, env );
 						}
-						else if ( ! thisData[0].hasOwnProperty("@id") ) { // its a literal in an object	
+						else if ( ! thisData[0].hasOwnProperty("@id") ) { // its a literal in an object
 							var liArr = new Array();
 							for ( var li in thisData ) {
 								liArr.push( thisData[li]["@value"] );
 							}
 							_this.addExistingDataFct( i, liArr, env );
-						}				
+						}
 						else { // its one or multiple resources
 
 							for ( var di in thisData ) {
@@ -866,7 +866,7 @@
 									}
 
 									if ( $(subEnv).length == 0 ) { // resource not found -> try to find external resource with typeof
-										var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();										
+										var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
 										if ( $(resource).length == 0 ) {
 											var addBtn = _this.getElement( _this.getElement( $(env).find("button"), 'name', i ), 'typeof', thisType );
 											if ( $(addBtn).length != 0 ) {
@@ -942,16 +942,16 @@
 								}); // end of __insertResource Hook
 
 							}
-						}		
+						}
 					}
 				}
 				prevKey = curName;
 			}
 		}, // end of addExistingData
-	
+
 		/*******************************************************
 		 *	Init form button handlers after building the form
-		 * 
+		 *
 		 *******************************************************/
 		initFormHandler : function( env ) {
 			var _this = this;
@@ -967,7 +967,7 @@
 					});
 				});
 			}
-			
+
 			// validate input values on change
 			$("input", $(env)).on("change", function() {
 				_this.userInputValidation( $(this) );
@@ -998,7 +998,7 @@
 				var defaultDate = "1970-01-01";
 				var dateProperty = $(this).parentsUntil("div.form-group").parent().find('input.'+_this._ID_+'-property');
 				var newDate = dateProperty.val();
-				
+
 				if ( $(this).val() == "xsd:gYear" ) {
 					dateFormat = "JJJJ";
 				} else if ( $(this).val() == "xsd:gYearMonth" ) {
@@ -1044,9 +1044,9 @@
 
 			// BUTTON: add property
 			$("button."+_this._ID_+"-add-property", $(env)).on("click", function() {
-				var btnContainer = $(this).parent("div.form-group");						
+				var btnContainer = $(this).parent("div.form-group");
 				var propertyModel = $.extend( true, {}, $(this).data( _this._ID_ + "-model" ) );
-				
+
 				propertyModel["@rdform"]['additionalIntermit'] = true;
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
 
@@ -1058,13 +1058,13 @@
 
 				if ( _this.Hooks && typeof _this.Hooks.__afterAddProperty !== "undefined" )
 					_this.Hooks.__afterAddProperty( propertyHTML );
-				
+
 				_this.initFormHandler( propertyHTML );
 
 				return false;
 			});
 
-			// BUTTON: duplicate property			
+			// BUTTON: duplicate property
 			$("button."+_this._ID_+"-duplicate-property", $(env)).on("click", function() {
 				var btnContainer = $(this).parentsUntil("div.form-group").parent();
 				var propertyModel = $.extend( true, {}, $(btnContainer).find("."+_this._ID_+"-property").first().data( _this._ID_ + "-model" ) );
@@ -1077,10 +1077,10 @@
 				}
 
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
-				
+
 				// hide legend text, help and label
 				$(propertyHTML).find(".help-block, ."+_this._ID_+"-show-class-help, ."+_this._ID_+"-legend-text").hide();
-				$(propertyHTML).find( ".control-label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );				
+				$(propertyHTML).find( ".control-label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
 				$(btnContainer).find("."+_this._ID_+"-new-subform").hide();
 
 				$(propertyHTML).hide();
@@ -1090,9 +1090,9 @@
 
 				if ( _this.Hooks && typeof _this.Hooks.__afterDuplicateProperty !== "undefined" )
 					_this.Hooks.__afterDuplicateProperty( propertyHTML );
-				
+
 				_this.initFormHandler( propertyHTML );
-			} );		
+			} );
 
 			//BUTTON: remove property
 			$("button."+_this._ID_+"-remove-property", $(env)).on("click", function() {
@@ -1101,10 +1101,10 @@
 
 				var prevProperty = btnContainer.prev('div[class="'+btnContainer.attr("class")+'"]');
 				var nextProperty = btnContainer.next('div[class="'+btnContainer.attr("class")+'"]');
-				
+
 				if ( _this.Hooks && typeof _this.Hooks.__beforeRemoveProperty !== "undefined" )
 					_this.Hooks.__beforeRemoveProperty( btnContainer );
-				
+
 				// the only property (no prevs or next) - recreate this property
 				if ( prevProperty.length == 0 && nextProperty.length == 0 ) {
 					propertyModel["@rdform"]['additionalIntermit'] = undefined;
@@ -1152,18 +1152,18 @@
 						$(curNextProperty).attr('index', index);
 
 						findWildcardInputs( curNextProperty );;
-					});					
+					});
 				}
 
 				//remove property container
-				$(btnContainer).hide( "slow", function() {					
+				$(btnContainer).hide( "slow", function() {
 					$(btnContainer).remove();
-				});				
+				});
 
 			});
 
 			// find inputs with wildcard
-			function findWildcardInputs( env ) {			
+			function findWildcardInputs( env ) {
 
 				// reset inputs values with existing modvalue
 				$(env).find('input[modvalue]').each(function() {
@@ -1180,21 +1180,21 @@
 
 					var strWcds = $(this).val().match(/\{[^\}]*/gi);
 					for ( var i in strWcds ) {
-						var wcd = strWcds[i].substring( 1 );	
+						var wcd = strWcds[i].substring( 1 );
 
 						// may get and remove wildcard-function
 						if ( wcd.search(/\(/) != -1 ) {
 							var wcdFcts = wcd.match(/\([^\)]*/gi);
 							wcd = wcd.replace( /\(.*\)/g, '' );
 							for ( var i in wcdFcts ) {
-								var wcdFct = wcdFcts[i].substring( 1 );	
+								var wcdFct = wcdFcts[i].substring( 1 );
 								wildcardFcts[wcd] = wcdFct;
 								var regex = new RegExp( '\\(' + wcdFct + '\\)', "g");
 								$(this).attr("modvalue", $(this).attr("modvalue").replace( regex, '' ) );
 							}
 						}
 
-						wildcards[wcd] = getWildcardTarget( wcd, envClass );	
+						wildcards[wcd] = getWildcardTarget( wcd, envClass );
 
 						if ( wildcards[wcd].length > 0 ) {
 							// TODO: if wildcard not found no keyup event exists!
@@ -1212,15 +1212,15 @@
 			}
 			//findWildcardInputs( _this.$elem );
 			findWildcardInputs( $(env) );
-			
+
 			// find the target input of a wildcard wcd in the class envClass
 			function getWildcardTarget( wcd, envClass ) {
 
 				var wcdTarget = envClass.find('input[name="'+wcd+'"],textarea[name="'+wcd+'"]');
 
-				//if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) { // if no input exist, may get wilcard vars from resource arguments 
-				//	var args = $.parseJSON( envClass.attr( "arguments" ) );				
-				if ( wcdTarget.length == 0 && envClass.data( _this._ID_ + "-model" )["@rdform"]["arguments"] !== undefined ) { // if no input exist, may get wilcard vars from resource arguments 
+				//if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) { // if no input exist, may get wilcard vars from resource arguments
+				//	var args = $.parseJSON( envClass.attr( "arguments" ) );
+				if ( wcdTarget.length == 0 && envClass.data( _this._ID_ + "-model" )["@rdform"]["arguments"] !== undefined ) { // if no input exist, may get wilcard vars from resource arguments
 					var args = envClass.data( _this._ID_ + "-model" )["@rdform"]["arguments"];
 					for ( var ai in args ) {
 						args[ai] = args[ai].toString();
@@ -1232,7 +1232,7 @@
 							}
 							break;
 						}
-					}				
+					}
 				}
 
 				// test if property exists
@@ -1256,10 +1256,30 @@
 
 						// may apply wildcard-function
 						if ( wildcardFcts.hasOwnProperty(wcd) ) {
-							if ( wildcardFcts[wcd] == "BASE" ) {
+
+							var wildcardFct = wildcardFcts[wcd];
+
+							// may apply some string functions
+							if (wildcardFct == 'toUpperCase' || wildcardFct == 'toLowerCase' || wildcardFct == 'trim') {
+								var strFn = String.prototype[wildcardFct];
+								wldVal = strFn.apply(wldVal);
+								//wldVal = strFn(wldVal);
+							}
+
+							// may apply a function from Hooks.__wildcardFcts (see your hooks file)
+							if ( _this.Hooks && typeof _this.Hooks.__wildcardFcts !== "undefined" &&
+								_this.Hooks.__wildcardFcts().hasOwnProperty(wildcardFct)
+							) {
+								var hooksWldcFct =  _this.Hooks.__wildcardFcts()[wildcardFct];
+								wldVal = hooksWldcFct.apply(null, [wldVal]);
+							}
+
+							// @deprecated, use wildcard function in Hooks
+							if ( wildcardFct == "BASE" ) {
 								wldVal = wldVal.split("/").reverse()[0];
 							}
-							if ( wildcardFcts[wcd] == "HASH" ) {
+							// @deprecated, use wildcard function in Hooks
+							if ( wildcardFct == "HASH" ) {
 								wldVal = _this.getHash(wldVal);
 							}
 						}
@@ -1294,7 +1314,7 @@
 				$(this).prev("small").hide();
 				$(this).hide();
 			});
-			
+
 			// live auto-update class-resource text
 			$("div."+_this._ID_+"-edit-class-resource input", $(env)).on("keyup", function() {
 				var val = $(this).val();
@@ -1355,7 +1375,7 @@
 				switch (apitype) {
 					case "sparql" :
 						$(this).autocompleteLinkItem().autocompleteLinkItem({
-							source: function( request, response ) {		
+							source: function( request, response ) {
 								var query = queryStr.replace(/%s/g, "'" + request.term + "'");
 								$.ajax({
 									url: queryEndpoint,
@@ -1412,7 +1432,7 @@
 			if ( _this.Hooks && typeof _this.Hooks.__afterInitFormHandler!== "undefined" )
 				_this.Hooks.__afterInitFormHandler( );
 
-		},// end of initFormHandler	
+		},// end of initFormHandler
 
 		/**
 		  * Submit the form callback functions
@@ -1431,7 +1451,7 @@
 			});
 
 			// proceed
-			if ( proceed ) {				
+			if ( proceed ) {
 				var json_result = _this.createResult();
 				jsonld.expand(json_result, function(err, expanded) {
 					if( err ) {
@@ -1474,10 +1494,10 @@
 			if ( _this.Hooks && typeof _this.Hooks.__createResult !== "undefined" )
 				_this.Hooks.__createResult();
 
-			json_result = new Object();			
+			json_result = new Object();
 
 			// walk every root class
-			_this.$elem.children("div[typeof]").each(function( ci ) {			
+			_this.$elem.children("div[typeof]").each(function( ci ) {
 				var curClass = _this.getResultClass( $(this) );
 				if ( ! $.isEmptyObject( curClass ) ) { // dont add empty classes
 					if (! json_result.hasOwnProperty( curClass["@resource"] ) ) {
@@ -1505,7 +1525,7 @@
 			if ( _this.MODEL[0].hasOwnProperty("@context") ) {
 				json_result['@context'] = _this.MODEL[0]["@context"];
 			}
-			
+
 			return json_result;
 		},
 
@@ -1558,11 +1578,11 @@
 			}
 
 			if (_this.Hooks && typeof _this.Hooks.__createClass !== "undefined" )
-				_this.Hooks.__createClass( $(cls) );		
+				_this.Hooks.__createClass( $(cls) );
 
 			var classResource = $(cls).attr("resource");
 			var wildcardsFct = _this.replaceWildcards( classResource, $(cls), _this.getWebsafeString );
-			
+
 			// dont save classes with wildcard pointers when every value is empty
 			if ( classResource.search(/\{.*\}/) != -1 && wildcardsFct['count'] == 0 ) {
 				console.log( 'Skip class "' + $(cls).attr("typeof") + '" because it has wildcards, but every pointer property is empty.' );
@@ -1593,28 +1613,28 @@
 		  */
 		getResultLiteral: function( literal ) {
 			var _this = this;
-			var thisLiteral = new Object();	
+			var thisLiteral = new Object();
 
 			if ( $(literal).length == 0 ) {
 				return thisLiteral; // return empty object fur null litreal e.g. add btn
 			}
-			var val = $(literal).val();		
+			var val = $(literal).val();
 
 			if ( $(literal).attr("type") == "checkbox" ) {
 				val = $(literal).prop("checked").toString();
-			}			
+			}
 			if ( $(literal).prop("tagName") == "SELECT" ) {
 				val = $( ":selected", $(literal) ).val();
 			}
 
 			if ( val != "" ) {
-				thisLiteral["@value"] = _this.replaceWildcards( val, $(literal).parentsUntil("div[typeof]").parent() )['str'];			
+				thisLiteral["@value"] = _this.replaceWildcards( val, $(literal).parentsUntil("div[typeof]").parent() )['str'];
 				thisLiteral['@resource'] = $(literal).attr("name");
 
 				if ( $(literal).attr("datatype") !== undefined ) {
 					_this.MODEL[0]["@context"][$(literal).attr("name")]["@type"] = $(literal).attr("datatype");
 				}
-			}		
+			}
 			return thisLiteral;
 		},
 
@@ -1627,11 +1647,11 @@
 		getResultResource: function( env ) {
 			var _this = this;
 			var resource = new Object(),
-				resourceGroup;			
+				resourceGroup;
 
 			// search for a normal resource class children
 			resourceGroup = $(env).children('div[typeof]');
-			if ( resourceGroup.length > 0 ) { 
+			if ( resourceGroup.length > 0 ) {
 				// create a new class for this resource and take its return ID
 				resource = _this.getResultClass( resourceGroup );
 			}
@@ -1647,7 +1667,7 @@
 				};
 			}
 			return resource;
-		},		
+		},
 
 		/**
 		  * Merge existing data with tha data of the form. Add properties to the result which were not in the form.
@@ -1680,19 +1700,19 @@
 			if ( $("." + this._ID_ + "-result").length == 0 ) {
 				this.$elem.after( '<div class="row '+this._ID_+'-result-container"><legend>'+ this.l("Result") +'</legend><div class="col-xs-12"><textarea class="form-control '+this._ID_+'-result" rows="10"></textarea></div></div>' );
 			}
-			
+
 			var resultStr = JSON.stringify(this.RESULT, null, '\t');
 
-			$("."+this._ID_+"-result-container").show();	
+			$("."+this._ID_+"-result-container").show();
 			$("."+this._ID_+"-result").val( resultStr );
 			var lines = resultStr.split("\n");
 			$("."+this._ID_+"-result").attr( "rows" , ( lines.length ) );
-			$('html, body').animate({ scrollTop: $("."+this._ID_+"-result-container").offset().top }, 200);				
+			$('html, body').animate({ scrollTop: $("."+this._ID_+"-result-container").offset().top }, 200);
 		},
 
 		/*******************************************************
 		 * Helper functions
-		 * 
+		 *
 		 *******************************************************/
 
 		/* Replacing wildcards {...} with the value of the property in the envoirement class or with values in the arguments attribute of resource-classes
@@ -1700,7 +1720,7 @@
 		 * @str String value with the wildcards
 		 * @envClass DOM element where to find inputs (properties)
 		 * @strFc Function, if defined the wildcard value will be passed to this
-		 * 
+		 *
 		 * @return Object. Keys: 'str', 'count'
 		 */
 		replaceWildcards: function( str, envClass, strFct ) {
@@ -1726,12 +1746,12 @@
 							if ( wcd == ai ) {
 								if ( args[ai].search(/\{.*\}/) != -1 ) {
 									env = envClass.parentsUntil("div[typeof]").parent();
-								} 
+								}
 								wcdVal = $( '<input type="hidden" name="' + ai + '" value="' + args[ai] + '" />' );
 								break;
 							}
 						}
-					}				
+					}
 
 					// test if property exists
 					if ( wcdVal.length == 0 ) {
@@ -1751,13 +1771,13 @@
 
 					// passing wildcard value to the function
 					if ( strFct !== undefined ) {
-						wcdVal = strFct(wcdVal);			
+						wcdVal = strFct(wcdVal);
 					}
 
 					// regex: replace the {wildard pointer} with the value
 					var regex = new RegExp("\{" + wcd + "\}", "g");
 					if ( wcdVal != "" ) {
-						++counted;	// count not empty properties 								
+						++counted;	// count not empty properties
 						str = str.replace(regex, wcdVal );
 					} else {
 						str = str.replace(regex, '' );
@@ -1773,9 +1793,9 @@
 		 * @property DOM object with input element
 		 * @return void
 		 */
-		userInputValidation: function ( property ) {	
+		userInputValidation: function ( property ) {
 			var _this = this;
-			var valid = true;			
+			var valid = true;
 
 			$(property).parentsUntil("div.form-group").parent().removeClass("has-error has-feedback");
 			$(property).next("span.glyphicon-warning-sign").remove();
@@ -1794,12 +1814,12 @@
 			}
 			else if ( $(property).attr("datatype") && $(property).val() != "" ) {
 
-				if (   $(property).attr("datatype") == "xsd:date" 
-					|| $(property).attr("datatype") == "xsd:gYearMonth" 
+				if (   $(property).attr("datatype") == "xsd:date"
+					|| $(property).attr("datatype") == "xsd:gYearMonth"
 					|| $(property).attr("datatype") == "xsd:gYear"
 				) {
 					var datatype = "xsd:date";
-					$(property).val( value.slice(0, 10) ); // max default date jjjj-mm-tt					
+					$(property).val( value.slice(0, 10) ); // max default date jjjj-mm-tt
 
 					value = $(property).val();
 					value = value.replace(/\./g, '-');
@@ -1807,13 +1827,13 @@
 
 					if ( value.search(/^\d{4}$/) != -1 ) {
 						datatype = "xsd:gYear";
-					} 
+					}
 					else if ( value.search(/^\d{4}-\d{2}$/) != -1 ) {
-						datatype = "xsd:gYearMonth";					
-					} 
+						datatype = "xsd:gYearMonth";
+					}
 					else if ( value.search(/^\d{4}-\d{2}-\d{2}$/) != -1 ) {
-						datatype = "xsd:date";					
-					} 
+						datatype = "xsd:date";
+					}
 					else {
 						_this.showAlert( "warning", 'Unknown xsd:date format in "'+ property.attr("name") +'"' );
 						valid = false;
@@ -1835,8 +1855,8 @@
 				if ( $(property).val().search(/^http/) == -1 ) {
 					valid = false;
 				}
-			}			
-			
+			}
+
 			if ( ! valid ) {
 				$(property).parentsUntil("div.form-group").parent().addClass("has-error has-feedback");
 				$(property).after( '<span class="glyphicon glyphicon-warning-sign form-control-feedback"></span>' );
@@ -1877,7 +1897,7 @@
 
 		/**
 		  * Set Base Uri for the model
-		  * 
+		  *
 		  * @str URI String
 		  */
 		setBaseUri : function( uri ) {
@@ -1888,12 +1908,13 @@
 		  * Creating random hash of a string (non unique secure!)
 		  *
 		  * @str String
+		  * @deprecated, use wildcard function in Hooks
 		  */
 		getHash : function( str ) {
 			return (str.length * Math.random()).toString(36).slice(2);
 		},
 
-		/** 
+		/**
 		  * Remove accents, umlauts, special chars, ... from string to get a web safe string
 		  *
 		  * @str String
@@ -1902,7 +1923,7 @@
 		getWebsafeString: function ( str ) {
 			if ( str === undefined ) return '';
 
-			// replace dictionary		
+			// replace dictionary
 			var dict = {
 				"ä": "ae", "ö": "oe", "ü": "ue",
 				"Ä": "Ae", "Ö": "Oe", "Ü": "Ue",
@@ -1927,8 +1948,8 @@
 
 		/**
 		 * Search und reaplace a prefix in a String if defined in the context
-		 * 
-		 * @param String str 
+		 *
+		 * @param String str
 		 * @return String with (maybe) replaced prefix
 		 */
 		replaceStrPrefix : function( str ) {
@@ -1985,7 +2006,7 @@
 		getElement : function( env, attr, val ) {
 			var _this = this;
 			var el = $(env).filter(function(index) {
-				return ( $(this).attr(attr) === val ) 
+				return ( $(this).attr(attr) === val )
 					|| ( _this.replaceStrPrefix( $(this).attr(attr) ) === val );
 			});
 			return el;
@@ -2008,7 +2029,7 @@
 
 				if ( this.translations && this.translations[translate] ) {
 					translated = this.translations[translate];
-				} 
+				}
 
 				if ( str.search( /l\(/ ) != -1 ) {
 					str = str.replace(/l\(.*?\)/, translated);
@@ -2052,7 +2073,7 @@
 			else if ( this.settings.debug ) {
 				console.log( "RDForm ("+type+"): " + msg );
 			}
-		},		
+		},
 	}; // end of rdform.prototype
 
 	/************************************************************************
@@ -2078,16 +2099,16 @@
 		if ( this.data('_rdform_settings') ) {
 			settings = $.extend({}, this.data('_rdform_settings'), settings || {});
 		}
-	
+
 		// merge default settings with given settings
 		settings = $.extend({}, $.fn.RDForm.defaultSettings, settings || {});
 
 		return this.each(function() {
-			var elem = $(this);			
+			var elem = $(this);
 			var rdform = new RDForm(this, settings);
 
 			// prepare plugin: may loading hooks, lang, ...
-			rdform.prepare();			
+			rdform.prepare();
 
 			// create form
 			rdform.init();
@@ -2110,14 +2131,14 @@
 			});
 		});
 	};
-	
+
 	/************************************************************************
 	* Default settings
 	************************************************************************/
 	$.fn.RDForm.defaultSettings = {
 		template	: "templates/form.html",
 		data 		: null,
-		hooks 		: null,		
+		hooks 		: null,
 		lang 		: null,
 		cache 		: false,
 		verbose 	: false,
@@ -2126,6 +2147,6 @@
 		abort 		: function() {},
 	};
 
-	
+
 
 })(jQuery);

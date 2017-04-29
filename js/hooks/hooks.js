@@ -19,7 +19,6 @@ RDForm_Hooks.prototype = {
 				_this.rdform.showAlert( "warning", "Invalid E-mail Address, please try again.");
 			}
 		});
-
 	},
 
 	__beforeInsertData : function() {
@@ -91,6 +90,27 @@ RDForm_Hooks.prototype = {
 	// before generating the class object from input values and properties
 	__createClass : function ( thisClass ) {
 		var _this = this;
+	},
+
+	// on write the value to in input field, value could changed an returned here
+	__writeWildcardValue : function ( input, value ) {
+		var _this = this;
+		return value;
+	},
+
+	// wildcard functions, too apply functions to wildcard values in your templates
+	// use e.g: <input name="id" type="literal" value="{(replace)foaf:name}" /> and change the replace function below as required
+	// your can also add custom functions here and use in your templates
+	__wildcardFcts : function() {
+		var _this = this;
+		return {
+			// sample replace function, replace spaces with "-" (instead "_" by default)
+			replace: function(str) { return str.replace(/ /g, '-') },
+			// sample base function, get base (last part) from url, e.g. base of "http://foo/bar" is "bar"
+			base: function(str) { return str.split("/").reverse()[0] },
+			// sample hash function, get string hash from string
+			hash: function(str) { return (str.length * Math.random()).toString(36).slice(2) }
+		};
 	},
 } // end of hooks
 
