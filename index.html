@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-	<meta charset="utf-8">	
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="">
-    <meta name="author" content="">	
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-	<!-- Datepicker -->
+    <!-- Datepicker -->
     <link href="css/datepicker.css" rel="stylesheet" media="screen">
-	
-	<!-- JQueryUI Style -->
-	<link href="css/smoothness/jquery-ui.custom.min.css" rel="stylesheet">
 
-	<!-- Bootstrap -->	
-	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <!-- JQueryUI Style -->
+    <link href="css/smoothness/jquery-ui.custom.min.css" rel="stylesheet">
 
-	<!-- style -->
-	<link href="css/rdform.css" rel="stylesheet" media="screen">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <!-- style -->
+    <link href="css/rdform.css" rel="stylesheet" media="screen">
 
     <style type="text/css">
     body {
-        background: url("img/noise.png"), -o-linear-gradient(top, #F4F4F4 0px, #EEEEEE 100%) transparent;    
+        background: url("img/noise.png"), -o-linear-gradient(top, #F4F4F4 0px, #EEEEEE 100%) transparent;
         background: url("img/noise.png") repeat scroll 0% 0%, -moz-linear-gradient(center top , #F4F4F4 0%, #EEEEEE 100%) repeat scroll 0% 0% transparent;
     }
     .container {
@@ -33,7 +33,7 @@
     }
     </style>
 
-	<title>RDForm</title>
+    <title>RDForm</title>
 </head>
 <body>
 
@@ -41,7 +41,7 @@
     <h1>Wellcome to RDForm!</h1>
 
     <!-- the form container -->
-    <form action="#" class="form-horizontal rdform" role="form"></form>    
+    <form action="#" class="form-horizontal rdform" role="form"></form>
 </div>
 
 
@@ -58,18 +58,19 @@
     <!-- own stuff -->
     <script src="js/rdform.js"></script>
 
-    <script type="text/javascript">        
-	$(document).ready(function(){
+    <script type="text/javascript">
+    $(document).ready(function(){
         $('.rdform').RDForm({
             template: "templates/form.html",
             hooks: "js/hooks/hooks.js",
+            verbose: true,
 
             submit: function() {
                 console.log( JSON.stringify(this, null, '\t') );
             }
         });
-	});
-	</script>
+    });
+    </script>
 
 </body>
 </html>
