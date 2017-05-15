@@ -1,4 +1,4 @@
-# RDForm f
+# RDForm
 
 RDForm is a jQuery plugin for creating and editing RDF data in a clean and modern HTML form.
 
