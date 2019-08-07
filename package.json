@@ -1,0 +1,27 @@
+{
+  "name": "rdform",
+  "version": "0.0.1",
+  "description": "RDForm is a jQuery plugin for creating and editing RDF data in a clean and modern HTML form.",
+  "main": "js/rdform.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/white-gecko/RDForm.git"
+  },
+  "keywords": [
+    "rdf",
+    "semantic",
+    "web",
+    "library",
+    "jquery",
+    "form"
+  ],
+  "author": "Simeon Ackermann <s.ackermann@mail.de>",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/white-gecko/RDForm/issues"
+  },
+  "homepage": "https://github.com/white-gecko/RDForm#readme"
+}
