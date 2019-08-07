@@ -12,11 +12,11 @@
   },
   "keywords": [
     "rdf",
-    "semantic",
-    "web",
+    "semantic web",
     "library",
-    "jquery",
-    "form"
+    "form",
+    "jquery-plugin",
+    "ecosystem:jquery"
   ],
   "author": "Simeon Ackermann <s.ackermann@mail.de>",
   "license": "GPL-2.0",
