@@ -16,7 +16,7 @@ The inserting of existing data and the output is done as a JavaScript object wit
 
 * download the source code
 * open [index.html](index.html) in your browser for a sample form.
-* to create a own form edit [templates/form.html](templates/form.html) to your requirements or create a new
+* to create an own form, edit [templates/form.html](templates/form.html) to your requirements or create a new file
 
 If you want to integrate RDForm into an existing project you have to include [jQuery](http://jquery.com/) (> 1.8) (and for a good style [Bootstrap](getbootstrap.com/)). Have a look at [index.html](index.html) for the right structure.
 
@@ -26,10 +26,9 @@ The basic initialization of the plugin with callback function on submit is:
 $(document).ready(function(){
 	$(".rdform").RDForm({
 		template: "templates/form.html",
-
-        submit: function() {
-            console.log( JSON.stringify(this, null, '\t') );
-        }
+		submit: function() {
+			console.log( JSON.stringify(this, null, '\t') );
+		}
 	});
 });
 ```
@@ -54,16 +53,16 @@ $(document).ready(function(){
 
 The following parameters can given to the plugin (see Installation above):
 
-Parameter (Type and default value)  | Description
+Parameter (Type and default value) | Description
 ------------- | -------------
-`template` (String)  	| Path to the template file
-`data` (Object)  		| Array or Object of existing data to insert
-`hooks` (String) 		| Path to the hooks file
-`lang` (String) 		| Path to the language file
-`cache` (Boolean=false) 		| true or false, loads template from cache
+`template` (String)	| Path to the template file
+`data` (Object)			| Array or Object of existing data to insert
+`hooks` (String)		| Path to the hooks file
+`lang` (String)			| Path to the language file
+`cache` (Boolean=false)			| true or false, loads template from cache
 `verbose` (Boolean=false) 	| true or false, output all messages and the result
 `debug` (Boolean=false)		| log error, warnings and infos into the console
-`submit`  (Function)		| Submit callback function, will be called after submit the form
+`submit` (Function)				| Submit callback function, will be called after submit the form
 
 
 ## Template Documentation ##
@@ -105,10 +104,10 @@ The JavaScript output for this template will be:
 
 Classes are described by a `<div typeof="...">...</div>` tag.
 
-Attribute  | Description
+Attribute | Description
 ------------- | -------------
-`typeof`  	| Type of the class
-`resource`  | Class uri
+`typeof`		| Type of the class
+`resource`	| Class uri
 `id`		| Optional class ID to reference classes with same typeof
 
 Example:
@@ -123,22 +122,22 @@ Example:
 
 Literals are described by a `<input type="literal" name="..." />`.
 
-Attribute  | Description
+Attribute | Description
 ------------- | -------------
-`type="literal"`  	|  Defines an input as an literal property
-`name`  			| Name of the property
+`type="literal"`	| Defines an input as an literal property
+`name`			| Name of the property
 
-Optional Attribute  | Description
+Optional Attribute | Description
 ------------- | -------------
-`datatype`  	| Datatype, e.g. xsd:string, xsd:date,
-`value`  		| Prefixed value
-`placeholder`  	| Placeholder
-`multiple`  	| The property can be multipled by clicking an add-button
-`required`  	| Required property, cannot be empty
-`additional`  	| Additional, by default hidden property. Can be added it by clicking an add-button
-`readonly`  	| Cannot be edited
+`datatype`	| Datatype, e.g. xsd:string, xsd:date,
+`value`		| Prefixed value
+`placeholder`	| Placeholder
+`multiple`	| The property can be multipled by clicking an add-button
+`required`	| Required property, cannot be empty
+`additional`	| Additional, by default hidden property. Can be added it by clicking an add-button
+`readonly`	| Cannot be edited
 `hidden`		| Hide this literal in the form
-`help`  		| Short help text for the property
+`help`		| Short help text for the property
 
 Example:
 
@@ -163,7 +162,7 @@ To get a select list add the attributes `select` and `select-options='...'`. the
 Example:
 
 ```html
-<input name="foaf:gender" type="literal" select select-options='{"woman":"woman", "man":"man"}'  datatype="xsd:string" />
+<input name="foaf:gender" type="literal" select select-options='{"woman":"woman", "man":"man"}' datatype="xsd:string" />
 ```
 
 ### Class Resources ###
@@ -176,8 +175,8 @@ Example:
 <div typeof="foaf:Person" resource="Person-{pid}">
 	<input name="pid" type="hidden" />
 	<input name="bio:event" type="resource" value="bio:Birth"
-      arguments='{"pid":"{pid}"}' additional
-    />
+	arguments='{"pid":"{pid}"}' additional
+	/>
 </div>
 
 <div typeof="bio:Birth" resource="Birth-{pid}">
@@ -277,14 +276,14 @@ Example:
 var data = {
 	"@id": "http://json-ld.org/playground/Person-Karl",
 	"@type": [
-      "http://xmlns.com/foaf/0.1/Person"
-    ],
-    "http://xmlns.com/foaf/0.1/name": [
-      {
-        "@type": "xsd:string",
-        "@value": "Karl"
-      }
-    ]
+		"http://xmlns.com/foaf/0.1/Person"
+	],
+	"http://xmlns.com/foaf/0.1/name": [
+		{
+			"@type": "xsd:string",
+			"@value": "Karl"
+		}
+	]
 };
 
 $(".rdform").RDForm({
