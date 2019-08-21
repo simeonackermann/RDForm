@@ -825,121 +825,121 @@
 								// create dummy __insertHook if not exists
 								if ( _this.Hooks && typeof _this.Hooks.__insertResource === "undefined" ) {
 									_this.Hooks.__insertResource = function(i, di, resource, callback){ callback(i, di, resource) };
-								}
 
-								// call __insertHook and wait for callback (helpful to get asynchron data in hooks)
-								_this.Hooks.__insertResource(i, di, thisData[di], function(i, di, data) {
-									thisData[di] = data;
+									// call __insertHook and wait for callback (helpful to get asynchron data in hooks)
+									_this.Hooks.__insertResource(i, di, thisData[di], function(i, di, data) {
+										thisData[di] = data;
 
-									if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
-										var resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
-										if ( $(resource).length == 0 ) {
-											var addBtn = _this.getElement( $(env).find('button.'+_this._ID_+'-add-property'), 'name', i );
-											if ( $(addBtn).length != 0 ) {
-												$(addBtn).trigger("click");
-												resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+										if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
+											var resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+											if ( $(resource).length == 0 ) {
+												var addBtn = _this.getElement( $(env).find('button.'+_this._ID_+'-add-property'), 'name', i );
+												if ( $(addBtn).length != 0 ) {
+													$(addBtn).trigger("click");
+													resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+												}
 											}
-										}
-										if ( $(resource).length != 0 ) {
-											if ( di > 0 ) {
-												$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
-												resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
-												$(resource).parentsUntil("."+_this._ID_+"-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
+											if ( $(resource).length != 0 ) {
+												if ( di > 0 ) {
+													$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
+													resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+													$(resource).parentsUntil("."+_this._ID_+"-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
+												}
+												$(resource).val( thisData[di]["@id"] );
+											} else {
+												_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
 											}
-											$(resource).val( thisData[di]["@id"] );
-										} else {
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
+											return true;
 										}
-										return true;
-									}
 
-									var thisType = ( typeof thisData[di]["@type"] === "string" ) ? thisData[di]["@type"] : thisData[di]["@type"][0];
-									var subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
-									var hasIDHTML = false;
+										var thisType = ( typeof thisData[di]["@type"] === "string" ) ? thisData[di]["@type"] : thisData[di]["@type"][0];
+										var subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
+										var hasIDHTML = false;
 
-									if ( $(subEnv).attr("id-html") != undefined ) { // subEnv has id-html -> may find the right id-html resource
-										if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
-											thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
-										}
-										subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
-										hasIDHTML = true;
-									}
-
-									if ( $(subEnv).length == 0 ) { // resource not found -> try to find external resource with typeof
-										var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
-										if ( $(resource).length == 0 ) {
-											var addBtn = _this.getElement( _this.getElement( $(env).find("button"), 'name', i ), 'typeof', thisType );
-											if ( $(addBtn).length != 0 ) {
-												$(addBtn).trigger("click");
-												resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
-											}
-										}
-										if ( $(resource).length != 0 ) {
-											if ( $(resource).val() != "" ) {
-												$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
-											}
-											resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
-											var resourceLabel = thisData[di]["@id"].split("/").reverse()[0];
-											if ( thisData[di].hasOwnProperty('http://www.w3.org/2000/01/rdf-schema#label') ) {
-												resourceLabel = thisData[di]['http://www.w3.org/2000/01/rdf-schema#label'][0]['@value'];
-											}
-
-											$(resource).val( thisData[di]["@id"] ).hide().trigger("blur");
-											$(resource).after('<p class="'+_this._ID_+'-resource-uri-container"><a href="'+thisData[di]["@id"]+'" class="'+_this._ID_+'-resource-uri">'+resourceLabel+'</a></p>');
-										} else {
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
-										}
-										return true;
-									}
-
-									if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
-										var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
-										if ( $(addBtn).length == 0 ) {
-											// add btn not found, may data has rdfs:type
+										if ( $(subEnv).attr("id-html") != undefined ) { // subEnv has id-html -> may find the right id-html resource
 											if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
 												thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
-												addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
-												hasIDHTML = true;
 											}
-										}
-										if ( $(addBtn).length == 0 ) { // data not found
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData[di]) + '" }', false );
-											return false;
-										}
-										$(addBtn).trigger("click");
-
-										subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
-										if ( hasIDHTML ) {
 											subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
+											hasIDHTML = true;
 										}
-									}
 
-									if ( i != $(subEnv).attr("name") && i != _this.replaceStrPrefix($(subEnv).attr("name")) ) {
-										_this.showAlert( "info", 'Der Datensatz enthält die Propertie "'+i+'", die im Modell zu "'+$(subEnv).attr("name")+'" verändert ist.', false );
-									}
-
-									// on multiple resource (walk thisData backwards) -> duplicate the subEnv
-									if ( di > 0 ) {
-										for (var ri = di-1; ri >= 0; ri--) {
-											var thisRType = ( typeof thisData[ri]["@type"] === "string" ) ? thisData[ri]["@type"] : thisData[ri]["@type"][0];
-											if ( hasIDHTML && thisData[ri].hasOwnProperty("http://www.w3.org/2000/01/rdf-schema#type") ) {
-												thisRType = thisData[ri]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
-											}
-											if( thisType == thisRType ) {
-												$(subEnv).find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
-												subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
-												if ( hasIDHTML ) {
-													subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
+										if ( $(subEnv).length == 0 ) { // resource not found -> try to find external resource with typeof
+											var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+											if ( $(resource).length == 0 ) {
+												var addBtn = _this.getElement( _this.getElement( $(env).find("button"), 'name', i ), 'typeof', thisType );
+												if ( $(addBtn).length != 0 ) {
+													$(addBtn).trigger("click");
+													resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
 												}
-												$(subEnv).removeAttr("style"); // bugfix: some classes have hidden inline style
-												break;
+											}
+											if ( $(resource).length != 0 ) {
+												if ( $(resource).val() != "" ) {
+													$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
+												}
+												resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+												var resourceLabel = thisData[di]["@id"].split("/").reverse()[0];
+												if ( thisData[di].hasOwnProperty('http://www.w3.org/2000/01/rdf-schema#label') ) {
+													resourceLabel = thisData[di]['http://www.w3.org/2000/01/rdf-schema#label'][0]['@value'];
+												}
+
+												$(resource).val( thisData[di]["@id"] ).hide().trigger("blur");
+												$(resource).after('<p class="'+_this._ID_+'-resource-uri-container"><a href="'+thisData[di]["@id"]+'" class="'+_this._ID_+'-resource-uri">'+resourceLabel+'</a></p>');
+											} else {
+												_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
+											}
+											return true;
+										}
+
+										if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
+											var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
+											if ( $(addBtn).length == 0 ) {
+												// add btn not found, may data has rdfs:type
+												if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
+													thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
+													addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
+													hasIDHTML = true;
+												}
+											}
+											if ( $(addBtn).length == 0 ) { // data not found
+												_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData[di]) + '" }', false );
+												return false;
+											}
+											$(addBtn).trigger("click");
+
+											subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
+											if ( hasIDHTML ) {
+												subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
 											}
 										}
-									}
 
-									_this.addExistingDataFct( undefined, thisData[di], subEnv );
+										if ( i != $(subEnv).attr("name") && i != _this.replaceStrPrefix($(subEnv).attr("name")) ) {
+											_this.showAlert( "info", 'Der Datensatz enthält die Propertie "'+i+'", die im Modell zu "'+$(subEnv).attr("name")+'" verändert ist.', false );
+										}
 
-								}); // end of __insertResource Hook
+										// on multiple resource (walk thisData backwards) -> duplicate the subEnv
+										if ( di > 0 ) {
+											for (var ri = di-1; ri >= 0; ri--) {
+												var thisRType = ( typeof thisData[ri]["@type"] === "string" ) ? thisData[ri]["@type"] : thisData[ri]["@type"][0];
+												if ( hasIDHTML && thisData[ri].hasOwnProperty("http://www.w3.org/2000/01/rdf-schema#type") ) {
+													thisRType = thisData[ri]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
+												}
+												if( thisType == thisRType ) {
+													$(subEnv).find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
+													subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
+													if ( hasIDHTML ) {
+														subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
+													}
+													$(subEnv).removeAttr("style"); // bugfix: some classes have hidden inline style
+													break;
+												}
+											}
+										}
+
+										_this.addExistingDataFct( undefined, thisData[di], subEnv );
+
+									}); // end of __insertResource Hook
+								}
 
 							}
 						}
