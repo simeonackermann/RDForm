@@ -255,17 +255,17 @@
 								delete curProperty["@type"];
 							}
 
-							var arguments = new Object();
+							var args = new Object();
 							if ( $(this).attr("arguments") ) {
-								arguments = $.parseJSON( $(this).attr("arguments") );
+								args = $.parseJSON( $(this).attr("arguments") );
 							}
 							// add arguments-index for multiple resources
 							if ( $(this).attr("multiple") ) {
-								arguments['i'] = 1;
+								args['i'] = 1;
 							}
 							if ( $(this).attr("arguments") || $(this).attr("multiple") ) {
 								//curProperty["@rdform"]["arguments"] = JSON.stringify(arguments);
-								curProperty["@rdform"]["arguments"] = arguments;
+								curProperty["@rdform"]["arguments"] = args;
 							}
 
 							break;
