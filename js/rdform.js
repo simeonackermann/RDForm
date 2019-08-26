@@ -823,12 +823,14 @@
 							for ( var di in thisData ) {
 
 								// create dummy __insertHook if not exists
-								if ( _this.Hooks && typeof _this.Hooks.__insertResource === "undefined" ) {
-									_this.Hooks.__insertResource = function(i, di, resource, callback){ callback(i, di, resource) };
+								var __insertResourceFct = function(i, di, resource, callback){ callback(i, di, resource) };
+
+								if ( _this.Hooks && typeof _this.Hooks.__insertResource !== "undefined" ) {
+									__insertResourceFct = _this.Hooks.__insertResource;
 								}
 
 								// call __insertHook and wait for callback (helpful to get asynchron data in hooks)
-								_this.Hooks.__insertResource(i, di, thisData[di], function(i, di, data) {
+								__insertResourceFct(i, di, thisData[di], function(i, di, data) {
 									thisData[di] = data;
 
 									if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
