@@ -1854,7 +1854,7 @@
 			}
 			else if ( $(property).prop("type") == "url" && $(property).val() != ""  ) {
 				$(property).val( _this.replaceStrPrefix($(property).val()) ); // maybe it contains a prefix
-				if ( $(property).val().search(/^http/) == -1 ) {
+				if ( $(property).val().search(/^\w+\:.*\w+/) == -1 ) {
 					valid = false;
 				}
 			}
