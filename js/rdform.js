@@ -1475,7 +1475,9 @@
 					}
 
 					// this calls the callback function
-					_this.settings.submit.call( _this.RESULT );
+					// by using call() it replaces the "this" value for the method
+					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/call
+					_this.settings.submit.call( _this.RESULT, _this.RESULT );
 				});
 			}
 		},
