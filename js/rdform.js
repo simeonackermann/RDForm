@@ -866,20 +866,21 @@
 												$(resource).parentsUntil("."+_this._ID_+"-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 											}
 											if ( $(resource).prop("tagName") == "SELECT" ) {
-												var selectOptions = $.parseJSON( $(resource).attr('select-options') );
-												var selectOptionKeys = Object.keys(selectOptions);
-												resourceVal = _this.getUriPrefix( resourceVal );
-
-												var elExists = selectOptionKeys.find(function(key) {
-													return ( key === thisData[di]["@id"] )
-														|| ( _this.replaceStrPrefix( key ) === thisData[di]["@id"] );
-												});
-
-												if (elExists === undefined) {
-													$(resource).append( '<option value="' + resourceVal + '">'+ resourceVal +'</option>' );
+												var selctElExists = false;
+												for (let selctIdx = 0; selctIdx < $(resource)[0].options.length; selctIdx++) {
+													var selctEl = $(resource)[0].options[selctIdx];
+													if ( _this.matchUris(selctEl.value, resourceVal) ) {
+														$(resource)[0].options[selctIdx].selected = true;
+														selctElExists = true;
+													}
 												}
+
+												if (!selctElExists) {
+													$(resource).append( '<option value="' + resourceVal + '" selected>'+ _this.getUriPrefix( resourceVal ) +'</option>' );
+												}
+											} else {
+												$(resource).val( resourceVal );
 											}
-											$(resource).val( resourceVal );
 										} else {
 											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
 										}
@@ -1249,7 +1250,7 @@
 			// find the target input of a wildcard wcd in the class envClass
 			function getWildcardTarget( wcd, envClass ) {
 
-				var wcdTarget = envClass.find('input[name="'+wcd+'"],textarea[name="'+wcd+'"]');
+				var wcdTarget = _this.getElement( envClass.find('input,textarea'), 'name', wcd )
 
 				//if ( wcdTarget.length == 0 && envClass.attr( "arguments" ) ) { // if no input exist, may get wilcard vars from resource arguments
 				//	var args = $.parseJSON( envClass.attr( "arguments" ) );
@@ -1774,7 +1775,7 @@
 					var wcd = strWcds[i].substring( 1 );
 					var env = envClass;
 
-					var wcdVal = env.find('input[name="'+wcd+'"],textarea[name="'+wcd+'"]');
+					var wcdVal = _this.getElement( env.find('input,textarea'), 'name', wcd )
 
 					// search the wilcard in the arguments attribute of resource classes
 					//if ( wcdVal.length == 0 && env.attr( "arguments" ) ) {
@@ -2046,10 +2047,22 @@
 		getElement : function( env, attr, val ) {
 			var _this = this;
 			var el = $(env).filter(function(index) {
-				return ( $(this).attr(attr) === val )
-					|| ( _this.replaceStrPrefix( $(this).attr(attr) ) === val );
+				return _this.matchUris($(this).attr(attr), val);
 			});
 			return el;
+		},
+
+		/**
+		 * Return true if two uris (string) are equal (with or without prefix)
+		 * @param String uri1
+		 * @param String uri2
+		 * @return true
+		 */
+		matchUris: function(uri1, uri2) {
+			var _this = this;
+			return uri1 === uri2
+				|| _this.replaceStrPrefix(uri1) === uri2
+				|| _this.getUriPrefix(uri1) === uri2;
 		},
 
 		/**
