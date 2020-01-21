@@ -622,7 +622,23 @@
 					return curFormGroup;
 				}
 
-				var resourceClass = $('<input type="url" class="form-control input-sm '+_this._ID_+'-property" />');
+				if ( resource['@rdform']['select'] !== undefined ) {
+					var resourceClass = $('<select class="form-control input-sm '+_this._ID_+'-property"></select>');
+					var selectOptions = $.parseJSON( resource['@rdform']['select-options'] );
+					resourceClass.append( '<option value="" disabled selected>'+_this.l("choose")+'...</option>' );
+					for ( var soi in selectOptions ) {
+						resourceClass.append( '<option value="'+ soi +'">'+ _this.l( selectOptions[soi] ) +'</option>' );
+					}
+					if ( resource['@rdform']['multiple'] !== undefined ) {
+						// multiple external select resources not yet supported.
+						// see https://github.com/simeonackermann/RDForm/issues/14 for further progress
+						console.log("Warning: multiple external <select /> resource not supported yet!", resource['@rdform']);
+						delete resource['@rdform']['multiple'];
+					}
+				} else {
+					var resourceClass = $('<input type="url" class="form-control input-sm '+_this._ID_+'-property" />');
+				}
+
 				resourceClass.data( _this._ID_ + "-model", resource);
 				// add attributes (except type)
 				var attr = $.extend( true, {}, resource["@rdform"] );
@@ -834,21 +850,36 @@
 									thisData[di] = data;
 
 									if ( ! thisData[di].hasOwnProperty("@type") ) { // it seemms to be an external resource
-										var resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+										var resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input,select"), 'name', i ).last();
 										if ( $(resource).length == 0 ) {
 											var addBtn = _this.getElement( $(env).find('button.'+_this._ID_+'-add-property'), 'name', i );
 											if ( $(addBtn).length != 0 ) {
 												$(addBtn).trigger("click");
-												resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+												resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input,select"), 'name', i ).last();
 											}
 										}
 										if ( $(resource).length != 0 ) {
+											var resourceVal = thisData[di]["@id"];
 											if ( di > 0 ) {
 												$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
-												resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input"), 'name', i ).last();
+												resource = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find("input,select"), 'name', i ).last();
 												$(resource).parentsUntil("."+_this._ID_+"-resource-group").parent().removeAttr("style"); // bugfix: some classes have hidden inline style
 											}
-											$(resource).val( thisData[di]["@id"] );
+											if ( $(resource).prop("tagName") == "SELECT" ) {
+												var selectOptions = $.parseJSON( $(resource).attr('select-options') );
+												var selectOptionKeys = Object.keys(selectOptions);
+												resourceVal = _this.getUriPrefix( resourceVal );
+
+												var elExists = selectOptionKeys.find(function(key) {
+													return ( key === thisData[di]["@id"] )
+														|| ( _this.replaceStrPrefix( key ) === thisData[di]["@id"] );
+												});
+
+												if (elExists === undefined) {
+													$(resource).append( '<option value="' + resourceVal + '">'+ resourceVal +'</option>' );
+												}
+											}
+											$(resource).val( resourceVal );
 										} else {
 											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
 										}
@@ -868,19 +899,19 @@
 									}
 
 									if ( $(subEnv).length == 0 ) { // resource not found -> try to find external resource with typeof
-										var resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+										var resource = _this.getElement( _this.getElement( $(env).find("input,select"), 'name', i ), 'typeof', thisType ).last();
 										if ( $(resource).length == 0 ) {
 											var addBtn = _this.getElement( _this.getElement( $(env).find("button"), 'name', i ), 'typeof', thisType );
 											if ( $(addBtn).length != 0 ) {
 												$(addBtn).trigger("click");
-												resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+												resource = _this.getElement( _this.getElement( $(env).find("input,select"), 'name', i ), 'typeof', thisType ).last();
 											}
 										}
 										if ( $(resource).length != 0 ) {
 											if ( $(resource).val() != "" ) {
 												$(resource).parent().find( 'button.'+_this._ID_+'-duplicate-property' ).trigger("click");
 											}
-											resource = _this.getElement( _this.getElement( $(env).find("input"), 'name', i ), 'typeof', thisType ).last();
+											resource = _this.getElement( _this.getElement( $(env).find("input,select"), 'name', i ), 'typeof', thisType ).last();
 											var resourceLabel = thisData[di]["@id"].split("/").reverse()[0];
 											if ( thisData[di].hasOwnProperty('http://www.w3.org/2000/01/rdf-schema#label') ) {
 												resourceLabel = thisData[di]['http://www.w3.org/2000/01/rdf-schema#label'][0]['@value'];
@@ -1660,14 +1691,19 @@
 				resource = _this.getResultClass( resourceGroup );
 			}
 			// search for a external resource input
-			else if ( $(env).find('input[external]').length > 0 ) {
-				resourceGroup = $(env).find('input[external]');
-				if ( $(resourceGroup).val() == "" ) {
+			else if ( $(env).find('input[external],select[external]').length > 0 ) {
+				resourceGroup = $(env).find('input[external],select[external]');
+				var val = $(resourceGroup).val()
+				if ( $(resourceGroup).prop("tagName") == "SELECT" ) {
+					val = $( ":selected", $(resourceGroup) ).val();
+				}
+				if ( val == "" ) {
 					return resource;
 				}
+
 				resource['@resource'] = $(resourceGroup).attr("name");
 				resource["@value"] = {
-					"@id" : _this.replaceWildcards( $(resourceGroup).val(), $(env).parent("div[typeof]"), _this.getWebsafeString )['str']
+					"@id" : _this.replaceWildcards( val, $(env).parent("div[typeof]"), _this.getWebsafeString )['str']
 				};
 			}
 			return resource;

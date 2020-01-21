@@ -162,7 +162,7 @@ To get a select list add the attributes `select` and `select-options='...'`. the
 Example:
 
 ```html
-<input name="foaf:gender" type="literal" select select-options='{"woman":"woman", "man":"man"}' datatype="xsd:string" />
+<input name="foaf:gender" type="literal" select select-options='{"female":"female", "male":"male", "not-specified":"Not specified"}' datatype="xsd:string" />
 ```
 
 ### Class Resources ###
@@ -208,6 +208,19 @@ Example:
 ```html
 <input type="resource" name="gnd" external />
 ```
+
+#### Select-Lists
+
+To get a select list add the attributes `select` and `select-options='...'`. the value of `select-options` must be a [JSON](https://en.wikipedia.org/wiki/JSON) object with a label and value pair.
+
+Example:
+
+```html
+<input name="foaf:knows" type="resource" select select-options='{"ex:p1":"Person 1", "ex:p2":"Person 2"}' external />
+```
+
+Multiple external select resources are not yet supported.
+
 
 ## Hidden Properties ##
 
