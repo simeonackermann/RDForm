@@ -109,11 +109,15 @@ Attribute | Description
 `typeof`		| Type of the class
 `resource`	| Class uri
 `id`		| Optional class ID to reference classes with same typeof
+`typeof-select` | Optional, show select form lets users choose the type of the class. The value must be a [JSON](https://en.wikipedia.org/wiki/JSON) object with label and value pairs.
 
-Example:
+Example (with legend and help message):
 
 ```html
+<legend>Birth</legend>
 <div typeof="bio:Birth" resource="Birth-123">
+	<p class="help">I'm a help message...</p>
+
 	...
 </div>
 ```
@@ -137,6 +141,10 @@ Optional Attribute | Description
 `additional`	| Additional, by default hidden property. Can be added it by clicking an add-button
 `readonly`	| Cannot be edited
 `hidden`		| Hide this literal in the form
+`boolean`		| Boolean property, shown as <checkbox />`
+`textarea`		| Multiple line text, shown as `<textarea />`
+`select`		| Select a property from multiple options, shown as `<select />`
+`select-options`		| Required for attribute select. JSON object with label/value pairs. >`
 `help`		| Short help text for the property
 
 Example:
@@ -153,7 +161,7 @@ Are described as checkboxes in the form and can be 1|0 or true|false. They are i
 
 #### Textareas
 
-Are more line texts and initialized by adding the attribute `textarea` to a literal property.
+Are multiple line texts and initialized by adding the attribute `textarea` to a literal property.
 
 #### Select-Lists
 
@@ -174,6 +182,7 @@ Example:
 ```html
 <div typeof="foaf:Person" resource="Person-{pid}">
 	<input name="pid" type="hidden" />
+
 	<input name="bio:event" type="resource" value="bio:Birth"
 	arguments='{"pid":"{pid}"}' additional
 	/>
