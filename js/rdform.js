@@ -137,12 +137,18 @@
 
 			_this.MODEL[0] = { "@context" : {} };
 
-			// get baseuri
-			if ( $(template).attr("base") ) {
-				_this.setBaseUri($(template).attr("base"));
-			}
+			// set baseuri
+			_this.setBaseUri($(template).attr("base")
+				? $(template).attr("base")
+				: _this.settings.base
+			);
 
-			// get prefixes
+			// set default prefixes
+			Object.keys(_this.settings.prefixes).forEach(function (prefix) {
+				_this.MODEL[0]["@context"][ prefix ] = { "@id" : _this.settings.prefixes[prefix] };
+
+			});
+			// set prefix from form, may overwrites defaults
 			if ( $(template).attr("prefix") ) {
 				var prefixesArr = $(template).attr("prefix").split(" ");
 				if ( prefixesArr.length % 2 != 0 ) {
@@ -1942,7 +1948,9 @@
 		  * @str URI String
 		  */
 		setBaseUri : function( uri ) {
-			this.MODEL[0]["@context"]["@base"] = uri;
+			if ( uri !== null ) {
+				this.MODEL[0]["@context"]["@base"] = uri;
+			}
 		},
 
 		/**
@@ -2189,6 +2197,14 @@
 	* Default settings
 	************************************************************************/
 	$.fn.RDForm.defaultSettings = {
+		base 		: null,
+		prefixes 	: {
+			'bio'	: 'http://vocab.org/bio/0.1/',
+			'foaf'	: 'http://xmlns.com/foaf/0.1/',
+			'rdf'	: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+			'rdfs'	: 'http://www.w3.org/2000/01/rdf-schema#',
+			'dc'	: 'http://purl.org/dc/elements/1.1/'
+		},
 		template	: "templates/form.html",
 		data 		: null,
 		hooks 		: null,
