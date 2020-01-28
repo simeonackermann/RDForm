@@ -515,7 +515,7 @@
 			else if ( literal['@rdform']['select'] !==  undefined ) {
 				var thisInput = $("<select></select>");
 				var selectOptions = $.parseJSON( literal['@rdform']['select-options'] );
-				thisInput.append( '<option value="" disabled selected>'+_this.l("choose")+'...</option>' );
+				thisInput.append( '<option value="" selected>'+_this.l("choose")+'...</option>' );
 				for ( var soi in selectOptions ) {
 					thisInput.append( '<option value="'+ soi +'">'+ _this.l( selectOptions[soi] ) +'</option>' );
 				}
@@ -625,7 +625,7 @@
 				if ( resource['@rdform']['select'] !== undefined ) {
 					var resourceClass = $('<select class="form-control input-sm '+_this._ID_+'-property"></select>');
 					var selectOptions = $.parseJSON( resource['@rdform']['select-options'] );
-					resourceClass.append( '<option value="" disabled selected>'+_this.l("choose")+'...</option>' );
+					resourceClass.append( '<option value="" selected>'+_this.l("choose")+'...</option>' );
 					for ( var soi in selectOptions ) {
 						resourceClass.append( '<option value="'+ soi +'">'+ _this.l( selectOptions[soi] ) +'</option>' );
 					}
