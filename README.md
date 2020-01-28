@@ -6,6 +6,8 @@ With templates based on the [RDFa](https://en.wikipedia.org/wiki/RDFa) notation 
 
 The inserting of existing data and the output is done as a JavaScript object with the [JSON-LD](https://github.com/digitalbazaar/jsonld.js) notation.
 
+For a **running example** see https://simeonackermann.github.io/RDForm/.
+
 > This software is currently in a very early state. Please be careful when use it in a productive environment.
 
 ## Screenshot ##
@@ -14,9 +16,24 @@ The inserting of existing data and the output is done as a JavaScript object wit
 
 ## Installation ##
 
+### Via npm
+
+`npm i @donsi/rdform`
+
+
+### Manually
+
 * download the source code
 * open [index.html](index.html) in your browser for a sample form.
 * to create an own form, edit [templates/form.html](templates/form.html) to your requirements or create a new file
+
+The load of templates and hooks requires a running http server. You can use docker for example:
+
+	docker run --name rdform -v $(pwd):/usr/share/nginx/html -p 8080:80 nginx
+
+and access at http://localhost:8080
+
+### Integrate
 
 If you want to integrate RDForm into an existing project you have to include [jQuery](http://jquery.com/) (> 1.8) (and for a good style [Bootstrap](getbootstrap.com/)). Have a look at [index.html](index.html) for the right structure.
 
