@@ -53,16 +53,19 @@ $(document).ready(function(){
 
 The following parameters can given to the plugin (see Installation above):
 
-Parameter (Type and default value) | Description
-------------- | -------------
-`template` (String)	| Path to the template file
-`data` (Object)			| Array or Object of existing data to insert
-`hooks` (String)		| Path to the hooks file
-`lang` (String)			| Path to the language file
-`cache` (Boolean=false)			| true or false, loads template from cache
-`verbose` (Boolean=false) 	| true or false, output all messages and the result
-`debug` (Boolean=false)		| log error, warnings and infos into the console
-`submit` (Function)				| Submit callback function, will be called after submit the form
+Parameter (Type) | Default | Description
+--- | --- | ---
+`template` (String) | templates/form.html | Path to the template file
+`data` (Object) | null | Array or Object of existing data to insert
+`hooks` (String) | null | Path to the hooks file
+`prefixes` (Object)	| {  foaf: ..., rdf: ..., rdfs: ..., ...} (see rdform.js) | Object with prefiex and URIs
+`base` (String)	| null | Base URI
+`lang` (String) | null | Path to the language file
+`cache` (Boolean) | false | true or false, loads template from cache
+`verbose` (Boolean)  | false | true or false, output all messages and the result
+`debug` (Boolean) false | log error, warnings and infos into the console
+`submit` (Function)	| null | Submit callback function, will be called after submit the form
+`abort` (Function)	| null | Abort callback function, will be called on aborting the form
 
 
 ## Template Documentation ##
@@ -74,7 +77,7 @@ Some default templates can by found in the subfolder [templates](templates/). Th
 The base structure of an example template is:
 
 ```html
-<form prefix="foaf http://xmlns.com/foaf/0.1/ rdfs http://www.w3.org/2000/01/rdf-schema#">
+<form prefix="foaf http://xmlns.com/foaf/0.1/ rdfs http://www.w3.org/2000/01/rdf-schema#" base="http://example.com/">
 	<legend>A person</legend>
 	<div typeof="foaf:Person" resource="Person-{rdfs:label}">
 		<label>The label</label>
@@ -87,11 +90,11 @@ The JavaScript output for this template will be:
 
 ```js
 {
-	"@id": "Person-Max_Mustermann",
+	"@id": "http://example.com/Person-Max_Mustermann",
 	"@type": [
 		"http://xmlns.com/foaf/0.1/Person"
 	],
-	"http://www.w3.org/2000/01/rdf-schema#name": [
+	"http://www.w3.org/2000/01/rdf-schema#label": [
 		{
 			"@type": "xsd:string",
 			"@value": "Max Mustermann"
@@ -99,6 +102,16 @@ The JavaScript output for this template will be:
 	]
 }
 ```
+
+### The Form ###
+
+The root element should be a `<form />...</form>` tag and contains all further classes and properties.
+
+Attribute | Description
+------------- | -------------
+`prefix`		| Optional, Prefixes fo all resources. The form is "PREFIX URI PREFIX URI ..."
+`base`	| Optional, Base URI
+
 
 ### Classes ###
 
@@ -134,7 +147,7 @@ Attribute | Description
 Optional Attribute | Description
 ------------- | -------------
 `datatype`	| Datatype, e.g. xsd:string, xsd:date,
-`value`		| Prefixed value
+`value`		| Prefilled value
 `placeholder`	| Placeholder
 `multiple`	| The property can be multipled by clicking an add-button
 `required`	| Required property, cannot be empty
@@ -162,6 +175,11 @@ Are described as checkboxes in the form and can be 1|0 or true|false. They are i
 #### Textareas
 
 Are multiple line texts and initialized by adding the attribute `textarea` to a literal property.
+
+### Dates
+
+Properties of type `xsd:date` will rendered with a date-type select option. To define the date format you can use `xsd:gYearMonth` or `xsd:gYear` as datatype.
+
 
 #### Select-Lists
 
