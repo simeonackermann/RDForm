@@ -1,6 +1,6 @@
 {
   "name": "@donsi/rdform",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "RDForm is a jQuery plugin for creating and editing RDF data in a clean and modern HTML form.",
   "main": "js/rdform.js",
   "scripts": {
@@ -9,6 +9,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/simeonackermann/RDForm.git"
+  },
+  "dependencies": {
+    "jquery" : "~1.11"
   },
   "keywords": [
     "rdf",
