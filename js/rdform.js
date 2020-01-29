@@ -1421,15 +1421,16 @@
 				}
 			});
 
-			// create custom autoconmplete item with resource uri as href
-			$.widget("custom.autocompleteLinkItem", $.ui.autocomplete, {
-				_renderItem: function( ul, item ) {
-					return $( "<li>" )
-					.attr( "data-value", item.value )
-					.append( '<a onclick="return false" href="' + item.value + '">' + item.label + "</a>" )
-					.appendTo( ul );
-					}
-			});
+			if ($.ui !== undefined && $.ui.autocomplete !== undefined) {
+				$.widget("custom.autocompleteLinkItem", $.ui.autocomplete, {
+					_renderItem: function( ul, item ) {
+						return $( "<li>" )
+						.attr( "data-value", item.value )
+						.append( '<a onclick="return false" href="' + item.value + '">' + item.label + "</a>" )
+						.appendTo( ul );
+						}
+				});
+			}
 
 			//autocomplete input
 			$("input[autocomplete]", $(env)).on("focus", function() {
