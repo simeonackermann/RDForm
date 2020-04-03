@@ -96,19 +96,6 @@
 					}
 				});
 			}
-
-			// loading template file
-			var templateFile = _this.settings.cache ? _this.settings.template : _this.settings.template + "?" + (new Date()).getTime();
-			var template = null;
-			$.ajax({ url: templateFile, type: "GET", dataType: "text", async: false,
-				success: function( m ) {
-					template = m;
-				},
-				error: function( jqxhr, type, e ) {
-					_this.showAlert( "error", 'Cannot load template "'+ _this.settings.template +'": '+e);
-				}
-			});
-			_this.template = template;
 		},
 
 		init: function() {
@@ -119,261 +106,398 @@
 			}
 
 			// parsing model
-			if ( _this.template ) {
-				_this.parseTemplate();
-				if ( this.settings.debug ) {
-					console.log( "RDForm Model = ", this.MODEL );
-				}
+			if ( !_this.settings.template ) {
+				return this;
 			}
 
-			if ( _this.MODEL.length > 0 ) {
-				_this.$elem.append( _this.createHTMLForm() );
-				_this.$elem.attr("autocomplete", "off");
+			_this.parseTemplate(function(result) {
+				if (!result) return;
+				if ( _this.settings.debug ) {
+					console.log( "RDForm Model = ", _this.MODEL );
+				}
+				if ( _this.MODEL.length > 0 ) {
+					_this.$elem.append( _this.createHTMLForm() );
+					_this.$elem.attr("autocomplete", "off");
 
-				_this.initFormHandler( _this.$elem );
+					_this.initFormHandler( _this.$elem );
 
-				var sbm_text = "create";
+					var sbm_text = "create";
 
-				// maybe add existing data
-				if ( _this.data ) {
-					sbm_text = "update";
-					if ( _this.settings.debug ) {
-						console.log( "RDForm Insert Data = ", _this.data );
+					// maybe add existing data
+					if ( _this.data ) {
+						sbm_text = "update";
+						if ( _this.settings.debug ) {
+							console.log( "RDForm Insert Data = ", _this.data );
+						}
+						_this.addExistingData();
 					}
-					_this.addExistingData();
+
+					// append submit button
+					_this.$elem.append('<div class="form-group '+_this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' +
+										'<button type="reset" class="btn btn-default '+_this._ID_+'-abort">'+ _this.l("reset") +'</button> ' +
+										'<button type="submit" class="btn btn-lg btn-primary">'+ _this.l(sbm_text) +'</button>' +
+									'</div></div>' );
 				}
 
-				// append submit button
-				_this.$elem.append('<div class="form-group '+_this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' +
-									'<button type="reset" class="btn btn-default '+_this._ID_+'-abort">'+ _this.l("reset") +'</button> ' +
-									'<button type="submit" class="btn btn-lg btn-primary">'+ _this.l(sbm_text) +'</button>' +
-								'</div></div>' );
-			}
+			});
+
 			return this;
 		},
 
-
 		/**
-		  *	Parse template file and create the MODEL array
+		  *	Parse SHACL template and create the MODEL array
 		  *
-		  * @return void
+		  * @param {Function}
+		  * @returns {Function}
 		  */
-		parseTemplate: function( ) {
+		parseTemplate: function (callback) {
 			var _this = this;
-			var template = $.parseHTML( _this.template );
-			var curClassIndex = 0;
+
+			var attr_template = _this.settings.template;
+			var template_expanded = null;
 
 			_this.MODEL[0] = { "@context" : {} };
 
-			// set baseuri
-			_this.setBaseUri($(template).attr("base")
-				? $(template).attr("base")
-				: _this.settings.base
-			);
-
-			// set default prefixes
-			Object.keys(_this.settings.prefixes).forEach(function (prefix) {
-				_this.MODEL[0]["@context"][ prefix ] = { "@id" : _this.settings.prefixes[prefix] };
-
-			});
-			// set prefix from form, may overwrites defaults
-			if ( $(template).attr("prefix") ) {
-				var prefixesArr = $(template).attr("prefix").split(" ");
-				if ( prefixesArr.length % 2 != 0 ) {
-					_this.showAlert( "warning", "Invalid prefix attribute format. Use: 'prefix URL prefix URL...'" );
-				}
-				for (var i = 0; i < prefixesArr.length - 1; i += 2) {
-					_this.MODEL[0]["@context"][ prefixesArr[i] ] = { "@id" : prefixesArr[i+1] };
-				}
+			// may add our prefixes to template context
+			if (attr_template['@context']) {
+				attr_template['@context'] = Object.assign({}, _this.settings.prefixes, attr_template['@context']);
 			}
 
-			// walk the classes
-			$(template).children('div').each(function(i) {
-				var curClass = new Object({ '@rdform' : {} });
-				var properties = new Object();
+			// set baseuri
+			if (_this.settings.base) {
+				_this.setBaseUri(_this.settings.base);
+			}
+			// may overwrite baseuri from shape temaplte
+			if (attr_template['@context'] && attr_template['@context']["@base"]) {
+				_this.setBaseUri(attr_template['@context']["@base"]);
+			}
 
-				if ( $(this).attr("typeof") === undefined ) {
-					_this.showAlert( "error", "Error: Couldnt find the attribute \"typeof\" in div on position " + (i+1) );
-					return;
-				}
-
-				if ( $(this).attr("resource") === undefined ) {
-					_this.showAlert( "error", "Error: Couldnt find the attribute \"resource\" in div on position " + (i+1) );
-					return;
-				}
-
-				curClass['@id'] = $(this).attr("resource");
-				curClass['@type'] = $(this).attr("typeof");
-				_this.validatePrefix( curClass['@type'] );
-
-				if ( $(this).attr("id") )
-					curClass['@rdform']['id-html'] = $(this).attr("id");
-				if ( $(this).attr("return-resource") )
-					curClass['@rdform']['id-return'] = $(this).attr("return-resource");
-				if ( $(this).attr("typeof-select") )
-					curClass['@rdform']['typeof-select'] = $(this).attr("typeof-select");
-				if ( $(this).prev("legend").length > 0 )
-					curClass['@rdform']['legend'] = _this.l( $(this).prev("legend").text() );
-				if ( $(this).find("p.help") ) {
-					curClass['@rdform']['help'] = $(this).find("p.help").html();
-				}
-				//curClass['@rdform']['properties'] = [];
-
-				// walk the input-properties
-				$(this).children('input').each(function() {
-					var curProperty = { '@rdform' : {} };
-
-					if ( $(this).attr("type") === undefined ) { // check if type exists, set literal as default
-						$(this).attr("type", "literal");
-						_this.showAlert( "warning", "Model parsing exception: type attribute in property \"" + $(this).attr("name") + "\" in \"" + curClass['@id'] + "\" is not set. I manually added it as literal..." );
-					}
-					if ( $(this).attr("name") === undefined ) { // check if name exists
-						_this.showAlert( "error", "Attention: Unnamed Property-" + $(this).attr("type") + " in \"" + curClass['@id'] + "\". Please add any name." );
-						return;
-					}
-
-					// add all attributes: type, name, value, multiple, additional, readonly, placeholder, datatype, requiere, autocomplete, textare, boolean, checked, select, ...
-					$.each ( $(this)[0].attributes, function( ai, attr) {
-						curProperty["@rdform"][ attr.name ] =  attr.value;
-
-						// maybe translate same attributes
-						if ( attr.name == "placeholder" || attr.name == "title" || attr.name == "label" ) {
-							curProperty["@rdform"][ attr.name ] = _this.l( attr.value );
-						}
-					});
-					// maybe add the label
-					if ( $(this).prev("label").length > 0 ) {
-						curProperty["@rdform"]["label"] = _this.l( $(this).prev("label").text() );
+			// set default prefixes in this model
+			Object.keys(_this.settings.prefixes).forEach(function (prefix) {
+				_this.MODEL[0]["@context"][ prefix ] = { "@id" : _this.settings.prefixes[prefix] };
+			});
+			// may add prefixes from shacl template
+			if (attr_template['@context']) {
+				Object.keys(attr_template['@context']).forEach(function (prefix) {
+					if (prefix.charAt(0) == "@") {
+						_this.MODEL[0]["@context"][ prefix ] = attr_template['@context'][prefix];
 					} else {
-						curProperty["@rdform"]["label"] = $(this).attr("name");
+						_this.MODEL[0]["@context"][ prefix ] = { "@id" : attr_template['@context'][prefix] };
 					}
-					// add datatype as type
-					if ( $(this).attr("datatype") ) {
-						curProperty["@type"] = $(this).attr("datatype");
-						// add type property in context
-						if ( ! _this.MODEL[0].hasOwnProperty("@context") ) {
-							_this.MODEL[0]["@context"] = new Object();
-						}
-						if ( ! _this.MODEL[0]["@context"].hasOwnProperty($(this).attr("name")) ) {
-							_this.MODEL[0]["@context"][$(this).attr("name")] = new Object();
-						}
-						_this.MODEL[0]["@context"][$(this).attr("name")]["@type"] = $(this).attr("datatype");
-					}
-					// add value as @value
-					if ( $(this).attr("value") ) {
-						curProperty["@value"] = $(this).attr("value");
-					}
-					// add index
-					if ( $(this).attr("multiple") ) {
-						curProperty["@rdform"]["index"] = 1;
-					}
-
-					// do some property-type specific things
-					switch ( curProperty['@rdform']['type'] ) {
-						case "resource":
-							if ( $(this).attr("value") ) {
-								curProperty["@type"] = $(this).attr("value");
-								delete curProperty["@value"];
-							}
-
-							// test if the resource class exists (if not external)
-							if ( $(this).attr("external") === undefined ) {
-
-								if ( $(template).find('div[typeof="'+$(this).val()+'"],div[id="'+$(this).val()+'"]').length < 1 ) {
-									_this.showAlert( "warning", "Couldnt find the class \"" + $(this).val() + "\" in the form model... ;( \n\n I will ignore the resource \"" + $(this).attr("name") + "\" in \"" + curClass['@id'] + "\"." );
-									return;
-								}
-
-							} else {
-								curProperty["@id"] = $(this).attr("name");
-								delete curProperty["@type"];
-							}
-
-							var args = new Object();
-							if ( $(this).attr("arguments") ) {
-								args = $.parseJSON( $(this).attr("arguments") );
-							}
-							// add arguments-index for multiple resources
-							if ( $(this).attr("multiple") ) {
-								args['i'] = 1;
-							}
-							if ( $(this).attr("arguments") || $(this).attr("multiple") ) {
-								//curProperty["@rdform"]["arguments"] = JSON.stringify(arguments);
-								curProperty["@rdform"]["arguments"] = args;
-							}
-
-							break;
-
-						case "literal":
-							break;
-
-						case "hidden":
-							break;
-
-						default:
-							_this.showAlert( "warning", "Unknown type \"" + $(this).attr("type") + "\" at property \"" + $(this).attr("name") + "\" in \"" + curClass['@type'] + "\" on parsing model found. I will ignore this property..." );
-							return;
-							break;
-					}
-
-					var propName = $(this).attr("name");
-					_this.validatePrefix( propName );
-
-					if ( properties[ propName ] ) {
-						properties[ propName ].push(curProperty);
-					} else {
-						properties[ propName ] = [ curProperty ];
-					}
-					//curClass['@rdform']['properties'].push(propName); // maybe add this array for the right property index range
-				}); // end of walking properties
-
-				if ( properties.length == 0 ) {
-					_this.showAlert( "warning", "No properties stored in class \"" + curClass['@type'] + "\" on parsing model found..." );
-				}
-
-				// add properties to the current class
-				$.extend( true, curClass, properties );
-
-				// find inputs which referencing this class by type or id
-				var thisClassReference = _this.getElement( $(template).find('input'), "value", curClass['@type'] );
-				if ( thisClassReference.length == 0 && curClass["@rdform"]['id-html'] ) {
-					thisClassReference = _this.getElement( $(template).find('input'), "value", curClass["@rdform"]['id-html'] );
-				}
-				// add current class as child resource if it was referenced
-				if ( thisClassReference.length > 0 ) {
-					addToModel( _this.MODEL, curClass );
-				// add current class ass root-class, extend with baseuri and prefixes
-				} else {
-					$.extend( true, _this.MODEL[curClassIndex], curClass );
-				}
-				curClassIndex++;
-			}); // end of walking class
-
-			// add a class as child-class into a referencing class
-			function addToModel( model, curClass ) {
-				$.each( model, function( rootClsIx, rootCls ) {
-					$.each( rootCls, function( clsIx, thisCls ) {
-						if ( typeof thisCls === "object" ) {
-							$.each( thisCls, function( propIx, thisProp ) {
-								// add currentClass if type==type or type==id, prop[id] must undefined for classes of same types
-								if ( thisProp.hasOwnProperty("@type")
-									 && thisProp["@id"] == undefined
-									 && ( thisProp["@type"] == curClass['@type']
-									   || thisProp["@type"] == curClass["@rdform"]['id-html']
-										)
-									) {
-										$.extend( true, thisProp, curClass );
-								}
-							});
-						}
-						// add recursive for deeper references
-						if ( Array.isArray(thisCls) ) {
-							addToModel( thisCls, curClass );
-						}
-					});
 				});
 			}
 
+			jsonld.expand(attr_template, function(err, expanded) {
+				if ( err != null ) {
+					_this.showAlert( "error", "Error on parse given SHACL shape: " + JSON.stringify(err, null, ' ') );
+					return callback(false);
+				}
+				if ( _this.settings.debug ) {
+					console.log( "SHACL shape:", expanded );
+				}
+				template_expanded = expanded;
+
+				// get node shapes
+				var root_node_shapes = get_root_node_shapes(expanded);
+
+				if (!root_node_shapes || root_node_shapes.length == 0) {
+					_this.showAlert( "warning", "No root shape of type \"sh:NodeShape\" found.");
+					return callback(false);
+				}
+
+				// @TODO decide which node-shape we take
+				if (root_node_shapes.length > 1) {
+					_this.showAlert( "warning", "Multiple root shapes found.");
+					return callback(false);
+				}
+
+				var curClass = parse_node_shape(root_node_shapes[0]);
+				if (!curClass) {
+					return callback(false);
+				}
+
+				$.extend( true, _this.MODEL[0], curClass );
+
+				// may add nodeshape uris
+				if ( _this.settings.uris ) {
+					_this.parseNodeUriGeneration(function(result) {
+						callback(result)
+					});
+				} else {
+					callback(true);
+				}
+			});
+
+			/**
+			 * Parse SHACL root template of type NodeShape
+			 * @param {Object} shape
+			 * @returns {Object|Boolean}
+			 */
+			function parse_node_shape(shape) {
+				var curClass = new Object({ '@rdform' : {} });
+				var properties = new Object();
+
+				if (!shape["@id"]) {
+					_this.showAlert( "error", "Shape doest not has a @id." );
+					return false;
+				}
+
+				// @TODO support other targets, eg. target IRI see https://www.w3.org/TR/shacl/#targetNode
+				if (!get_value_from_object(shape, 'sh:targetClass')) {
+					_this.showAlert( "error", "Shape doest not has a sh:targetClass" );
+					return callback(false);
+				}
+
+				curClass['@id'] = shape["@id"];
+				curClass['@type'] = get_value_from_object(shape, 'sh:targetClass'); // TODO could be target IRI also!...
+				// _this.validatePrefix( curClass['@type'] );
+
+				// class legend is sh:name, rdfs:label or @id
+				var legend = get_value_from_object(shape, 'sh:name', 'rdfs:label')
+				curClass['@rdform']['legend'] = legend
+					? legend
+					: _this.getUriPrefix(shape["@id"]);
+
+				// walk the properties
+				if (shape[_this.replaceStrPrefix('sh:property')]) {
+					shape[_this.replaceStrPrefix('sh:property')].forEach(function(property) {
+						var curProperty = parse_property_shape(property);
+						if (curProperty) {
+							properties[curProperty["@id"]] = [curProperty];
+						}
+					});
+				}
+
+				$.extend( true, curClass, properties );
+				return curClass;
+			}
+
+			/**
+			 * Parse SHACL shape of type PropertyShape
+			 * @param {Object} property
+			 * @returns {Object|Boolean}
+			 */
+			function parse_property_shape(_property) {
+				var curProperty = { '@rdform' : {} };
+				var property = $.extend( {}, property, _property );
+				var path = null;
+
+				// may use PropertyShape from template
+				if (property["@id"]) {
+					var property_shape = template_expanded.filter(function(shape) {
+						return shape["@id"] && _this.matchUris(shape["@id"], property["@id"]);
+					});
+					if (property_shape.length == 0) {
+						_this.showAlert( "warning", "Shape for property \"" + property["@id"] + "\" not found" );
+						return false;
+					}
+					else if (property_shape.length > 1) {
+						_this.showAlert( "warning", "Multiple shapes for property \"" + property["@id"] + "\" found" );
+						return false;
+					}
+					else {
+						$.extend( true, property, property_shape[0] );
+					}
+				}
+
+				if (!get_value_from_object(property, 'sh:path')) {
+					_this.showAlert( "warning", "Property doest not has a sh:path. We ignore it" );
+					return false;
+				}
+				path = get_value_from_object(property, 'sh:path')
+
+				curProperty["@id"] = path;
+				curProperty["@rdform"]['name'] = path;
+
+				// property is sub-form
+				if (get_value_from_object(property, 'sh:node')) {
+					var property_node = get_value_from_object(property, 'sh:node');
+					var _property_nodeShape = template_expanded.filter(function(shape) {
+						return shape["@id"] && _this.matchUris(shape["@id"], property_node);
+					});
+					// TODO what todo if nothing found/multiple ??? may use property as external?!
+					if (_property_nodeShape.length == 0) {
+						_this.showAlert( "warning", "Shape for property not found" );
+						return false;
+					}
+					else if (_property_nodeShape.length > 1) {
+						_this.showAlert( "warning", "Multiple shapes for property found" );
+						return false;
+					}
+					else {
+						curProperty["@rdform"]['type'] = 'resource';
+						var property_nodeShape = parse_node_shape(_property_nodeShape[0]);
+						$.extend( true, curProperty, property_nodeShape );
+					}
+				} else {
+					// property is external IRI
+					if (get_value_from_object(property, 'sh:nodeKind')
+						&& _this.matchUris(get_value_from_object(property, 'sh:nodeKind') , 'sh:IRI')
+					) {
+						curProperty["@id"] = path;
+						curProperty["@rdform"]['external'] = true;
+						curProperty["@rdform"]['type'] = 'resource';
+					} else {
+						curProperty["@rdform"]['type'] = 'literal';
+					}
+				}
+
+				var minCount = get_value_from_object(property, 'sh:minCount');
+				var maxCount = get_value_from_object(property, 'sh:maxCount');
+				if (minCount !== undefined && maxCount !== undefined) {
+					if (minCount > maxCount) {
+						_this.showAlert( "warning", "sh:minCount is bigger than sh:maxCount in shape property " + property["@id"] );
+						minCount = undefined;
+						maxCount = undefined;
+					}
+				}
+				if (minCount !== undefined) {
+					if (minCount === 0) {
+						curProperty["@rdform"]["additional"] = true;
+					}
+					else if (minCount > 0) {
+						curProperty["@rdform"]["required"] = true;
+					}
+					// @TODO implement real min count -> count properties
+				}
+				var maxCount = get_value_from_object(property, 'sh:maxCount');
+				if (maxCount !== undefined) {
+					if (maxCount === 0) {
+						curProperty["@rdform"]["hidden"] = true;
+					}
+					else if (maxCount > 1) {
+						curProperty["@rdform"]["multiple"] = true;
+						curProperty["@rdform"]["index"] = 1;
+					}
+					// @TODO implement real max count -> count properties
+				}
+
+				// property label is sh:name, rdfs:label or sh:path
+				var label = get_value_from_object(property, 'sh:name', 'rdfs:label')
+				curProperty["@rdform"]['label'] = label
+					? label
+					: _this.getUriPrefix(path);
+
+				var datatype = get_value_from_object(property, 'sh:datatype');
+
+				if (datatype) {
+					curProperty["@rdform"]['datatype'] = datatype;
+					curProperty["@type"] = datatype;
+					// @TODO may add to model context ?!? (see old method)
+					if ( ! _this.MODEL[0]["@context"].hasOwnProperty(path) ) {
+						_this.MODEL[0]["@context"][path] = new Object();
+					}
+					_this.MODEL[0]["@context"][path]["@type"] = datatype;
+				}
+
+				return curProperty;
+			}
+
+			/**
+			 * Get @value or @id from given key(s) in given object.
+			 * @param {Object} obj
+			 * @param {String} key1, key2, ...
+			 * @returns {String|undefined}
+			 */
+			function get_value_from_object(obj, ...keys) {
+				var value = undefined;
+
+				keys.some(function(_key) {
+					var key = _this.replaceStrPrefix(_key);
+
+					if (obj[key] ) {
+						if (obj[key][0]['@id'] !== undefined) {
+							value = obj[key][0]['@id']
+							return true;
+						}
+
+						if (obj[key][0]['@value'] !== undefined) {
+							value = obj[key][0]['@value'];
+							return true;
+						}
+					}
+				});
+				return value;
+			}
+
+			/**
+			 * Get root shape of type sh:NodeShape
+			 * @todo Check if shape is used somewhere as referance, so it is not a root shape?!
+			 * @param {Array} template
+			 * @return {Array}
+			 */
+			function get_root_node_shapes(template) {
+				if (template.length == 0)
+					return undefined;
+
+				var shapes = template.filter(function(shape) {
+					// @TODO may we can use PropertyShape as root shape!
+					return shape["@type"] && _this.matchUris(shape["@type"][0], 'sh:NodeShape');
+				});
+
+				if (shapes.length > 1) {
+					// @TODO if data given may use shape of given data resource type
+
+					// get root shape from given attribute
+					if (_this.settings.rootShape) {
+						shapes = shapes.filter(function(shape) {
+							return shape["@id"] && _this.matchUris(shape["@id"], _this.settings.rootShape);
+						})
+					}
+				}
+
+				return shapes;
+			}
+		},
+
+		/**
+		 * Parse node shape URI generation and may merge URIs and wildcards to our model
+		 * @return Boolean
+		 */
+		parseNodeUriGeneration: function (callback) {
+			var _this = this;
+			var uriGeneration =  _this.settings.uris;
+
+			if (!_this.MODEL || _this.MODEL.length == 0) callback(true);
+
+			console.log('_this.settings.uris', uriGeneration);
+
+			// may add our prefixes to template context
+			if (uriGeneration['@context']) {
+				uriGeneration['@context'] = Object.assign({}, _this.settings.prefixes, uriGeneration['@context']);
+			}
+
+			jsonld.expand(uriGeneration, function(err, expanded) {
+				if ( err != null ) {
+					_this.showAlert( "error", "Error on parse given URI generation shape: " + JSON.stringify(err, null, ' ') );
+					return callback(false);
+				}
+
+				expanded.some(function(shape, i) {
+					if (!shape["@id"]) {
+						_this.showAlert( "warning", "URI generation shape entry (index: " + i + ") does not has an @id." );
+						return;
+					}
+					var id = shape["@id"];
+					var value = shape[ _this.replaceStrPrefix('rdf:value') ];
+					if (!value) {
+						_this.showAlert( "warning", "URI generation shape entry \"" + shape["@id"] + "\"  does not has an rdf:value." );
+						return;
+					}
+					value = value[0]["@value"];
+
+					if (_this.MODEL[0]["@id"] == id) {
+						_this.MODEL[0]["@id"] = value;
+					}
+					else if (_this.MODEL[0][id]) {
+						_this.MODEL[0][id][0]["@id"] = value;
+					}
+					else {
+						_this.showAlert( "warning", "Cannot find node \"" + shape["@id"] + "\" given in URI generation shape." );
+					}
+				});
+				callback(true);
+			});
 		},
 
 		/**
@@ -405,11 +529,13 @@
 				'typeof'	: classModel['@type'],
 				'resource'	: classModel['@id']
 			});
-			thisClass.attr( classModel['@rdform'] ); // add all rdform-attributes
+			if (classModel['@rdform']) {
+				thisClass.attr( classModel['@rdform'] ); // add all rdform-attributes
+			}
 			thisClass.data( _this._ID_ + "-model", classModel);
 
 			// maybe rewrite arguments index
-			if ( classModel['@rdform']['arguments'] !== undefined ) {
+			if ( classModel['@rdform'] && classModel['@rdform']['arguments'] !== undefined ) {
 				/*var arguments = $.parseJSON( $(thisClass).attr('arguments') );
 				arguments['i'] = classModel["@rdform"]['index'];
 				$(thisClass).attr("arguments", JSON.stringify( arguments ) );
@@ -1522,6 +1648,8 @@
 			// proceed
 			if ( proceed ) {
 				var json_result = _this.createResult();
+				console.log('json_result', json_result);
+
 				jsonld.expand(json_result, function(err, expanded) {
 					if( err ) {
 						_this.showAlert( "error", "Error on creating the expanded result: " + JSON.stringify(err, null, ' ') );
@@ -2053,13 +2181,18 @@
 		/**
 		  * Return the compact uri (prefix:name)
 		  *
-		  * @param String str The Uri
+		  * @param {String} str The Uri
 		  * @return String Replaced Uri with prefix (if defined in model->@context)
 		*/
 		getUriPrefix: function( str ) {
 			var _this = this;
 			var strShort = str;
 			if ( str === undefined ) return str;
+
+			if (_this.MODEL[0]["@context"]["@base"]) {
+				if (str.includes(_this.MODEL[0]["@context"]["@base"]))
+					return str.slice( _this.MODEL[0]["@context"]["@base"].length )
+			}
 
 			$.each( _this.MODEL[0]["@context"], function(key,val) {
 				if ( 	val.hasOwnProperty("@id") &&
@@ -2234,11 +2367,16 @@
 			'rdfs'	: 'http://www.w3.org/2000/01/rdf-schema#',
 			'dc'	: 'http://purl.org/dc/elements/1.1/',
 			'xsd'	: 'http://www.w3.org/2001/XMLSchema#',
-			'owl'	: 'http://www.w3.org/2002/07/owl#'
+			'owl'	: 'http://www.w3.org/2002/07/owl#',
+			'sh'	: 'http://www.w3.org/ns/shacl#',
+			'rdform' : 'https://github.com/simeonackermann/RDForm/',
+			'dash'  : 'http://datashapes.org/'
 		},
-		template	: "templates/form.html",
+		template	: null,
 		data 		: null,
 		hooks 		: null,
+		rootShape	: null,
+		uris	    : null,
 		lang 		: null,
 		cache 		: false,
 		verbose 	: false,

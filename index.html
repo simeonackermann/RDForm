@@ -62,11 +62,84 @@
     <script src="js/rdform.js"></script>
 
     <script type="text/javascript">
+
+    var shape = {
+        "@context": {
+            "@base": "http://example.org/",
+            "@vocab": "http://example.org/"
+        },
+        "@graph": [
+            {
+                "@id": "PersonShape",
+                "@type": "sh:NodeShape",
+                "sh:name": "Person",
+                "sh:targetClass" : {"@id": "foaf:Person"},
+                "sh:property" : [
+                    {
+                        "sh:path" : { "@id": "foaf:name" },
+                        "sh:datatype" : { "@id": "xsd:string" },
+                        "sh:name" : "Name",
+                        "sh:minCount" : 1,
+                    },
+                    {
+                        "sh:path" : {"@id": "email"},
+                        "sh:nodeKind" : {"@id": "sh:IRI"},
+                        "sh:name" : "Mail",
+                        "sh:maxCount" : 99,
+                    },
+                    {
+                        "sh:path" : {"@id": "hasBirth"},
+                        "sh:node" : {"@id": "BirthShape"}
+                    },
+                    {
+                        "sh:path" : { "@id": "rdfs:comment" },
+                        "sh:minCount" : 0,
+                    },
+                ]
+            },
+            {
+                "@id": "BirthShape",
+                "@type": "sh:NodeShape",
+                "sh:targetClass" : {"@id": "bio:Birth"},
+                "sh:name": "Birth",
+                "sh:property" : [
+                    {
+                        "sh:path" : { "@id": "rdfs:label" },
+                        "sh:name" : "Place"
+                    },
+                    {
+                        "sh:path" : { "@id": "dc:date" },
+                        "sh:datatype" : { "@id": "xsd:date" },
+                        "sh:name" : "Date"
+                    },
+                ]
+            }
+        ]
+    };
+
+    var nodeShapeUris = {
+        "@context": {
+            "@base": "http://example.org/"
+        },
+        "@graph": [
+            {
+                "@id": "PersonShape",
+                "rdf:value": "person-{foaf:name}"
+            },
+            {
+                "@id": "BirthShape",
+                "rdf:value": "birth-{rdfs:label}"
+            }
+        ]
+    };
+
     $(document).ready(function(){
         $('.rdform').RDForm({
-            template: "templates/form.html",
-            hooks: "js/hooks/hooks.js",
+            template: shape,
+            rootShape: 'http://example.org/PersonShape',
+            uris: nodeShapeUris,
             verbose: true,
+            debug: true,
 
             submit: function() {
                 console.log( JSON.stringify(this, null, '\t') );
