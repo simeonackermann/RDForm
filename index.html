@@ -83,7 +83,6 @@
                     },
                     {
                         "sh:path" : {"@id": "email"},
-                        "sh:nodeKind" : {"@id": "sh:IRI"},
                         "sh:name" : "Mail",
                         "sh:maxCount" : 99,
                     },
@@ -117,18 +116,28 @@
         ]
     };
 
-    var nodeShapeUris = {
+    var shapeExtension = {
         "@context": {
-            "@base": "http://example.org/"
+            "@base": "http://example.org/",
+            "@vocab": "http://example.org/"
         },
         "@graph": [
             {
                 "@id": "PersonShape",
-                "rdf:value": "person-{foaf:name}"
+                "rdform:resource": "person-{foaf:name}",
+                "email": {
+                    "rdform:placeholder": "name@example.org"
+                },
+                "rdfs:comment": {
+                    "rdform:textarea": true
+                },
+                "BirthShape": {
+                    "rdform:arguments": '{ "personName": "{foaf:name}" }'
+                }
             },
             {
                 "@id": "BirthShape",
-                "rdf:value": "birth-{rdfs:label}"
+                "rdform:resource": "{personName}-birth-{rdfs:label}"
             }
         ]
     };
@@ -137,7 +146,7 @@
         $('.rdform').RDForm({
             template: shape,
             rootShape: 'http://example.org/PersonShape',
-            uris: nodeShapeUris,
+            templateExtension: shapeExtension,
             verbose: true,
             debug: true,
 

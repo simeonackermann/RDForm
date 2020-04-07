@@ -105,11 +105,12 @@
 				console.log("RDForm settings = ", _this.settings);
 			}
 
-			// parsing model
 			if ( !_this.settings.template ) {
+				_this.showAlert( "warning", 'No template given');
 				return this;
 			}
 
+			// parsing template, uri generation to model
 			_this.parseTemplate(function(result) {
 				if (!result) return;
 				if ( _this.settings.debug ) {
@@ -218,9 +219,9 @@
 
 				$.extend( true, _this.MODEL[0], curClass );
 
-				// may add nodeshape uris
-				if ( _this.settings.uris ) {
-					_this.parseNodeUriGeneration(function(result) {
+				// may add template extension, eg uri generation, subform-attributes
+				if ( _this.settings.templateExtension ) {
+					_this.parseTemplateExtension(function(result) {
 						callback(result)
 					});
 				} else {
@@ -238,15 +239,15 @@
 				var properties = new Object();
 
 				if (!shape["@id"]) {
-					_this.showAlert( "error", "Shape doest not has a @id." );
+					_this.showAlert( "error", "Shape does not has an @id." );
 					return false;
 				}
 
 				// @TODO support other targets, eg. target IRI see https://www.w3.org/TR/shacl/#targetNode
-				if (!get_value_from_object(shape, 'sh:targetClass')) {
-					_this.showAlert( "error", "Shape doest not has a sh:targetClass" );
-					return callback(false);
-				}
+				// if (!get_value_from_object(shape, 'sh:targetClass')) {
+				// 	_this.showAlert( "error", "Shape does not has a sh:targetClass" );
+				// 	return callback(false);
+				// }
 
 				curClass['@id'] = shape["@id"];
 				curClass['@type'] = get_value_from_object(shape, 'sh:targetClass'); // TODO could be target IRI also!...
@@ -300,11 +301,11 @@
 					}
 				}
 
-				if (!get_value_from_object(property, 'sh:path')) {
+				path = get_value_from_object(property, 'sh:path');
+				if (!path) {
 					_this.showAlert( "warning", "Property doest not has a sh:path. We ignore it" );
 					return false;
 				}
-				path = get_value_from_object(property, 'sh:path')
 
 				curProperty["@id"] = path;
 				curProperty["@rdform"]['name'] = path;
@@ -451,50 +452,85 @@
 		},
 
 		/**
-		 * Parse node shape URI generation and may merge URIs and wildcards to our model
+		 * Parse SHACL template extension for RDForm, like URI generation, wildcards, subform arguments, textareas, selects etc
 		 * @return Boolean
 		 */
-		parseNodeUriGeneration: function (callback) {
+		parseTemplateExtension: function (callback) {
 			var _this = this;
-			var uriGeneration =  _this.settings.uris;
+			var templateExtension =  _this.settings.templateExtension;
 
 			if (!_this.MODEL || _this.MODEL.length == 0) callback(true);
 
-			console.log('_this.settings.uris', uriGeneration);
-
 			// may add our prefixes to template context
-			if (uriGeneration['@context']) {
-				uriGeneration['@context'] = Object.assign({}, _this.settings.prefixes, uriGeneration['@context']);
+			if (templateExtension['@context']) {
+				templateExtension['@context'] = Object.assign({}, _this.settings.prefixes, templateExtension['@context']);
 			}
 
-			jsonld.expand(uriGeneration, function(err, expanded) {
+			jsonld.expand(templateExtension, function(err, expanded) {
 				if ( err != null ) {
-					_this.showAlert( "error", "Error on parse given URI generation shape: " + JSON.stringify(err, null, ' ') );
+					_this.showAlert( "error", "Error on parse given template extension shape: " + JSON.stringify(err, null, ' ') );
 					return callback(false);
+				}
+				if ( _this.settings.debug ) {
+					console.log( "SHACL template extension = ", expanded );
 				}
 
 				expanded.some(function(shape, i) {
 					if (!shape["@id"]) {
-						_this.showAlert( "warning", "URI generation shape entry (index: " + i + ") does not has an @id." );
+						_this.showAlert( "warning", "Template extension shape entry (index: " + i + ") does not has an @id." );
 						return;
 					}
 					var id = shape["@id"];
-					var value = shape[ _this.replaceStrPrefix('rdf:value') ];
-					if (!value) {
-						_this.showAlert( "warning", "URI generation shape entry \"" + shape["@id"] + "\"  does not has an rdf:value." );
-						return;
-					}
-					value = value[0]["@value"];
+					var targetNode = null;
 
 					if (_this.MODEL[0]["@id"] == id) {
-						_this.MODEL[0]["@id"] = value;
+						targetNode = _this.MODEL[0];
 					}
 					else if (_this.MODEL[0][id]) {
-						_this.MODEL[0][id][0]["@id"] = value;
+						targetNode = _this.MODEL[0][id][0];
 					}
 					else {
-						_this.showAlert( "warning", "Cannot find node \"" + shape["@id"] + "\" given in URI generation shape." );
+						_this.showAlert( "warning", "Cannot find node \"" + shape["@id"] + "\" given in template extension shape." );
+						return;
 					}
+					var shapeKeys = Object.keys(shape);
+
+					// may add new resource uri
+					var rdformResource = shapeKeys.find(function(k) {
+						return k == _this.replaceStrPrefix('rdform:resource');
+					})
+
+					if (rdformResource) {
+						targetNode["@id"] = shape[rdformResource].reduce(function(k) { return k["@value"] })["@value"];
+					}
+
+					// get defined attributes (exceptr @id and rdform:resource)
+					var shapeProperties = shapeKeys.filter(function(k) {
+						return k != "@id" && k != _this.replaceStrPrefix('rdform:resource');
+					});
+
+					// add given attributes (placeholder, arguments, textarea, checked, select, ...)
+					shapeProperties.some(function(propertyKey) {
+						if (! targetNode[propertyKey] ) {
+							_this.showAlert( "warning", "Cannot find node \"" + propertyKey + "\" given in template extension shape." );
+							return;
+						}
+						var targetPropertyNode = targetNode[propertyKey][0];
+
+						Object.keys(shape[propertyKey][0]).some(function(k) {
+							var v = shape[propertyKey][0][k].reduce(function(k) { return k["@value"] })["@value"];
+							k = k.replace(_this.MODEL[0]["@context"]["rdform"]["@id"], "")
+
+							// may parse given arguments and arguments-index for multiple resources
+							if (k == "arguments") {
+								v = $.parseJSON(v);
+								if (targetPropertyNode["@rdform"]["multiple"]) {
+									v['i'] = 1;
+								}
+							}
+							targetPropertyNode["@rdform"][k] = v;
+						});
+					});
 				});
 				callback(true);
 			});
@@ -1273,8 +1309,8 @@
 				var propertyHTML = _this.createHTMLProperty( propertyModel );
 
 				// hide legend text, help and label
-				$(propertyHTML).find(".help-block, ."+_this._ID_+"-show-class-help, ."+_this._ID_+"-legend-text").hide();
-				$(propertyHTML).find( ".control-label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
+				// $(propertyHTML).find(".help-block, ."+_this._ID_+"-show-class-help, ."+_this._ID_+"-legend-text").hide();
+				// $(propertyHTML).find( ".control-label" ).css( "textIndent", "-999px" ).css( "textAlign", "left" );
 				$(btnContainer).find("."+_this._ID_+"-new-subform").hide();
 
 				$(propertyHTML).hide();
@@ -2376,7 +2412,7 @@
 		data 		: null,
 		hooks 		: null,
 		rootShape	: null,
-		uris	    : null,
+		templateExtension : null,
 		lang 		: null,
 		cache 		: false,
 		verbose 	: false,

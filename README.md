@@ -60,16 +60,16 @@ $(document).ready(function(){
             }
         ]
 	}
-	var nodeShapeUris = {
+	var shapeExtension = {
         "@context": {
             "@base": "http://example.org/"
 		},
 		"@id": "PersonShape",
 		"rdf:value": "person-{foaf:name}"
-    };
+	};
 	$(".rdform").RDForm({
 		template: shape,
-		uris: nodeShapeUris,
+		templateExtension: shapeExtension,
 		submit: function() {
 			console.log( JSON.stringify(this, null, '\t') );
 		}
@@ -108,7 +108,7 @@ Parameter (Type) | Default | Description
 `template` (Object) | null | SHACL shape
 `data` (Object) | null | Array or Object of existing data to insert
 `rootShape` (String) | null | @id of the root shape
-`uris` (Object) | null | JSON-LD to define URI generation
+`templateExtension` (Object) | null | Extend the SHACL shape with RDForm specifics, like URI generation, textarea, subform arguments, selects etc. Given as JSON-LD object.
 `hooks` (String) | null | Path to the hooks file
 `prefixes` (Object)	| {  foaf: ..., rdf: ..., rdfs: ..., ...} (see rdform.js) | Object with prefiex and URIs
 `base` (String)	| null | Base URI
