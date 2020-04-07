@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Datepicker -->
+    <link href="../css/datepicker.css" rel="stylesheet" media="screen">
+
+    <!-- JQueryUI Style -->
+    <link href="../css/smoothness/jquery-ui.custom.min.css" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <!-- style -->
+    <link href="../css/rdform.css" rel="stylesheet" media="screen">
+
+    <style type="text/css">
+    body {
+        background: url("../img/noise.png"), -o-linear-gradient(top, #F4F4F4 0px, #EEEEEE 100%) transparent;
+        background: url("../img/noise.png") repeat scroll 0% 0%, -moz-linear-gradient(center top , #F4F4F4 0%, #EEEEEE 100%) repeat scroll 0% 0% transparent;
+    }
+    .container {
+        border: 1px solid lightGray;
+        padding: 2% 8%;
+        border-radius: 10px;
+        margin: 10px auto;
+        background: white;
+        max-width: 960px;
+    }
+    </style>
+
+    <title>RDForm</title>
+</head>
+<body>
+
+<div class="container">
+    <h1>RDForm SHACL Generator</h1>
+
+    <!-- the form container -->
+    <form action="#" class="form-horizontal rdform" role="form"></form>
+</div>
+
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!-- Bootstrap components -->
+    <!--<script src="js/bootstrap.min.js"></script>-->
+
+    <!-- Datepicker  http://www.eyecon.ro/bootstrap-datepicker/ -->
+    <!--<script src="js/bootstrap-datepicker.js"></script>-->
+
+    <!-- JQuery UI -->
+    <script src="../js/jquery-ui.custom.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script>
+
+    <!-- own stuff -->
+    <script src="../js/rdform.js"></script>
+
+    <script type="text/javascript">
+
+    var shape = {
+        "@context": {
+            "@base": "http://example.org/",
+            "@vocab": "http://example.org/"
+        },
+        "@graph": [
+            {
+                "@id": "NodeShape",
+                "@type": "sh:NodeShape",
+                "sh:name": "NodeShape (Class)",
+                "sh:targetClass" : {"@id": "sh:NodeShape"},
+                "sh:property" : [
+                    {
+                        "sh:path" : { "@id": "sh:targetClass" },
+                        "sh:name" : "Target class (URI)",
+                        "sh:nodeKind" : {"@id": "sh:IRI"},
+                        "sh:minCount" : 1,
+                    },
+                    {
+                        "sh:path" : {"@id": "sh:name"},
+                        "sh:datatype" : { "@id": "xsd:string" },
+                        "sh:name" : "Shape name",
+                    },
+                    {
+                        "sh:path" : {"@id": "sh:property"},
+                        "sh:node" : {"@id": "PropertyShape"},
+                        "sh:maxCount" : 99,
+                    },
+                ]
+            },
+            {
+                "@id": "PropertyShape",
+                "@type": "sh:PropertyShape",
+                "sh:targetClass" : {"@id": "sh:PropertyShape"},
+                "sh:name": "PropertyShape",
+                "sh:property" : [
+                    {
+                        "sh:path" : { "@id": "sh:path" },
+                        "sh:name" : "Path (URI)",
+                        "sh:nodeKind" : {"@id": "sh:IRI"},
+                        "sh:minCount" : 1,
+                    },
+                    {
+                        "sh:path" : { "@id": "sh:name" },
+                        "sh:datatype" : { "@id": "xsd:string" },
+                        "sh:name" : "Property name"
+                    },
+                    {
+                        "sh:path" : { "@id": "sh:minCount" },
+                        "sh:datatype" : { "@id": "xsd:integer" },
+                        "sh:name" : "Min count",
+                        "sh:minCount" : 0,
+                    },
+                    {
+                        "sh:path" : { "@id": "sh:maxCount" },
+                        "sh:datatype" : { "@id": "xsd:integer" },
+                        "sh:name" : "Max count",
+                        "sh:minCount" : 0,
+                    },
+                ]
+            }
+        ]
+    };
+
+    var shapeExtension = {
+        "@context": {
+            "@base": "http://example.org/",
+            "@vocab": "http://example.org/"
+        },
+        "@graph": [
+            {
+                "@id": "NodeShape",
+                "rdform:resource": "NodeShape-{sh:name}",
+                "PropertyShape": {
+                    "rdform:arguments": '{ "parentName": "{sh:name}" }'
+                }
+            },
+            {
+                "@id": "PropertyShape",
+                "rdform:resource": "NodeShape-{parentName}-{sh:name}"
+            }
+        ]
+    };
+
+    $(document).ready(function(){
+        $('.rdform').RDForm({
+            template: shape,
+            rootShape: 'http://example.org/NodeShape',
+            templateExtension: shapeExtension,
+            verbose: true,
+            debug: true,
+
+            submit: function() {
+                console.log( JSON.stringify(this, null, '\t') );
+            }
+        });
+    });
+    </script>
+
+</body>
+</html>
