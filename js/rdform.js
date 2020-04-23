@@ -143,11 +143,19 @@
 					_this.addExistingData();
 				}
 
-				// append submit button
-				_this.$elem.append('<div class="form-group '+_this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right">' +
-									'<button type="reset" class="btn btn-default '+_this._ID_+'-abort">'+ _this.l("reset") +'</button> ' +
-									'<button type="submit" class="btn btn-lg btn-primary">'+ _this.l(sbm_text) +'</button>' +
-								'</div></div>' );
+				// append submit buttons
+				var abortBtn = $('<button type="reset" class="btn btn-default '+_this._ID_+'-abort">'+ _this.l("reset") +'</button> ');
+				var submitBtn = $('<button type="submit" class="btn btn-lg btn-primary">'+ _this.l(sbm_text) +'</button>');
+				var submitWrapper = $('<div class="form-group '+_this._ID_+'-submit-btn-group"><div class="col-xs-12 text-right"></div></div>');
+				submitWrapper.find("div").append( abortBtn );
+				submitWrapper.find("div").append( submitBtn );
+				_this.$elem.append( submitWrapper );
+
+				// abort event listener
+				abortBtn.click(function() {
+					_this.abort();
+
+				})
 			}
 			return this;
 		},
@@ -2208,11 +2216,6 @@
 
 			// store this class at element
 			elem.data("_rdform_class", rdform);
-
-			elem.find(".rdform-abort").click(function() {
-				rdform.abort();
-				return false;
-			});
 
 			// callback submit function
 			elem.submit(function() {
