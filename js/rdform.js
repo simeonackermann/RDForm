@@ -261,6 +261,8 @@
 				curClass['@type'] = get_value_from_object(shape, 'sh:targetClass'); // TODO could be target IRI also!...
 				// _this.validatePrefix( curClass['@type'] );
 
+				curClass["@rdform"]["value"] = curClass['@type'];
+
 				// class legend is sh:name, rdfs:label or @id
 				var legend = get_value_from_object(shape, 'sh:name', 'rdfs:label')
 				curClass['@rdform']['legend'] = legend
