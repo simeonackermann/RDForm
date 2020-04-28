@@ -963,31 +963,28 @@
 											$(resource).val( thisData[di]["@id"] ).hide().trigger("blur");
 											$(resource).after('<p class="'+_this._ID_+'-resource-uri-container"><a href="'+thisData[di]["@id"]+'" class="'+_this._ID_+'-resource-uri">'+resourceLabel+'</a></p>');
 										} else {
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
-										}
-										return true;
-									}
+											// _this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
+											var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
+											if ( $(addBtn).length == 0 ) {
+												// add btn not found, may data has rdfs:type
+												if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
+													thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
+													addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
+													hasIDHTML = true;
+												}
+											}
+											if ( $(addBtn).length == 0 ) { // data not found
+												_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData[di]) + '" }', false );
+												return false;
+											}
+											$(addBtn).trigger("click");
 
-									if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
-										var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
-										if ( $(addBtn).length == 0 ) {
-											// add btn not found, may data has rdfs:type
-											if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
-												thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
-												addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
-												hasIDHTML = true;
+											subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
+											if ( hasIDHTML ) {
+												subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
 											}
 										}
-										if ( $(addBtn).length == 0 ) { // data not found
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData[di]) + '" }', false );
-											return false;
-										}
-										$(addBtn).trigger("click");
-
-										subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
-										if ( hasIDHTML ) {
-											subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
-										}
+										// return true;
 									}
 
 									if ( i != $(subEnv).attr("name") && i != _this.replaceStrPrefix($(subEnv).attr("name")) ) {
