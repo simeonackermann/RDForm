@@ -614,7 +614,7 @@
 									'<input type="text" name="'+_this._ID_+'-classUri" value="'+ classModel['@id'] +'" class="form-control input-sm" />' +
 								'</div>' );
 
-			thisLegend.append( '<small>a '+ classModel['@type'] +'</small>' );
+			thisLegend.append( '<small>a '+ _this.getUriPrefix(classModel['@type']) +'</small>' );
 
 			if ( classModel["@rdform"]['typeof-select'] !== undefined ) {
 				var typeofSelect = $(' <select class="'+_this._ID_+'-class-typeof-select form-control input-sm"></select>');
@@ -866,6 +866,9 @@
 					var resourceClass = $(	'<button type="button" class="btn btn-default '+_this._ID_+'-add-property" name="'+ resource['@rdform']['name'] +'" value="'+ resource['@rdform']['value'] +'" title="' + _this.l("Add class %s", btnText)+'" label="'+btnText+'">' +
 												'<span class="glyphicon glyphicon-plus"></span> '+ btnText +
 											'</button>' );
+					if (resource['@rdform'].hasOwnProperty("id-html")) {
+						resourceClass.attr("id-html", resource['@rdform']["id-html"])
+					}
 					resourceClass.data( _this._ID_ + "-model", resource);
 				}
 				else { // create class-model for the resource
@@ -1101,6 +1104,9 @@
 										if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
 											thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
 										}
+										else if ( thisData[di].hasOwnProperty( "http://www.w3.org/ns/shacl#path" ) ) {
+											thisType = thisData[di]["http://www.w3.org/ns/shacl#path"][0]["@id"];
+										}
 										subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
 										hasIDHTML = true;
 									}
@@ -1127,30 +1133,34 @@
 											$(resource).val( thisData[di]["@id"] ).hide().trigger("blur");
 											$(resource).after('<p class="'+_this._ID_+'-resource-uri-container"><a href="'+thisData[di]["@id"]+'" class="'+_this._ID_+'-resource-uri">'+resourceLabel+'</a></p>');
 										} else {
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene externe Resource { "'+i+'": "' + JSON.stringify(thisData[di]) + '" }', false );
-										}
-										return true;
-									}
+											// may find add button
+											var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
 
-									if ( $(subEnv).length == 0 ) { // resourc not found -> try to find the add button
-										var addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
-										if ( $(addBtn).length == 0 ) {
-											// add btn not found, may data has rdfs:type
-											if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
-												thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
-												addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
-												hasIDHTML = true;
+											if ( $(addBtn).length == 0 ) {
+												// add btn not found, may data has rdfs:type
+												if ( thisData[di].hasOwnProperty( "http://www.w3.org/2000/01/rdf-schema#type" ) ) {
+													thisType = thisData[di]["http://www.w3.org/2000/01/rdf-schema#type"][0]["@value"];
+													addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
+													hasIDHTML = true;
+												}
+												// may use sh:path
+												else if ( thisData[di].hasOwnProperty( "http://www.w3.org/ns/shacl#path" ) ) {
+													thisType = thisData[di]["http://www.w3.org/ns/shacl#path"][0]["@id"];
+													addBtn = _this.getElement( $(env).children("div."+_this._ID_+"-resource-group").find( 'button.'+_this._ID_+'-add-property'), 'value', thisType );
+													hasIDHTML = true;
+												}
 											}
-										}
-										if ( $(addBtn).length == 0 ) { // data not found
-											_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData[di]) + '" }', false );
-											return false;
-										}
-										$(addBtn).trigger("click");
+											if ( $(addBtn).length == 0 ) { // data not found
+												_this.showAlert( "info", 'Der Datensatz enthält die nicht im Modell vorhandene Resource { "'+thisType+'": "' + JSON.stringify(thisData[di]) + '" }', false );
+												return false;
+											}
+											$(addBtn).trigger("click");
 
-										subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
-										if ( hasIDHTML ) {
-											subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
+											subEnv = _this.getElement( $(env).find("div"), 'typeof', thisType ).last();
+											if ( hasIDHTML ) {
+												// TODO: BUG: may typeof AND id-html must match!
+												subEnv = _this.getElement( $(env).find("div"), 'id-html', thisType ).last();
+											}
 										}
 									}
 
@@ -1928,12 +1938,40 @@
 			var _this = this;
 			var model = _this.MODEL;
 			$.each( _this.data, function( key0, value0 ) {
-				// TODO: BUG: only literals and external resources of the root classes get merged!
 				$.each( value0, function( key1, value1) {
-					if ( 	! model[0].hasOwnProperty(_this.replaceStrPrefix(key1)) &&
-							! model[0].hasOwnProperty(_this.getUriPrefix(key1))
+					// may merge properties in given data, if their path is not in the model
+					if (_this.replaceStrPrefix(key1) == "http://www.w3.org/ns/shacl#property") {
+						$.each( value1, function( key2, value2) {
+							var type = value2.hasOwnProperty("@type")
+								? value2["@type"][0]
+								: null;
+							var path = value2.hasOwnProperty("http://www.w3.org/ns/shacl#path")
+								? value2["http://www.w3.org/ns/shacl#path"][0]["@id"]
+								: null;
+
+							var modelHasProperty = Object.keys(model[key0]).find(function(v) {
+								return model[key0][v].length > 0
+									&& model[key0][v][0].hasOwnProperty("@type")
+									&& model[key0][v][0]["@type"] == type
+									&& model[key0][v][0].hasOwnProperty("http://www.w3.org/ns/shacl#path")
+									&& model[key0][v][0]["http://www.w3.org/ns/shacl#path"][0]["@rdform"]["value"] == path;
+							})
+
+							if (modelHasProperty === undefined) {
+								result[key0][ _this.replaceStrPrefix( key1 ) ] = value1;
+								if (result[key0].hasOwnProperty("http://www.w3.org/ns/shacl#property")) {
+									result[key0]["http://www.w3.org/ns/shacl#property"].push(value2);
+								} else {
+									result[key0]["http://www.w3.org/ns/shacl#property"] = [value2];
+								}
+							}
+						})
+					}
+					else if (
+							! model[key0].hasOwnProperty(_this.replaceStrPrefix(key1)) &&
+							! model[key0].hasOwnProperty(_this.getUriPrefix(key1))
 					) {
-						result[0][ _this.replaceStrPrefix( key1 ) ] = value1;
+						result[key0][ _this.replaceStrPrefix( key1 ) ] = value1;
 					}
 				});
 			});
