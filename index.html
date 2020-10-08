@@ -74,6 +74,7 @@
                 "@type": "sh:NodeShape",
                 "sh:name": "Person",
                 "sh:targetClass" : {"@id": "foaf:Person"},
+                "rdform:resource": "person-{foaf:name}",
                 "sh:property" : [
                     {
                         "sh:path" : { "@id": "foaf:name" },
@@ -88,11 +89,14 @@
                     },
                     {
                         "sh:path" : {"@id": "hasBirth"},
-                        "sh:node" : {"@id": "BirthShape"}
+                        "sh:node" : {"@id": "BirthShape"},
+                        "rdform:arguments": '{ "personName": "{foaf:name}" }'
                     },
                     {
                         "sh:path" : { "@id": "rdfs:comment" },
                         "sh:minCount" : 0,
+                        "rdform:textarea": true,
+                        "rdform:placeholder": "Your comment..."
                     },
                 ]
             },
@@ -101,6 +105,7 @@
                 "@type": "sh:NodeShape",
                 "sh:targetClass" : {"@id": "bio:Birth"},
                 "sh:name": "Birth",
+                "rdform:resource": "{personName}-birth-{rdfs:label}",
                 "sh:property" : [
                     {
                         "sh:path" : { "@id": "rdfs:label" },
@@ -116,37 +121,10 @@
         ]
     };
 
-    var shapeExtension = {
-        "@context": {
-            "@base": "http://example.org/",
-            "@vocab": "http://example.org/"
-        },
-        "@graph": [
-            {
-                "@id": "PersonShape",
-                "rdform:resource": "person-{foaf:name}",
-                "email": {
-                    "rdform:placeholder": "name@example.org"
-                },
-                "rdfs:comment": {
-                    "rdform:textarea": true
-                },
-                "BirthShape": {
-                    "rdform:arguments": '{ "personName": "{foaf:name}" }'
-                }
-            },
-            {
-                "@id": "BirthShape",
-                "rdform:resource": "{personName}-birth-{rdfs:label}"
-            }
-        ]
-    };
-
     $(document).ready(function(){
         $('.rdform').RDForm({
             template: shape,
             rootShape: 'http://example.org/PersonShape',
-            templateExtension: shapeExtension,
             verbose: true,
             debug: true,
 

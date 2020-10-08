@@ -156,8 +156,8 @@
 		/**
 		  *	Parse SHACL template and create the MODEL array
 		  *
-		  * @param {Function}
-		  * @returns {Function}
+		  * @param {Function} Callback
+		  * @returns {Function} Callback function with boolean attribute
 		  */
 		parseTemplate: function (callback) {
 			var _this = this;
@@ -217,6 +217,7 @@
 				// @TODO decide which node-shape we take
 				if (root_node_shapes.length > 1) {
 					_this.showAlert( "warning", "Multiple root shapes found.");
+					console.log('Mutliple root shapes found, TODO: try to findout root shape');
 					return callback(false);
 				}
 
@@ -227,14 +228,7 @@
 
 				$.extend( true, _this.MODEL[0], curClass );
 
-				// may add template extension, eg uri generation, subform-attributes
-				if ( _this.settings.templateExtension ) {
-					_this.parseTemplateExtension(function(result) {
-						callback(result)
-					});
-				} else {
-					callback(true);
-				}
+				callback(true);
 			});
 
 			/**
@@ -262,6 +256,11 @@
 				// _this.validatePrefix( curClass['@type'] );
 
 				curClass["@rdform"]["value"] = curClass['@type'];
+
+				var rdformResource = get_value_from_object(shape, 'rdform:resource');
+				if (rdformResource) {
+					curClass["@id"] = rdformResource;
+				}
 
 				// class legend is sh:name, rdfs:label or @id
 				var legend = get_value_from_object(shape, 'sh:name', 'rdfs:label')
@@ -390,7 +389,6 @@
 					: _this.getUriPrefix(path);
 
 				var datatype = get_value_from_object(property, 'sh:datatype');
-
 				if (datatype) {
 					curProperty["@rdform"]['datatype'] = datatype;
 					curProperty["@type"] = datatype;
@@ -400,6 +398,24 @@
 					}
 					_this.MODEL[0]["@context"][path]["@type"] = datatype;
 				}
+
+				var rdformProperties =  Object.keys(property).filter(function(k) {
+					return k.includes( _this.replaceStrPrefix('rdform:') );
+				});
+
+				rdformProperties.some((rdformProperty) => {
+					var propertyKey = _this.getUriPrefix(rdformProperty).replace( 'rdform:', '')
+					var value = get_value_from_object(property, rdformProperty);
+
+					if (propertyKey == 'arguments') {
+						value = $.parseJSON(value);
+						if (curProperty["@rdform"]["multiple"]) {
+							value['i'] = 1;
+						}
+					}
+
+					curProperty["@rdform"][propertyKey] = value;
+				});
 
 				return curProperty;
 			}
@@ -459,91 +475,6 @@
 
 				return shapes;
 			}
-		},
-
-		/**
-		 * Parse SHACL template extension for RDForm, like URI generation, wildcards, subform arguments, textareas, selects etc
-		 * @return Boolean
-		 */
-		parseTemplateExtension: function (callback) {
-			var _this = this;
-			var templateExtension =  _this.settings.templateExtension;
-
-			if (!_this.MODEL || _this.MODEL.length == 0) callback(true);
-
-			// may add our prefixes to template context
-			if (templateExtension['@context']) {
-				templateExtension['@context'] = Object.assign({}, _this.settings.prefixes, templateExtension['@context']);
-			}
-
-			jsonld.expand(templateExtension, function(err, expanded) {
-				if ( err != null ) {
-					_this.showAlert( "error", "Error on parse given template extension shape: " + JSON.stringify(err, null, ' ') );
-					return callback(false);
-				}
-				if ( _this.settings.debug ) {
-					console.log( "SHACL template extension = ", expanded );
-				}
-
-				expanded.some(function(shape, i) {
-					if (!shape["@id"]) {
-						_this.showAlert( "warning", "Template extension shape entry (index: " + i + ") does not has an @id." );
-						return;
-					}
-					var id = shape["@id"];
-					var targetNode = null;
-
-					if (_this.MODEL[0]["@id"] == id) {
-						targetNode = _this.MODEL[0];
-					}
-					else if (_this.MODEL[0][id]) {
-						targetNode = _this.MODEL[0][id][0];
-					}
-					else {
-						_this.showAlert( "warning", "Cannot find node \"" + shape["@id"] + "\" given in template extension shape." );
-						return;
-					}
-					var shapeKeys = Object.keys(shape);
-
-					// may add new resource uri
-					var rdformResource = shapeKeys.find(function(k) {
-						return k == _this.replaceStrPrefix('rdform:resource');
-					})
-
-					if (rdformResource) {
-						targetNode["@id"] = shape[rdformResource].reduce(function(k) { return k["@value"] })["@value"];
-					}
-
-					// get defined attributes (exceptr @id and rdform:resource)
-					var shapeProperties = shapeKeys.filter(function(k) {
-						return k != "@id" && k != _this.replaceStrPrefix('rdform:resource');
-					});
-
-					// add given attributes (placeholder, arguments, textarea, checked, select, ...)
-					shapeProperties.some(function(propertyKey) {
-						if (! targetNode[propertyKey] ) {
-							_this.showAlert( "warning", "Cannot find node \"" + propertyKey + "\" given in template extension shape." );
-							return;
-						}
-						var targetPropertyNode = targetNode[propertyKey][0];
-
-						Object.keys(shape[propertyKey][0]).some(function(k) {
-							var v = shape[propertyKey][0][k].reduce(function(k) { return k["@value"] })["@value"];
-							k = k.replace(_this.MODEL[0]["@context"]["rdform"]["@id"], "")
-
-							// may parse given arguments and arguments-index for multiple resources
-							if (k == "arguments") {
-								v = $.parseJSON(v);
-								if (targetPropertyNode["@rdform"]["multiple"]) {
-									v['i'] = 1;
-								}
-							}
-							targetPropertyNode["@rdform"][k] = v;
-						});
-					});
-				});
-				callback(true);
-			});
 		},
 
 		/**
